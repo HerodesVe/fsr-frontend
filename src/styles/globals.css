@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-color: #007C88;
+  --primary-light: #e6f7f8;
+  --primary-dark: #005058;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Estilos para checkbox personalizado */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #007C88;
+  border-color: #007C88;
+}
+
+input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+input[type="checkbox"]:hover {
+  border-color: #007C88;
+}
+
+/* Estilos para evitar que los inputs se pongan oscuros con autocompletado */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #f3f4f6 inset !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-color: #f3f4f6 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Para inputs de tipo email */
+input[type="email"]:-webkit-autofill,
+input[type="email"]:-webkit-autofill:hover,
+input[type="email"]:-webkit-autofill:focus,
+input[type="email"]:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #f3f4f6 inset !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-color: #f3f4f6 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Para inputs de tipo password */
+input[type="password"]:-webkit-autofill,
+input[type="password"]:-webkit-autofill:hover,
+input[type="password"]:-webkit-autofill:focus,
+input[type="password"]:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #f3f4f6 inset !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-color: #f3f4f6 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
