@@ -2,14 +2,15 @@ import React from 'react';
 import { LuUser, LuCalendar, LuClock } from 'react-icons/lu';
 import type { Anteproyecto } from '@/types/anteproyecto.types';
 import type { Proyecto } from '@/types/proyecto.types';
+import type { Demolicion } from '@/types/demolicion.types';
 
-// Tipo genérico que puede ser Anteproyecto o Proyecto
-type ProyectoItem = Anteproyecto | Proyecto;
+// Tipo genérico que puede ser Anteproyecto, Proyecto o Demolicion
+type ProyectoItem = Anteproyecto | Proyecto | Demolicion;
 
 interface ProyectoCardProps {
   item: ProyectoItem;
   onClick: (item: ProyectoItem) => void;
-  type?: 'anteproyecto' | 'proyecto';
+  type?: 'anteproyecto' | 'proyecto' | 'demolicion';
 }
 
 export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type = 'proyecto' }) => {
@@ -29,7 +30,15 @@ export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type 
   };
 
   // Función para obtener el color del badge según el status
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | undefined) => {
+    if (!status) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-500 text-white">
+          Sin estado
+        </span>
+      );
+    }
+    
     switch (status.toLowerCase()) {
       case 'completado':
         return (
@@ -63,7 +72,14 @@ export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type 
 
   // Determinar el texto del número de identificación
   const getIdLabel = () => {
-    return type === 'anteproyecto' ? 'N° de Trámite:' : 'N° de Proyecto:';
+    switch (type) {
+      case 'anteproyecto':
+        return 'N° de Trámite:';
+      case 'demolicion':
+        return 'N° de Demolición:';
+      default:
+        return 'N° de Proyecto:';
+    }
   };
 
   return (
@@ -77,6 +93,8 @@ export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type 
           <h3 className="text-lg font-semibold text-gray-900 mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
             {type === 'anteproyecto' 
               ? (item.data as any)?.nombre_proyecto || 'Anteproyecto sin título'
+              : type === 'demolicion'
+              ? (item.data as any)?.nombre_proyecto || 'Demolición sin título'
               : (item.data as any)?.titulo_proyecto || 'Proyecto sin título'
             }
           </h3>
@@ -110,7 +128,10 @@ export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type 
           <div>
             <p className="text-xs text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>Fecha de creación:</p>
             <p className="text-sm font-medium text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>
-              {new Date(item.created_at).toLocaleDateString('es-ES')}
+              {item.created_at 
+                ? new Date(item.created_at).toLocaleDateString('es-ES')
+                : item.fecha_creacion || 'N/A'
+              }
             </p>
           </div>
         </div>
@@ -121,7 +142,7 @@ export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type 
             <p className="text-sm font-medium text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>
               {item.scheduled_completion_date 
                 ? new Date(item.scheduled_completion_date).toLocaleDateString('es-ES')
-                : 'Por definir'
+                : item.fecha_culminacion || 'Por definir'
               }
             </p>
           </div>

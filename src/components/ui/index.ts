@@ -8,6 +8,8 @@ export { Pagination } from './Pagination';
 export { Select } from './Select';
 export { Switch } from './Switch';
 export { FileUpload } from './FileUpload';
+export { default as DateInput } from './DateInput';
+export { Textarea } from './Textarea';
 
 // Tipos
 export type { ButtonProps } from './Button';
@@ -17,3 +19,4 @@ export type { FilterOption } from './Filter';
 export type { TableColumn, TableAction } from './Table';
 export type { SelectOption } from './Select';
 export type { FileUploadProps } from './FileUpload';
+export type { CustomTextareaProps } from './Textarea';
