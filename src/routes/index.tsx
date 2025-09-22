@@ -8,6 +8,7 @@ import { Administrados, CreateEditAdministrado } from '@/pages/private/Administr
 import Servicios from '@/pages/private/Servicios';
 import Anteproyectos from '@/pages/private/Anteproyectos';
 import CreateEditAnteproyecto from '@/pages/private/Anteproyectos/CreateEditAnteproyecto';
+import Proyectos, { CreateEditProyecto } from '@/pages/private/Proyectos';
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { isAuthenticated } = useAuthStore();
@@ -51,6 +52,9 @@ export default function AppRoutes() {
         <Route path="dashboard/anteproyectos" element={<Anteproyectos />} />
         <Route path="dashboard/anteproyectos/create" element={<CreateEditAnteproyecto />} />
         <Route path="dashboard/anteproyectos/edit/:id" element={<CreateEditAnteproyecto />} />
+        <Route path="dashboard/proyectos" element={<Proyectos />} />
+        <Route path="dashboard/proyectos/create" element={<CreateEditProyecto />} />
+        <Route path="dashboard/proyectos/edit/:id" element={<CreateEditProyecto />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" />} />

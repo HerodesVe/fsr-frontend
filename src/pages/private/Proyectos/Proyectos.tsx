@@ -3,20 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { LuPlus } from 'react-icons/lu';
 import { useHeaderStore } from '@/store/headerStore';
 import { Button, Filter } from '@/components/ui';
-import { useAnteproyectos } from '@/hooks/useAnteproyectos';
+import { useProyectos } from '@/hooks/useProyectos';
 import { ProyectoCard } from '@/components/utils/ProyectoCard';
-import { Anteproyecto, AnteproyectoStatus } from '@/types/anteproyecto.types';
+import { Proyecto, ProyectoStatus } from '@/types/proyecto.types';
 
-export default function Anteproyectos() {
+export default function Proyectos() {
   const navigate = useNavigate();
-  const { anteproyectos, isLoading, error, refetch } = useAnteproyectos();
+  const { proyectos, isLoading, error, refetch } = useProyectos();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState<AnteproyectoStatus>(AnteproyectoStatus.TODOS);
+  const [selectedStatus, setSelectedStatus] = useState<ProyectoStatus>(ProyectoStatus.TODOS);
   const { setHeader } = useHeaderStore();
 
   useEffect(() => {
     setHeader(
-      'Elaboración de expediente técnico de Arquitectura para Anteproyecto',
+      'Elaboración de expediente técnico de Arquitectura para Proyecto',
       'Gestiona todos tus trámites y servicios en un solo lugar'
     );
     
@@ -29,23 +29,23 @@ export default function Anteproyectos() {
   }, [setHeader, refetch]);
 
   const filterOptions = [
-    { key: AnteproyectoStatus.TODOS, label: 'Todos' },
-    { key: AnteproyectoStatus.PENDIENTE, label: 'Pendientes' },
-    { key: AnteproyectoStatus.COMPLETADO, label: 'Completados' },
+    { key: ProyectoStatus.TODOS, label: 'Todos' },
+    { key: ProyectoStatus.PENDIENTE, label: 'Pendientes' },
+    { key: ProyectoStatus.COMPLETADO, label: 'Completados' },
   ];
 
-  const filteredAnteproyectos = useMemo(() => {
-    if (!anteproyectos) return [];
+  const filteredProyectos = useMemo(() => {
+    if (!proyectos) return [];
 
-    return anteproyectos.filter((anteproyecto) => {
+    return proyectos.filter((proyecto) => {
       const searchLower = searchTerm.toLowerCase();
       
       // Filtro por texto de búsqueda
       const matchesSearch = searchTerm === '' || 
-        (anteproyecto.data?.nombre_proyecto?.toLowerCase().includes(searchLower)) ||
-        (anteproyecto.instance_code?.toLowerCase().includes(searchLower)) ||
-        (anteproyecto.administrado?.toLowerCase().includes(searchLower)) ||
-        (anteproyecto.responsable?.toLowerCase().includes(searchLower));
+        (proyecto.data?.titulo_proyecto?.toLowerCase().includes(searchLower)) ||
+        (proyecto.instance_code?.toLowerCase().includes(searchLower)) ||
+        (proyecto.administrado?.toLowerCase().includes(searchLower)) ||
+        (proyecto.responsable?.toLowerCase().includes(searchLower));
 
       // Calcular progreso basado en steps_status
       const calculateProgress = (stepsStatus: any) => {
@@ -55,18 +55,18 @@ export default function Anteproyectos() {
         return Math.round((completedSteps / steps.length) * 100);
       };
 
-      const progress = calculateProgress(anteproyecto.steps_status);
+      const progress = calculateProgress(proyecto.steps_status);
 
       // Filtro por estado basado en progreso
       let matchesStatus = false;
       switch (selectedStatus) {
-        case AnteproyectoStatus.TODOS:
+        case ProyectoStatus.TODOS:
           matchesStatus = true;
           break;
-        case AnteproyectoStatus.PENDIENTE:
+        case ProyectoStatus.PENDIENTE:
           matchesStatus = progress < 100; // Borrador, en progreso, etc.
           break;
-        case AnteproyectoStatus.COMPLETADO:
+        case ProyectoStatus.COMPLETADO:
           matchesStatus = progress === 100; // Solo completados al 100%
           break;
         default:
@@ -75,14 +75,14 @@ export default function Anteproyectos() {
 
       return matchesSearch && matchesStatus;
     });
-  }, [anteproyectos, searchTerm, selectedStatus]);
+  }, [proyectos, searchTerm, selectedStatus]);
 
-  const handleAnteproyectoClick = (anteproyecto: Anteproyecto) => {
-    navigate(`/dashboard/anteproyectos/edit/${anteproyecto.id}`);
+  const handleProyectoClick = (proyecto: Proyecto) => {
+    navigate(`/dashboard/proyectos/edit/${proyecto.id}`);
   };
 
-  const handleNewAnteproyecto = () => {
-    navigate('/dashboard/anteproyectos/create');
+  const handleNewProyecto = () => {
+    navigate('/dashboard/proyectos/create');
   };
 
   if (error) {
@@ -90,7 +90,7 @@ export default function Anteproyectos() {
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-700" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Error al cargar los anteproyectos: {error.message}
+            Error al cargar los proyectos: {error.message}
           </p>
         </div>
       </div>
@@ -105,12 +105,12 @@ export default function Anteproyectos() {
           onSearchChange={setSearchTerm}
           searchPlaceholder="Buscar por nombre de proyecto, trámite, administrado o responsable..."
           filters={filterOptions}
-          onFilterChange={(filterKey) => setSelectedStatus(filterKey as AnteproyectoStatus)}
+          onFilterChange={(filterKey) => setSelectedStatus(filterKey as ProyectoStatus)}
           className="flex-1"
         />
         
         <Button
-          onClick={handleNewAnteproyecto}
+          onClick={handleNewProyecto}
           style={{ backgroundColor: 'var(--primary-color)' }}
           className="text-white hover:opacity-90"
           startContent={<LuPlus className="w-5 h-5" />}
@@ -142,20 +142,20 @@ export default function Anteproyectos() {
             </div>
           ))}
         </div>
-      ) : filteredAnteproyectos.length === 0 ? (
+      ) : filteredProyectos.length === 0 ? (
         <div className="text-center text-gray-500 py-10" style={{ fontFamily: 'Inter, sans-serif' }}>
-          {searchTerm || selectedStatus !== AnteproyectoStatus.TODOS 
-            ? 'No se encontraron anteproyectos que coincidan con los filtros.' 
-            : 'No hay anteproyectos registrados.'}
+          {searchTerm || selectedStatus !== ProyectoStatus.TODOS 
+            ? 'No se encontraron proyectos que coincidan con los filtros.' 
+            : 'No hay proyectos registrados.'}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAnteproyectos.map((anteproyecto) => (
+          {filteredProyectos.map((proyecto) => (
             <ProyectoCard
-              key={anteproyecto.id}
-              item={anteproyecto}
-              onClick={handleAnteproyectoClick}
-              type="anteproyecto"
+              key={proyecto.id}
+              item={proyecto}
+              onClick={handleProyectoClick}
+              type="proyecto"
             />
           ))}
         </div>

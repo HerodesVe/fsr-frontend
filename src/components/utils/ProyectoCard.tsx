@@ -1,22 +1,27 @@
 import React from 'react';
 import { LuUser, LuCalendar, LuClock } from 'react-icons/lu';
 import type { Anteproyecto } from '@/types/anteproyecto.types';
+import type { Proyecto } from '@/types/proyecto.types';
 
-interface AnteproyectoCardProps {
-  anteproyecto: Anteproyecto;
-  onClick: (anteproyecto: Anteproyecto) => void;
+// Tipo genérico que puede ser Anteproyecto o Proyecto
+type ProyectoItem = Anteproyecto | Proyecto;
+
+interface ProyectoCardProps {
+  item: ProyectoItem;
+  onClick: (item: ProyectoItem) => void;
+  type?: 'anteproyecto' | 'proyecto';
 }
 
-export const AnteproyectoCard: React.FC<AnteproyectoCardProps> = ({ anteproyecto, onClick }) => {
+export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type = 'proyecto' }) => {
   const handleClick = () => {
-    onClick(anteproyecto);
+    onClick(item);
   };
 
   // Función para calcular el progreso basado en steps_status
   const calculateProgress = () => {
-    if (!anteproyecto.steps_status) return 0;
+    if (!item.steps_status) return 0;
     
-    const steps = Object.values(anteproyecto.steps_status);
+    const steps = Object.values(item.steps_status);
     const completedSteps = steps.filter(step => step === 'Completada').length;
     const totalSteps = steps.length;
     
@@ -56,6 +61,11 @@ export const AnteproyectoCard: React.FC<AnteproyectoCardProps> = ({ anteproyecto
   // Calcular el progreso basado en steps_status
   const progress = calculateProgress();
 
+  // Determinar el texto del número de identificación
+  const getIdLabel = () => {
+    return type === 'anteproyecto' ? 'N° de Trámite:' : 'N° de Proyecto:';
+  };
+
   return (
     <div
       onClick={handleClick}
@@ -65,13 +75,16 @@ export const AnteproyectoCard: React.FC<AnteproyectoCardProps> = ({ anteproyecto
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1 pr-4">
           <h3 className="text-lg font-semibold text-gray-900 mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-            {anteproyecto.data?.nombre_proyecto || 'Proyecto Residencial Surquillo'}
+            {type === 'anteproyecto' 
+              ? (item.data as any)?.nombre_proyecto || 'Anteproyecto sin título'
+              : (item.data as any)?.titulo_proyecto || 'Proyecto sin título'
+            }
           </h3>
           <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-            N° de Trámite: {anteproyecto.instance_code}
+            {getIdLabel()} {item.instance_code}
           </p>
         </div>
-        {getStatusBadge(anteproyecto.status)}
+        {getStatusBadge(item.status)}
       </div>
 
       {/* Información del administrado y responsable */}
@@ -79,13 +92,13 @@ export const AnteproyectoCard: React.FC<AnteproyectoCardProps> = ({ anteproyecto
         <div className="flex items-center gap-2">
           <LuUser className="w-4 h-4 text-gray-500" />
           <span className="text-sm text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>
-            <span className="font-medium">Administrado:</span> {anteproyecto.administrado || 'Inversiones Inmobiliarias San Borja S.A.C.'}
+            <span className="font-medium">Administrado:</span> {item.administrado || 'Inversiones Inmobiliarias San Borja S.A.C.'}
           </span>
         </div>
         <div className="flex items-center gap-2">
           <LuUser className="w-4 h-4 text-gray-500" />
           <span className="text-sm text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>
-            <span className="font-medium">Responsable:</span> {anteproyecto.responsable || 'Leonel Cisneros'}
+            <span className="font-medium">Responsable:</span> {item.responsable || 'Leonel Cisneros'}
           </span>
         </div>
       </div>
@@ -97,7 +110,7 @@ export const AnteproyectoCard: React.FC<AnteproyectoCardProps> = ({ anteproyecto
           <div>
             <p className="text-xs text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>Fecha de creación:</p>
             <p className="text-sm font-medium text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>
-              {new Date(anteproyecto.created_at).toLocaleDateString('es-ES')}
+              {new Date(item.created_at).toLocaleDateString('es-ES')}
             </p>
           </div>
         </div>
@@ -106,8 +119,8 @@ export const AnteproyectoCard: React.FC<AnteproyectoCardProps> = ({ anteproyecto
           <div>
             <p className="text-xs text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>Fecha de culminación:</p>
             <p className="text-sm font-medium text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>
-              {anteproyecto.scheduled_completion_date 
-                ? new Date(anteproyecto.scheduled_completion_date).toLocaleDateString('es-ES')
+              {item.scheduled_completion_date 
+                ? new Date(item.scheduled_completion_date).toLocaleDateString('es-ES')
                 : 'Por definir'
               }
             </p>
@@ -132,4 +145,4 @@ export const AnteproyectoCard: React.FC<AnteproyectoCardProps> = ({ anteproyecto
   );
 };
 
-export default AnteproyectoCard;
+export default ProyectoCard;
