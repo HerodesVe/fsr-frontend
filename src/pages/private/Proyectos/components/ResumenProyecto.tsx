@@ -8,7 +8,7 @@ interface ResumenProyectoProps {
   proyectoId: string;
   onSave: () => void;
   isSaving: boolean;
-  uploadedDocuments: UploadedDocument[];
+  uploadedDocuments?: UploadedDocument[];
 }
 
 export function ResumenProyecto({
@@ -18,7 +18,6 @@ export function ResumenProyecto({
   proyectoId,
   onSave,
   isSaving,
-  uploadedDocuments,
 }: ResumenProyectoProps) {
   const calculateProgress = () => {
     const completedSteps = steps.filter(step => step.completed).length;

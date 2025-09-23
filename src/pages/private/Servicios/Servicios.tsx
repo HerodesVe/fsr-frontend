@@ -3,15 +3,15 @@ import { useNavigate } from 'react-router-dom';
 
 import { useServices } from '@/hooks/useServices';
 import { useHeaderStore } from '@/store/headerStore';
-import { Filter } from '@/components/ui';
-import { ServiceCard } from './components/ServiceCard';
+// import { Filter } from '@/components/ui';
+// import { ServiceCard } from './components/ServiceCard';
 import { EditServiceModal } from './components/EditServiceModal';
 import type { ServiceDefinition } from '@/types/service.types';
 
 export default function Servicios() {
   const navigate = useNavigate();
   const { services, isLoading, error, refetch } = useServices();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm ] = useState('');
   const [selectedService, setSelectedService] = useState<ServiceDefinition | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { setHeader } = useHeaderStore();
@@ -43,10 +43,10 @@ export default function Servicios() {
     });
   }, [services, searchTerm]);
 
-  const handleEditService = (service: ServiceDefinition) => {
-    setSelectedService(service);
-    setIsModalOpen(true);
-  };
+  // const handleEditService = (service: ServiceDefinition) => {
+  //   setSelectedService(service);
+  //   setIsModalOpen(true);
+  // };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
@@ -189,7 +189,7 @@ export default function Servicios() {
         </h2>
 
         {/* Filtro de búsqueda */}
-        <div className="flex items-center justify-between gap-4 mb-6">
+        {/* <div className="flex items-center justify-between gap-4 mb-6">
           <Filter
             searchValue={searchTerm}
             onSearchChange={setSearchTerm}
@@ -198,7 +198,7 @@ export default function Servicios() {
             onFilterChange={() => {}} // No hay filtros
             className="flex-1"
           />
-        </div>
+        </div> */}
 
         {/* Grid de servicios */}
         {isLoading ? (
@@ -223,15 +223,15 @@ export default function Servicios() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredServices.map((service) => (
-              <ServiceCard
-                key={service.id}
-                service={service}
-                onEdit={handleEditService}
-              />
-            ))}
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* {filteredServices.map((service) => (
+                <ServiceCard
+                  key={service.id}
+                  service={service}
+                  onEdit={handleEditService}
+                />
+              ))} */}
+            </div>
         )}
       </div>
 

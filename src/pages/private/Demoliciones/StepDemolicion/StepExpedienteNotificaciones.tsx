@@ -106,7 +106,11 @@ export default function StepExpedienteNotificaciones({
                   onUpload={onFileUpload}
                   documentKey="cargo_ingreso"
                   anteproyectoId={demolicionId}
-                  uploadedFiles={uploadedDocuments}
+                  uploadedFiles={uploadedDocuments.map(doc => ({
+                    key: doc.id,
+                    name: doc.name,
+                    file_id: doc.id
+                  }))}
                 />
               </div>
               <div>
@@ -144,7 +148,11 @@ export default function StepExpedienteNotificaciones({
             onUpload={onFileUpload}
             documentKey="consulta_ministerio"
             anteproyectoId={demolicionId}
-            uploadedFiles={uploadedDocuments}
+            uploadedFiles={uploadedDocuments.map(doc => ({
+              key: doc.id,
+              name: doc.name,
+              file_id: doc.id
+            }))}
           />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -243,7 +251,11 @@ export default function StepExpedienteNotificaciones({
               onUpload={onFileUpload}
               documentKey="documento_relacionado"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+              key: doc.id,
+              name: doc.name,
+              file_id: doc.id
+            }))}
             />
           </div>
         </div>
@@ -299,7 +311,11 @@ export default function StepExpedienteNotificaciones({
                 onUpload={onFileUpload}
                 documentKey="documento_levantamiento"
                 anteproyectoId={demolicionId}
-                uploadedFiles={uploadedDocuments}
+                uploadedFiles={uploadedDocuments.map(doc => ({
+              key: doc.id,
+              name: doc.name,
+              file_id: doc.id
+            }))}
               />
             </div>
           </div>

@@ -49,7 +49,11 @@ export default function StepAntecedentes({
               onUpload={onFileUpload}
               documentKey="planos_ubicacion"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.id,
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -71,7 +75,11 @@ export default function StepAntecedentes({
               onUpload={onFileUpload}
               documentKey="planos_arquitectura"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.id,
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -93,7 +101,11 @@ export default function StepAntecedentes({
               onUpload={onFileUpload}
               documentKey="planos_sostenimiento"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.id,
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -115,7 +127,11 @@ export default function StepAntecedentes({
               onUpload={onFileUpload}
               documentKey="planos_cercos"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.id,
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -137,7 +153,11 @@ export default function StepAntecedentes({
               onUpload={onFileUpload}
               documentKey="planos_excavaciones"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.id,
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -159,7 +179,11 @@ export default function StepAntecedentes({
               onUpload={onFileUpload}
               documentKey="partida_registral"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.id,
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -181,7 +205,11 @@ export default function StepAntecedentes({
               onUpload={onFileUpload}
               documentKey="fue"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.id,
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -207,7 +235,11 @@ export default function StepAntecedentes({
                 onUpload={onFileUpload}
                 documentKey="otros_antecedentes"
                 anteproyectoId={demolicionId}
-                uploadedFiles={uploadedDocuments}
+                uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.id,
+                name: doc.name,
+                file_id: doc.id
+              }))}
               />
             </div>
           )}

@@ -162,7 +162,7 @@ export default function CreateEditDemolicion() {
     }
   };
 
-  const handleFileUpload = async (file: File, documentKey: string) => {
+  const handleFileUpload = async (file: File) => {
     // Simular upload
     const uploadedDoc: UploadedDocument = {
       id: Date.now().toString(),

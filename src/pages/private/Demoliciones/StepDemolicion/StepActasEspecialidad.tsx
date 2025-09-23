@@ -55,7 +55,11 @@ export default function StepActasEspecialidad({
         onUpload={onFileUpload}
         documentKey="actas_arquitectura_cargo_ingreso"
         anteproyectoId={demolicionId}
-        uploadedFiles={uploadedDocuments}
+        uploadedFiles={uploadedDocuments.map(doc => ({
+          key: doc.id,
+          name: doc.name,
+          file_id: doc.id
+        }))}
       />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -106,7 +110,11 @@ export default function StepActasEspecialidad({
           onUpload={onFileUpload}
           documentKey="actas_arquitectura_levantamiento"
           anteproyectoId={demolicionId}
-          uploadedFiles={uploadedDocuments}
+          uploadedFiles={uploadedDocuments.map(doc => ({
+          key: doc.id,
+          name: doc.name,
+          file_id: doc.id
+        }))}
         />
       )}
     </div>
@@ -123,7 +131,11 @@ export default function StepActasEspecialidad({
         onUpload={onFileUpload}
         documentKey="actas_estructura"
         anteproyectoId={demolicionId}
-        uploadedFiles={uploadedDocuments}
+        uploadedFiles={uploadedDocuments.map(doc => ({
+          key: doc.id,
+          name: doc.name,
+          file_id: doc.id
+        }))}
       />
     </div>
   );
@@ -139,7 +151,11 @@ export default function StepActasEspecialidad({
         onUpload={onFileUpload}
         documentKey="actas_electrica"
         anteproyectoId={demolicionId}
-        uploadedFiles={uploadedDocuments}
+        uploadedFiles={uploadedDocuments.map(doc => ({
+          key: doc.id,
+          name: doc.name,
+          file_id: doc.id
+        }))}
       />
     </div>
   );
@@ -155,7 +171,11 @@ export default function StepActasEspecialidad({
         onUpload={onFileUpload}
         documentKey="actas_sanitaria"
         anteproyectoId={demolicionId}
-        uploadedFiles={uploadedDocuments}
+        uploadedFiles={uploadedDocuments.map(doc => ({
+          key: doc.id,
+          name: doc.name,
+          file_id: doc.id
+        }))}
       />
     </div>
   );

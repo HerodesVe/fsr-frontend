@@ -2,8 +2,7 @@ import api from './api';
 import type { 
   Proyecto, 
   CreateProyectoRequest, 
-  UpdateProyectoRequest,
-  UploadDocumentRequest 
+  UpdateProyectoRequest
 } from '@/types/proyecto.types';
 
 export const getAllProyectos = async (): Promise<Proyecto[]> => {
@@ -59,7 +58,7 @@ export const uploadSingleDocument = async (id: string, file: File, documentKey: 
   return response.data;
 };
 
-export const uploadDocuments = async (id: string, uploadData: UploadDocumentRequest): Promise<any> => {
+export const uploadDocuments = async (id: string, uploadData: { files: File[]; keys: string[] }): Promise<any> => {
   const formData = new FormData();
   
   // Agregar archivos al FormData

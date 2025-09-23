@@ -5,7 +5,7 @@ import { useHeaderStore } from '@/store/headerStore';
 import { Button, Filter } from '@/components/ui';
 import { useAnteproyectos } from '@/hooks/useAnteproyectos';
 import { ProyectoCard } from '@/components/utils/ProyectoCard';
-import { Anteproyecto, AnteproyectoStatus } from '@/types/anteproyecto.types';
+import {  AnteproyectoStatus } from '@/types/anteproyecto.types';
 
 export default function Anteproyectos() {
   const navigate = useNavigate();
@@ -77,8 +77,8 @@ export default function Anteproyectos() {
     });
   }, [anteproyectos, searchTerm, selectedStatus]);
 
-  const handleAnteproyectoClick = (anteproyecto: Anteproyecto) => {
-    navigate(`/dashboard/anteproyectos/edit/${anteproyecto.id}`);
+  const handleAnteproyectoClick = (item: any) => {
+    navigate(`/dashboard/anteproyectos/edit/${item.id}`);
   };
 
   const handleNewAnteproyecto = () => {

@@ -3,13 +3,128 @@ import { useNavigate } from 'react-router-dom';
 import { LuPlus } from 'react-icons/lu';
 import { useHeaderStore } from '@/store/headerStore';
 import { Button, Filter } from '@/components/ui';
-import { useProyectos } from '@/hooks/useProyectos';
+// import { useProyectos } from '@/hooks/useProyectos';
 import { ProyectoCard } from '@/components/utils/ProyectoCard';
 import { Proyecto, ProyectoStatus } from '@/types/proyecto.types';
 
+// Data dummy para desarrollo
+const proyectosDummy: Proyecto[] = [
+  {
+    id: '1',
+    instance_code: 'PRO-2024-001',
+    service_id: 'serv-001',
+    client_id: 'client-001',
+    user_id: 'user-001',
+    administrado: 'Constructora Lima S.A.C.',
+    responsable: 'Carlos Mendoza',
+    fecha_creacion: '15/01/2024',
+    fecha_culminacion: '20/01/2024',
+    status: 'Completado',
+    progress_percentage: 100,
+    created_at: '2024-01-15T00:00:00Z',
+    scheduled_completion_date: '2024-01-20T00:00:00Z',
+    next_step: 'completado',
+    uploaded_documents: [],
+    data: {
+      service_type: 'proyecto',
+      titulo_proyecto: 'Edificio Residencial San Isidro',
+      tipo_proyecto: 'Residencial',
+      descripcion: 'Proyecto de edificio residencial de 8 pisos',
+      arquitectura_docs: {} as any,
+      estructuras_docs: {} as any,
+      electricas_docs: {} as any,
+      sanitarias_docs: {} as any
+    },
+    steps_status: {
+      anteproyecto: 'Completada',
+      licencias_normativas: 'Completada',
+      arquitectura: 'Completada',
+      estructuras: 'Completada',
+      electricas: 'Completada',
+      sanitarias: 'Completada',
+      sustento_tecnico: 'Completada'
+    }
+  },
+  {
+    id: '2',
+    instance_code: 'PRO-2024-002',
+    service_id: 'serv-002',
+    client_id: 'client-002',
+    user_id: 'user-002',
+    administrado: 'Inversiones Norte S.A.C.',
+    responsable: 'Ana García',
+    fecha_creacion: '18/01/2024',
+    fecha_culminacion: '',
+    status: 'Pendiente',
+    progress_percentage: 25,
+    created_at: '2024-01-18T00:00:00Z',
+    scheduled_completion_date: undefined,
+    next_step: 'estructuras',
+    uploaded_documents: [],
+    data: {
+      service_type: 'proyecto',
+      titulo_proyecto: 'Centro Comercial Miraflores',
+      tipo_proyecto: 'Comercial',
+      descripcion: 'Centro comercial de 3 niveles con estacionamiento',
+      arquitectura_docs: {} as any,
+      estructuras_docs: {} as any,
+      electricas_docs: {} as any,
+      sanitarias_docs: {} as any
+    },
+    steps_status: {
+      anteproyecto: 'Completada',
+      licencias_normativas: 'Completada',
+      arquitectura: 'En progreso',
+      estructuras: 'Pendiente',
+      electricas: 'Pendiente',
+      sanitarias: 'Pendiente',
+      sustento_tecnico: 'Pendiente'
+    }
+  },
+  {
+    id: '3',
+    instance_code: 'PRO-2024-003',
+    service_id: 'serv-003',
+    client_id: 'client-003',
+    user_id: 'user-003',
+    administrado: 'Desarrollos Sur S.A.C.',
+    responsable: 'Miguel Torres',
+    fecha_creacion: '22/01/2024',
+    fecha_culminacion: '',
+    status: 'Pendiente',
+    progress_percentage: 10,
+    created_at: '2024-01-22T00:00:00Z',
+    scheduled_completion_date: undefined,
+    next_step: 'licencias_normativas',
+    uploaded_documents: [],
+    data: {
+      service_type: 'proyecto',
+      titulo_proyecto: 'Oficinas Corporativas La Molina',
+      tipo_proyecto: 'Oficinas',
+      descripcion: 'Edificio de oficinas de 6 pisos',
+      arquitectura_docs: {} as any,
+      estructuras_docs: {} as any,
+      electricas_docs: {} as any,
+      sanitarias_docs: {} as any
+    },
+    steps_status: {
+      anteproyecto: 'Completada',
+      licencias_normativas: 'Pendiente',
+      arquitectura: 'Pendiente',
+      estructuras: 'Pendiente',
+      electricas: 'Pendiente',
+      sanitarias: 'Pendiente',
+      sustento_tecnico: 'Pendiente'
+    }
+  }
+];
+
 export default function Proyectos() {
   const navigate = useNavigate();
-  const { proyectos, isLoading, error, refetch } = useProyectos();
+  // const { proyectos, isLoading, error, refetch } = useProyectos();
+  const [proyectos] = useState<Proyecto[]>(proyectosDummy);
+  const [isLoading] = useState(false);
+  const [error] = useState<Error | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<ProyectoStatus>(ProyectoStatus.TODOS);
   const { setHeader } = useHeaderStore();
@@ -21,12 +136,12 @@ export default function Proyectos() {
     );
     
     // Refetch data when component mounts
-    refetch();
+    // refetch();
     
     return () => {
       setHeader('Dashboard');
     };
-  }, [setHeader, refetch]);
+  }, [setHeader]);
 
   const filterOptions = [
     { key: ProyectoStatus.TODOS, label: 'Todos' },
@@ -77,8 +192,8 @@ export default function Proyectos() {
     });
   }, [proyectos, searchTerm, selectedStatus]);
 
-  const handleProyectoClick = (proyecto: Proyecto) => {
-    navigate(`/dashboard/proyectos/edit/${proyecto.id}`);
+  const handleProyectoClick = (item: any) => {
+    navigate(`/dashboard/proyectos/edit/${item.id}`);
   };
 
   const handleNewProyecto = () => {

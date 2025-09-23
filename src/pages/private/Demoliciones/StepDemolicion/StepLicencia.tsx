@@ -83,7 +83,11 @@ export default function StepLicencia({
             onUpload={onFileUpload}
             documentKey="archivo_normativo"
             anteproyectoId={demolicionId}
-            uploadedFiles={uploadedDocuments}
+            uploadedFiles={uploadedDocuments.map(doc => ({
+              key: doc.id,
+              name: doc.name,
+              file_id: doc.id
+            }))}
           />
         </div>
       </div>

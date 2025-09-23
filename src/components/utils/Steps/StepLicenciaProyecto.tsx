@@ -44,12 +44,13 @@ export default function StepLicenciaProyecto({
               value={formData.tipo_licencia_edificacion}
               onChange={(value) => onInputChange('tipo_licencia_edificacion', value)}
               error={errors.tipo_licencia_edificacion}
-            >
-              <option value="licencia_edificacion">Licencia de Edificación</option>
-              <option value="licencia_funcionamiento">Licencia de Funcionamiento</option>
-              <option value="licencia_ampliacion">Licencia de Ampliación</option>
-              <option value="licencia_remodelacion">Licencia de Remodelación</option>
-            </Select>
+              options={[
+                { value: "licencia_edificacion", label: "Licencia de Edificación" },
+                { value: "licencia_funcionamiento", label: "Licencia de Funcionamiento" },
+                { value: "licencia_ampliacion", label: "Licencia de Ampliación" },
+                { value: "licencia_remodelacion", label: "Licencia de Remodelación" }
+              ]}
+            />
           </div>
 
           {/* Tipo de modalidad */}
@@ -62,11 +63,12 @@ export default function StepLicenciaProyecto({
               value={formData.tipo_modalidad}
               onChange={(value) => onInputChange('tipo_modalidad', value)}
               error={errors.tipo_modalidad}
-            >
-              <option value="modalidad_1">Modalidad 1</option>
-              <option value="modalidad_2">Modalidad 2</option>
-              <option value="modalidad_3">Modalidad 3</option>
-            </Select>
+              options={[
+                { value: "modalidad_1", label: "Modalidad 1" },
+                { value: "modalidad_2", label: "Modalidad 2" },
+                { value: "modalidad_3", label: "Modalidad 3" }
+              ]}
+            />
           </div>
 
           {/* Link de normativas */}

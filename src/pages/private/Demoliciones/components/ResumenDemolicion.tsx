@@ -8,7 +8,7 @@ interface ResumenDemolicionProps {
   demolicionId: string;
   onSave: () => void;
   isSaving: boolean;
-  uploadedDocuments: UploadedDocument[];
+  uploadedDocuments?: UploadedDocument[];
 }
 
 export function ResumenDemolicion({
@@ -18,7 +18,7 @@ export function ResumenDemolicion({
   demolicionId,
   onSave,
   isSaving,
-  uploadedDocuments,
+
 }: ResumenDemolicionProps) {
   const calculateProgress = () => {
     const completedSteps = steps.filter(step => step.completed).length;

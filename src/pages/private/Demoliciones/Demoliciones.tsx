@@ -148,8 +148,8 @@ export default function Demoliciones() {
     });
   }, [demoliciones, searchTerm, selectedStatus]);
 
-  const handleDemolicionClick = (demolicion: Demolicion) => {
-    navigate(`/dashboard/demoliciones/edit/${demolicion.id}`);
+  const handleDemolicionClick = (item: any) => {
+    navigate(`/dashboard/demoliciones/edit/${item.id}`);
   };
 
   const handleNewDemolicion = () => {

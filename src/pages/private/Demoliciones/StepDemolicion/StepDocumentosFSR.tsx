@@ -49,7 +49,11 @@ export default function StepDocumentosFSR({
               onUpload={onFileUpload}
               documentKey="memoria_descriptiva"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.id,
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -71,7 +75,11 @@ export default function StepDocumentosFSR({
               onUpload={onFileUpload}
               documentKey="plano_ubicacion"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.id,
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -93,7 +101,11 @@ export default function StepDocumentosFSR({
               onUpload={onFileUpload}
               documentKey="plano_arquitectura_demoler"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.id,
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -115,7 +127,11 @@ export default function StepDocumentosFSR({
               onUpload={onFileUpload}
               documentKey="plano_serramiento"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.id,
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -141,7 +157,11 @@ export default function StepDocumentosFSR({
                 onUpload={onFileUpload}
                 documentKey="otros_planos"
                 anteproyectoId={demolicionId}
-                uploadedFiles={uploadedDocuments}
+                uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.id,
+                name: doc.name,
+                file_id: doc.id
+              }))}
               />
             </div>
           )}
