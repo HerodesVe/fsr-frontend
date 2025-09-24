@@ -80,3 +80,4 @@ export enum ModificacionStatus {
   PENDIENTE = 'Pendiente',
   COMPLETADO = 'Completado'
 }
+
