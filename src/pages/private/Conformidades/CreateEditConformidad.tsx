@@ -4,14 +4,15 @@ import { LuArrowLeft, LuArrowRight, LuX, LuInfo } from 'react-icons/lu';
 import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
-import { ResumenConformidad } from './components';
+
+import type { ConformidadFormData, FormStep, UploadedDocument } from '@/types/conformidad.types';
 import StepAdministrado from './StepConformidad/StepAdministrado';
 import StepModalidad from './StepConformidad/StepModalidad';
 import StepDocumentosIniciales from './StepConformidad/StepDocumentosIniciales';
 import StepAntecedentes from './StepConformidad/StepAntecedentes';
 import StepDocumentosExpediente from './StepConformidad/StepDocumentosExpediente';
 import StepVerificacion from './StepConformidad/StepVerificacion';
-import type { ConformidadFormData, FormStep, UploadedDocument } from '@/types/conformidad.types';
+import { ResumenConformidad } from './components';
 
 const stepLabels = [
   'Administrado',
@@ -245,7 +246,7 @@ export default function CreateEditConformidad() {
         return (
           <StepAdministrado
             formData={formData}
-            clients={clients}
+            clients={clients || []}
             errors={errors}
             onInputChange={handleInputChange}
           />
