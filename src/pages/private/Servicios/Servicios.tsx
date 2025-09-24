@@ -70,6 +70,10 @@ export default function Servicios() {
     navigate('/dashboard/demoliciones');
   };
 
+  const handleConformidadesClick = () => {
+    navigate('/dashboard/conformidades');
+  };
+
   if (error) {
     return (
       <div className="p-6">
@@ -89,7 +93,7 @@ export default function Servicios() {
         <h2 className="text-xl font-semibold text-gray-900 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
           Servicios Principales
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl">
           {/* Card de Anteproyectos */}
           <div
             onClick={handleAnteproyectosClick}
@@ -171,6 +175,35 @@ export default function Servicios() {
             </p>
             <div className="flex items-center text-teal-600 font-medium text-sm">
               <span>Acceder a Demoliciones</span>
+              <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Card de Conformidad de Obra */}
+          <div
+            onClick={handleConformidadesClick}
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <span className="text-2xl">✓</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Conformidad de Obra
+                </h3>
+                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Certificación de conformidad
+                </p>
+              </div>
+            </div>
+            <p className="text-gray-700 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+              Gestiona los trámites de conformidad de obra en sus diferentes modalidades: sin variaciones, con variaciones y casco habitable.
+            </p>
+            <div className="flex items-center text-teal-600 font-medium text-sm">
+              <span>Acceder a Conformidades</span>
               <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>

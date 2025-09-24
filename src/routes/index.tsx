@@ -11,6 +11,7 @@ import CreateEditAnteproyecto from '@/pages/private/Anteproyectos/CreateEditAnte
 import Proyectos, { CreateEditProyecto } from '@/pages/private/Proyectos';
 import Demoliciones from '@/pages/private/Demoliciones';
 import CreateEditDemolicion from '@/pages/private/Demoliciones/CreateEditDemolicion';
+import { Conformidades, CreateEditConformidad } from '@/pages/private/Conformidades';
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { isAuthenticated } = useAuthStore();
@@ -44,7 +45,7 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       >
-        <Route index element={<Navigate to="/dashboard/users" replace />} />
+        <Route index element={<Navigate to="/dashboard/services" replace />} />
         {/* Aquí irán las rutas hijas del dashboard */}
         <Route path="dashboard/users" element={<Users />} />
         <Route path="dashboard/administrados" element={<Administrados />} />
@@ -60,6 +61,9 @@ export default function AppRoutes() {
         <Route path="dashboard/demoliciones" element={<Demoliciones />} />
         <Route path="dashboard/demoliciones/create" element={<CreateEditDemolicion />} />
         <Route path="dashboard/demoliciones/edit/:id" element={<CreateEditDemolicion />} />
+        <Route path="dashboard/conformidades" element={<Conformidades />} />
+        <Route path="dashboard/conformidades/create" element={<CreateEditConformidad />} />
+        <Route path="dashboard/conformidades/edit/:id" element={<CreateEditConformidad />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" />} />

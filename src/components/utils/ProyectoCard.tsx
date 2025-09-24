@@ -3,14 +3,15 @@ import { LuUser, LuCalendar, LuClock } from 'react-icons/lu';
 import type { Anteproyecto } from '@/types/anteproyecto.types';
 import type { Proyecto } from '@/types/proyecto.types';
 import type { Demolicion } from '@/types/demolicion.types';
+import type { Conformidad } from '@/types/conformidad.types';
 
-// Tipo genérico que puede ser Anteproyecto, Proyecto o Demolicion
-type ProyectoItem = Anteproyecto | Proyecto | Demolicion;
+// Tipo genérico que puede ser Anteproyecto, Proyecto, Demolicion o Conformidad
+type ProyectoItem = Anteproyecto | Proyecto | Demolicion | Conformidad;
 
 interface ProyectoCardProps {
   item: ProyectoItem;
   onClick: (item: ProyectoItem) => void;
-  type?: 'anteproyecto' | 'proyecto' | 'demolicion';
+  type?: 'anteproyecto' | 'proyecto' | 'demolicion' | 'conformidad';
 }
 
 export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type = 'proyecto' }) => {
@@ -77,6 +78,8 @@ export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type 
         return 'N° de Trámite:';
       case 'demolicion':
         return 'N° de Demolición:';
+      case 'conformidad':
+        return 'N° de Conformidad:';
       default:
         return 'N° de Proyecto:';
     }
@@ -95,6 +98,8 @@ export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type 
               ? (item.data as any)?.nombre_proyecto || 'Anteproyecto sin título'
               : type === 'demolicion'
               ? (item.data as any)?.nombre_proyecto || 'Demolición sin título'
+              : type === 'conformidad'
+              ? (item.data as any)?.nombre_proyecto || 'Conformidad sin título'
               : (item.data as any)?.titulo_proyecto || 'Proyecto sin título'
             }
           </h3>
