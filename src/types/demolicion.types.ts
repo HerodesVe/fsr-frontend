@@ -2,70 +2,51 @@ export interface DemolicionFormData {
   // Paso 1: Administrado
   selectedClient: any | null;
 
-  // Paso 2: Licencia
-  tipo_licencia_edificacion: string;
-  tipo_modalidad: string;
-  link_normativas: string;
-  archivo_normativo: File | null;
-
-  // Paso 3: Antecedentes
-  planos_ubicacion: File[];
-  planos_arquitectura: File[];
-  planos_sostenimiento: File[];
-  planos_cercos: File[];
-  planos_excavaciones: File[];
+  // Paso 2: Documentación
+  // 2.1: Documentación del Administrado
   partida_registral: File[];
   fue: File[];
-  otros_antecedentes: File[];
-  mostrar_otros_antecedentes: boolean;
+  documentos_antecedentes: File[];
+  es_zona_reglamentacion_especial: boolean;
+  licencia_obra_nueva: File[];
+  comentarios_adicionales: string;
 
-  // Paso 4: Área y Medidas Perimétricas
-  area_total: string;
-  por_el_frente: string;
-  por_la_derecha: string;
-  por_la_izquierda: string;
-  por_el_fondo: string;
-  medidas_perimetricas_administrado: string;
-  medidas_perimetricas_reales_fsr: string;
-  descripcion_proyecto: string;
-
-  // Paso 5: Documentos FSR
+  // 2.2: Documentación FSR
   memoria_descriptiva: File[];
   plano_ubicacion: File[];
-  plano_arquitectura_demoler: File[];
-  plano_serramiento: File[];
-  otros_planos: File[];
-  mostrar_otros_planos: boolean;
+  plano_arquitectura: File[];
+  plano_cerco: File[];
+  plano_sostenimiento: File[];
 
-  // Paso 6: Expediente y Notificaciones
-  expediente_ingresado: boolean;
-  numero_expediente: string;
-  cargo_ingreso: File | null;
-  
-  // Notificación del Expediente
-  consulta_ministerio: File | null;
-  fecha_subida: string;
-  fecha_recepcion: string;
-  fecha_emision: string;
-  fecha_vencimiento: string;
-  
-  // Notificación del Expediente (segunda instancia)
-  fecha_notificacion: string;
-  hora_notificacion: string;
-  motivo_notificacion: string;
-  funcionario: string;
-  documento_relacionado: File | null;
-  
-  // Levantamiento de Observaciones
-  levantamiento_presentado: boolean;
-  fecha_presentacion: string;
-  documento_levantamiento: File | null;
-  
-  // Citas con Equipo Técnico
-  citas_tecnico: CitaTecnico[];
+  // 2.3: Panel Fotográfico
+  fotografias: File[];
+  link_video: string;
 
-  // Paso 7: Actas por Especialidad
-  actas_especialidad: ActasEspecialidad;
+  // Paso 3: Medidas Perimétricas
+  // Según Partida Registral
+  frente_partida: string;
+  fondo_partida: string;
+  derecha_partida: string;
+  izquierda_partida: string;
+  area_total_partida: string;
+
+  // Medidas Reales (de Campo)
+  frente_real: string;
+  fondo_real: string;
+  derecha_real: string;
+  izquierda_real: string;
+  area_total_real: string;
+
+  // Observaciones
+  observaciones_medidas: string;
+
+  // Paso 4: Gestión Municipal
+  cargo_ingreso_municipalidad: File[];
+  fecha_ingreso_municipalidad: string;
+  respuesta_resolucion_municipal: File[];
+  fecha_respuesta_municipal: string;
+  cargo_entrega_administrado: File[];
+  fecha_entrega_administrado: string;
 }
 
 export interface CitaTecnico {

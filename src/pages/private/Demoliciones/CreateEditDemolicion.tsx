@@ -6,23 +6,17 @@ import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
 import { ResumenDemolicion } from './components';
 import StepAdministrado from './StepDemolicion/StepAdministrado';
-import StepLicencia from './StepDemolicion/StepLicencia';
-import StepAntecedentes from './StepDemolicion/StepAntecedentes';
-import StepAreaMedidas from './StepDemolicion/StepAreaMedidas';
-import StepDocumentosFSR from './StepDemolicion/StepDocumentosFSR';
-import StepExpedienteNotificaciones from './StepDemolicion/StepExpedienteNotificaciones';
-import StepActasEspecialidad from './StepDemolicion/StepActasEspecialidad';
+import StepDocumentacion from './StepDemolicion/StepDocumentacion';
+import StepMedidasPerimetricas from './StepDemolicion/StepMedidasPerimetricas';
+import StepGestionMunicipal from './StepDemolicion/StepGestionMunicipal';
 import type { DemolicionFormData, FormStep, UploadedDocument } from '@/types/demolicion.types';
 
 
 const stepLabels = [
   'Administrado',
-  'Licencia', 
-  'Antecedentes',
-  'Área y Medidas',
-  'Documentos FSR',
-  'Expediente',
-  'Actas'
+  'Documentación',
+  'Medidas Perimétricas',
+  'Gestión Municipal'
 ];
 
 export default function CreateEditDemolicion() {
@@ -40,93 +34,60 @@ export default function CreateEditDemolicion() {
   // Estado para manejar los pasos del formulario
   const [steps, setSteps] = useState<FormStep[]>([
     { id: 1, title: 'Administrado', completed: false },
-    { id: 2, title: 'Licencia', completed: false },
-    { id: 3, title: 'Antecedentes', completed: false },
-    { id: 4, title: 'Área y Medidas', completed: false },
-    { id: 5, title: 'Documentos FSR', completed: false },
-    { id: 6, title: 'Expediente', completed: false },
-    { id: 7, title: 'Actas', completed: false },
+    { id: 2, title: 'Documentación', completed: false },
+    { id: 3, title: 'Medidas Perimétricas', completed: false },
+    { id: 4, title: 'Gestión Municipal', completed: false },
   ]);
   
   const [formData, setFormData] = useState<DemolicionFormData>({
     // Paso 1: Administrado
     selectedClient: null,
 
-    // Paso 2: Licencia
-    tipo_licencia_edificacion: '',
-    tipo_modalidad: '',
-    link_normativas: '',
-    archivo_normativo: null,
-
-    // Paso 3: Antecedentes
-    planos_ubicacion: [],
-    planos_arquitectura: [],
-    planos_sostenimiento: [],
-    planos_cercos: [],
-    planos_excavaciones: [],
+    // Paso 2: Documentación
+    // 2.1: Documentación del Administrado
     partida_registral: [],
     fue: [],
-    otros_antecedentes: [],
-    mostrar_otros_antecedentes: false,
+    documentos_antecedentes: [],
+    es_zona_reglamentacion_especial: false,
+    licencia_obra_nueva: [],
+    comentarios_adicionales: '',
 
-    // Paso 4: Área y Medidas Perimétricas
-    area_total: '',
-    por_el_frente: '',
-    por_la_derecha: '',
-    por_la_izquierda: '',
-    por_el_fondo: '',
-    medidas_perimetricas_administrado: '',
-    medidas_perimetricas_reales_fsr: '',
-    descripcion_proyecto: '',
-
-    // Paso 5: Documentos FSR
+    // 2.2: Documentación FSR
     memoria_descriptiva: [],
     plano_ubicacion: [],
-    plano_arquitectura_demoler: [],
-    plano_serramiento: [],
-    otros_planos: [],
-    mostrar_otros_planos: false,
+    plano_arquitectura: [],
+    plano_cerco: [],
+    plano_sostenimiento: [],
 
-    // Paso 6: Expediente y Notificaciones
-    expediente_ingresado: false,
-    numero_expediente: '',
-    cargo_ingreso: null,
-    consulta_ministerio: null,
-    fecha_subida: '',
-    fecha_recepcion: '',
-    fecha_emision: '',
-    fecha_vencimiento: '',
-    fecha_notificacion: '',
-    hora_notificacion: '',
-    motivo_notificacion: '',
-    funcionario: '',
-    documento_relacionado: null,
-    levantamiento_presentado: false,
-    fecha_presentacion: '',
-    documento_levantamiento: null,
-    citas_tecnico: [],
+    // 2.3: Panel Fotográfico
+    fotografias: [],
+    link_video: '',
 
-    // Paso 7: Actas por Especialidad
-    actas_especialidad: {
-      arquitectura: {
-        cargo_ingreso: null,
-        fecha_subida: '',
-        fecha_recepcion: '',
-        fecha_emision: '',
-        fecha_vencimiento: '',
-        resultado: 'conforme',
-        levantamiento_observaciones: null,
-      },
-      estructura: {
-        acta_estructura: null,
-      },
-      electrica: {
-        acta_electrica: null,
-      },
-      sanitaria: {
-        acta_sanitaria: null,
-      },
-    },
+    // Paso 3: Medidas Perimétricas
+    // Según Partida Registral
+    frente_partida: '',
+    fondo_partida: '',
+    derecha_partida: '',
+    izquierda_partida: '',
+    area_total_partida: '',
+
+    // Medidas Reales (de Campo)
+    frente_real: '',
+    fondo_real: '',
+    derecha_real: '',
+    izquierda_real: '',
+    area_total_real: '',
+
+    // Observaciones
+    observaciones_medidas: '',
+
+    // Paso 4: Gestión Municipal
+    cargo_ingreso_municipalidad: [],
+    fecha_ingreso_municipalidad: '',
+    respuesta_resolucion_municipal: [],
+    fecha_respuesta_municipal: '',
+    cargo_entrega_administrado: [],
+    fecha_entrega_administrado: '',
   });
 
   const isEdit = Boolean(id);
@@ -185,69 +146,64 @@ export default function CreateEditDemolicion() {
           newErrors.selectedClient = 'Debe seleccionar un administrado';
         }
         break;
-      case 1: // Licencia
-        if (!formData.tipo_licencia_edificacion) {
-          newErrors.tipo_licencia_edificacion = 'El tipo de licencia es requerido';
+      case 1: // Documentación
+        // Validar documentos obligatorios del administrado
+        if (!formData.partida_registral || formData.partida_registral.length === 0) {
+          newErrors.partida_registral = 'La partida registral es requerida';
         }
-        if (!formData.tipo_modalidad) {
-          newErrors.tipo_modalidad = 'El tipo de modalidad es requerido';
+        if (!formData.fue || formData.fue.length === 0) {
+          newErrors.fue = 'El FUE es requerido';
         }
-        break;
-      case 2: // Antecedentes
-        // Validaciones opcionales para antecedentes
-        break;
-      case 3: // Área y Medidas
-        if (!formData.area_total) {
-          newErrors.area_total = 'El área total es requerida';
+        // Validar documentos obligatorios de FSR
+        if (!formData.memoria_descriptiva || formData.memoria_descriptiva.length === 0) {
+          newErrors.memoria_descriptiva = 'La memoria descriptiva es requerida';
         }
-        if (!formData.por_el_frente) {
-          newErrors.por_el_frente = 'La medida del frente es requerida';
+        if (!formData.plano_ubicacion || formData.plano_ubicacion.length === 0) {
+          newErrors.plano_ubicacion = 'El plano de ubicación es requerido';
         }
-        if (!formData.por_la_derecha) {
-          newErrors.por_la_derecha = 'La medida derecha es requerida';
+        if (!formData.plano_arquitectura || formData.plano_arquitectura.length === 0) {
+          newErrors.plano_arquitectura = 'El plano de arquitectura es requerido';
         }
-        if (!formData.por_la_izquierda) {
-          newErrors.por_la_izquierda = 'La medida izquierda es requerida';
-        }
-        if (!formData.por_el_fondo) {
-          newErrors.por_el_fondo = 'La medida del fondo es requerida';
-        }
-        if (!formData.medidas_perimetricas_administrado) {
-          newErrors.medidas_perimetricas_administrado = 'Las medidas perimétricas del administrado son requeridas';
-        }
-        if (!formData.medidas_perimetricas_reales_fsr) {
-          newErrors.medidas_perimetricas_reales_fsr = 'Las medidas perimétricas reales FSR son requeridas';
+        if (!formData.plano_cerco || formData.plano_cerco.length === 0) {
+          newErrors.plano_cerco = 'El plano de cerco es requerido';
         }
         break;
-      case 4: // Documentos FSR
-        // Validaciones opcionales para documentos FSR
+      case 2: // Medidas Perimétricas
+        // Validar medidas según partida registral
+        if (!formData.frente_partida) {
+          newErrors.frente_partida = 'La medida del frente según partida es requerida';
+        }
+        if (!formData.fondo_partida) {
+          newErrors.fondo_partida = 'La medida del fondo según partida es requerida';
+        }
+        if (!formData.derecha_partida) {
+          newErrors.derecha_partida = 'La medida derecha según partida es requerida';
+        }
+        if (!formData.izquierda_partida) {
+          newErrors.izquierda_partida = 'La medida izquierda según partida es requerida';
+        }
+        if (!formData.area_total_partida) {
+          newErrors.area_total_partida = 'El área total según partida es requerida';
+        }
+        // Validar medidas reales
+        if (!formData.frente_real) {
+          newErrors.frente_real = 'La medida real del frente es requerida';
+        }
+        if (!formData.fondo_real) {
+          newErrors.fondo_real = 'La medida real del fondo es requerida';
+        }
+        if (!formData.derecha_real) {
+          newErrors.derecha_real = 'La medida real derecha es requerida';
+        }
+        if (!formData.izquierda_real) {
+          newErrors.izquierda_real = 'La medida real izquierda es requerida';
+        }
+        if (!formData.area_total_real) {
+          newErrors.area_total_real = 'El área total real es requerida';
+        }
         break;
-      case 5: // Expediente
-        // Validar si se ingresó el expediente
-        if (formData.expediente_ingresado && !formData.numero_expediente) {
-          newErrors.numero_expediente = 'El número de expediente es requerido';
-        }
-        if (formData.expediente_ingresado && !formData.cargo_ingreso) {
-          newErrors.cargo_ingreso = 'El cargo de ingreso es requerido';
-        }
-        
-        // Validar fechas si hay consulta al ministerio
-        if (formData.consulta_ministerio) {
-          if (!formData.fecha_subida) {
-            newErrors.fecha_subida = 'La fecha de subida es requerida';
-          }
-          if (!formData.fecha_recepcion) {
-            newErrors.fecha_recepcion = 'La fecha de recepción es requerida';
-          }
-        }
-        
-        // Validar levantamiento de observaciones
-        if (formData.levantamiento_presentado && !formData.fecha_presentacion) {
-          newErrors.fecha_presentacion = 'La fecha de presentación es requerida';
-        }
-        break;
-      case 6: // Actas
-        // Validaciones opcionales para actas
+      case 3: // Gestión Municipal
+        // Validaciones opcionales para gestión municipal
         break;
     }
 
@@ -325,9 +281,8 @@ export default function CreateEditDemolicion() {
         );
       case 1:
         return (
-          <StepLicencia
+          <StepDocumentacion
             formData={formData}
-            errors={errors}
             demolicionId={id || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
@@ -336,45 +291,15 @@ export default function CreateEditDemolicion() {
         );
       case 2:
         return (
-          <StepAntecedentes
-            formData={formData}
-            demolicionId={id || 'new'}
-            uploadedDocuments={uploadedDocuments}
-            onInputChange={handleInputChange}
-            onFileUpload={handleFileUpload}
-          />
-        );
-      case 3:
-        return (
-          <StepAreaMedidas
+          <StepMedidasPerimetricas
             formData={formData}
             errors={errors}
             onInputChange={handleInputChange}
           />
         );
-      case 4:
+      case 3:
         return (
-          <StepDocumentosFSR
-            formData={formData}
-            demolicionId={id || 'new'}
-            uploadedDocuments={uploadedDocuments}
-            onInputChange={handleInputChange}
-            onFileUpload={handleFileUpload}
-          />
-        );
-      case 5:
-        return (
-          <StepExpedienteNotificaciones
-            formData={formData}
-            demolicionId={id || 'new'}
-            uploadedDocuments={uploadedDocuments}
-            onInputChange={handleInputChange}
-            onFileUpload={handleFileUpload}
-          />
-        );
-      case 6:
-        return (
-          <StepActasEspecialidad
+          <StepGestionMunicipal
             formData={formData}
             demolicionId={id || 'new'}
             uploadedDocuments={uploadedDocuments}

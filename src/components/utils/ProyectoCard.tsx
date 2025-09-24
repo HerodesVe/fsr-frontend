@@ -4,14 +4,15 @@ import type { Anteproyecto } from '@/types/anteproyecto.types';
 import type { Proyecto } from '@/types/proyecto.types';
 import type { Demolicion } from '@/types/demolicion.types';
 import type { Conformidad } from '@/types/conformidad.types';
+import type { Modificacion } from '@/types/modificacion.types';
 
-// Tipo genérico que puede ser Anteproyecto, Proyecto, Demolicion o Conformidad
-type ProyectoItem = Anteproyecto | Proyecto | Demolicion | Conformidad;
+// Tipo genérico que puede ser Anteproyecto, Proyecto, Demolicion, Conformidad o Modificacion
+type ProyectoItem = Anteproyecto | Proyecto | Demolicion | Conformidad | Modificacion;
 
 interface ProyectoCardProps {
   item: ProyectoItem;
   onClick: (item: ProyectoItem) => void;
-  type?: 'anteproyecto' | 'proyecto' | 'demolicion' | 'conformidad';
+  type?: 'anteproyecto' | 'proyecto' | 'demolicion' | 'conformidad' | 'modificacion';
 }
 
 export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type = 'proyecto' }) => {

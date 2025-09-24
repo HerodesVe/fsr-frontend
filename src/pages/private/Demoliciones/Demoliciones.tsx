@@ -23,12 +23,9 @@ const demolicionesDummy: Demolicion[] = [
     },
     steps_status: {
       administrado: 'Completada',
-      licencia: 'Completada',
-      antecedentes: 'Completada',
-      area_medidas: 'Completada',
-      documentos_fsr: 'Completada',
-      expediente: 'Completada',
-      actas: 'Completada'
+      documentacion: 'Completada',
+      medidas_perimetricas: 'Completada',
+      gestion_municipal: 'Completada'
     }
   },
   {
@@ -46,12 +43,9 @@ const demolicionesDummy: Demolicion[] = [
     },
     steps_status: {
       administrado: 'Completada',
-      licencia: 'Completada',
-      antecedentes: 'En progreso',
-      area_medidas: 'Pendiente',
-      documentos_fsr: 'Pendiente',
-      expediente: 'Pendiente',
-      actas: 'Pendiente'
+      documentacion: 'En progreso',
+      medidas_perimetricas: 'Pendiente',
+      gestion_municipal: 'Pendiente'
     }
   },
   {
@@ -69,12 +63,9 @@ const demolicionesDummy: Demolicion[] = [
     },
     steps_status: {
       administrado: 'Completada',
-      licencia: 'Pendiente',
-      antecedentes: 'Pendiente',
-      area_medidas: 'Pendiente',
-      documentos_fsr: 'Pendiente',
-      expediente: 'Pendiente',
-      actas: 'Pendiente'
+      documentacion: 'Pendiente',
+      medidas_perimetricas: 'Pendiente',
+      gestion_municipal: 'Pendiente'
     }
   }
 ];

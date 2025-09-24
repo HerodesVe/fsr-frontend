@@ -52,12 +52,9 @@ export function ResumenDemolicion({
 
   const stepLabels = [
     'Administrado',
-    'Licencia',
-    'Antecedentes',
-    'Área y Medidas',
-    'Documentos FSR',
-    'Expediente',
-    'Actas'
+    'Documentación',
+    'Medidas Perimétricas',
+    'Gestión Municipal'
   ];
 
   return (
@@ -191,12 +188,9 @@ export function ResumenDemolicion({
 function getStepIcon(label: string): string {
   const iconMap: { [key: string]: string } = {
     'Administrado': '👤',
-    'Licencia': '📜',
-    'Antecedentes': '📋',
-    'Área y Medidas': '📏',
-    'Documentos FSR': '📄',
-    'Expediente': '📁',
-    'Actas': '📝'
+    'Documentación': '📋',
+    'Medidas Perimétricas': '📏',
+    'Gestión Municipal': '🏛️'
   };
   return iconMap[label] || '📄';
 }

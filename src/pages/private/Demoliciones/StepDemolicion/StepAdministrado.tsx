@@ -26,25 +26,25 @@ export default function StepAdministrado({
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
-          Seleccionar Administrado
+          Paso 1: Vincular Administrado
         </h3>
         <p className="text-sm text-gray-600 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
-          Seleccione el administrado para esta demolición
+          Seleccione el administrado para este servicio de demolición total
         </p>
         
-          <Select
-            label="Administrado"
-            placeholder="Seleccione un administrado"
-            options={clientOptions}
-            selectedKeys={formData.selectedClient ? [formData.selectedClient.id] : []}
-            onSelectionChange={(keys) => {
-              const clientId = Array.from(keys)[0] as string;
-              const client = clients?.find(c => c.id === clientId);
-              onInputChange('selectedClient', client || null);
-            }}
-            error={errors.selectedClient}
-          />
-  
+        <Select
+          label="Administrado"
+          placeholder="Buscar y seleccionar administrado..."
+          options={clientOptions}
+          selectedKeys={formData.selectedClient ? [formData.selectedClient.id] : []}
+          onSelectionChange={(keys) => {
+            const clientId = Array.from(keys)[0] as string;
+            const client = clients?.find(c => c.id === clientId);
+            onInputChange('selectedClient', client || null);
+          }}
+          error={errors.selectedClient}
+        />
+
         {formData.selectedClient && (
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <h4 className="font-medium text-gray-900 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
