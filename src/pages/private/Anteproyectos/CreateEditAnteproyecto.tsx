@@ -357,7 +357,7 @@ export default function CreateEditAnteproyecto() {
             formData={formData}
             clients={clients}
             errors={errors}
-            onInputChange={handleInputChange}
+            onInputChange={(field: string, value: any) => handleInputChange(field as keyof AnteproyectoFormData, value)}
           />
         );
 

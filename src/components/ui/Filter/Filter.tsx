@@ -59,7 +59,7 @@ export const Filter: React.FC<FilterProps> = ({
 
       {/* Filtros tipo burbuja */}
       <div className="flex items-center gap-2">
-        {filters.map((filter) => (
+        {filters?.map((filter) => (
           <button
             key={filter.key}
             onClick={() => handleFilterClick(filter.key)}

@@ -78,6 +78,14 @@ export default function Servicios() {
     navigate('/dashboard/modificaciones');
   };
 
+  const handleRegularizacionesClick = () => {
+    navigate('/dashboard/regularizaciones');
+  };
+
+  const handleAmpliacionesClick = () => {
+    navigate('/dashboard/ampliaciones');
+  };
+
   if (error) {
     return (
       <div className="p-6">
@@ -91,24 +99,24 @@ export default function Servicios() {
   }
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-4 sm:p-6 space-y-8">
       {/* Servicios Principales */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
           Servicios Principales
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 max-w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
           {/* Card de Anteproyectos */}
           <div
             onClick={handleAnteproyectosClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
           >
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <span className="text-2xl">📋</span>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
                   Anteproyectos
                 </h3>
                 <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -116,12 +124,12 @@ export default function Servicios() {
                 </p>
               </div>
             </div>
-            <p className="text-gray-700 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
               Gestiona los anteproyectos de arquitectura, desde la documentación inicial hasta la aprobación final.
             </p>
             <div className="flex items-center text-teal-600 font-medium text-sm">
               <span>Acceder a Anteproyectos</span>
-              <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </div>
@@ -130,14 +138,14 @@ export default function Servicios() {
           {/* Card de Proyectos */}
           <div
             onClick={handleProyectosClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
           >
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <span className="text-2xl">🏗️</span>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
                   Proyectos
                 </h3>
                 <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -145,12 +153,12 @@ export default function Servicios() {
                 </p>
               </div>
             </div>
-            <p className="text-gray-700 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
               Gestiona los proyectos completos con todas las especialidades: arquitectura, estructuras, sanitarias y eléctricas.
             </p>
             <div className="flex items-center text-teal-600 font-medium text-sm">
               <span>Acceder a Proyectos</span>
-              <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </div>
@@ -159,14 +167,14 @@ export default function Servicios() {
           {/* Card de Demoliciones */}
           <div
             onClick={handleDemolicionesClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
           >
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🏗️</span>
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">🏚️</span>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
                   Demolición Total
                 </h3>
                 <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -174,12 +182,12 @@ export default function Servicios() {
                 </p>
               </div>
             </div>
-            <p className="text-gray-700 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
               Gestiona los procesos de demolición total con todas las especialidades y documentación requerida.
             </p>
             <div className="flex items-center text-teal-600 font-medium text-sm">
               <span>Acceder a Demoliciones</span>
-              <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </div>
@@ -188,14 +196,14 @@ export default function Servicios() {
           {/* Card de Conformidad de Obra */}
           <div
             onClick={handleConformidadesClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
           >
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <span className="text-2xl">✓</span>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
                   Conformidad de Obra
                 </h3>
                 <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -203,12 +211,12 @@ export default function Servicios() {
                 </p>
               </div>
             </div>
-            <p className="text-gray-700 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
               Gestiona los trámites de conformidad de obra en sus diferentes modalidades: sin variaciones, con variaciones y casco habitable.
             </p>
             <div className="flex items-center text-teal-600 font-medium text-sm">
               <span>Acceder a Conformidades</span>
-              <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </div>
@@ -217,14 +225,14 @@ export default function Servicios() {
           {/* Card de Modificación de Obra */}
           <div
             onClick={handleModificacionesClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
           >
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <span className="text-2xl">🔧</span>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
                   Modificación de Obra
                 </h3>
                 <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -232,12 +240,70 @@ export default function Servicios() {
                 </p>
               </div>
             </div>
-            <p className="text-gray-700 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
               Gestiona las modificaciones de obras existentes, incluyendo ampliaciones, cambios de uso y remodelaciones en todas las modalidades.
             </p>
             <div className="flex items-center text-teal-600 font-medium text-sm">
               <span>Acceder a Modificaciones</span>
-              <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Card de Regularización de Licencia */}
+          <div
+            onClick={handleRegularizacionesClick}
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">📜</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Regularización de Licencia
+                </h3>
+                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Legalización de construcciones
+                </p>
+              </div>
+            </div>
+            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
+              Regulariza construcciones existentes que no cuentan con licencia de edificación mediante el proceso de legalización retroactiva.
+            </p>
+            <div className="flex items-center text-teal-600 font-medium text-sm">
+              <span>Acceder a Regularizaciones</span>
+              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Card de Ampliación, Remodelación, Demolición */}
+          <div
+            onClick={handleAmpliacionesClick}
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">🔨</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Ampliación/Remodelación
+                </h3>
+                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Modificaciones de obra
+                </p>
+              </div>
+            </div>
+            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
+              Gestiona proyectos de ampliación, remodelación y demolición con todas las especialidades y documentación técnica requerida.
+            </p>
+            <div className="flex items-center text-teal-600 font-medium text-sm">
+              <span>Acceder a Ampliaciones</span>
+              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </div>
@@ -250,9 +316,9 @@ export default function Servicios() {
 
       {/* Configuración de Servicios */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
+        {/* <h2 className="text-xl font-semibold text-gray-900 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
           Configuración de Servicios
-        </h2>
+        </h2> */}
 
         {/* Filtro de búsqueda */}
         {/* <div className="flex items-center justify-between gap-4 mb-6">

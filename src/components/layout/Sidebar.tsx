@@ -17,9 +17,9 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-white dark:bg-gray-800 flex-shrink-0 shadow-lg flex flex-col h-full">
+    <aside className="w-64 bg-white flex-shrink-0 shadow-lg flex flex-col h-full">
       {/* Header con logo */}
-      <div className="flex items-center justify-center h-20 border-b dark:border-gray-700">
+      <div className="flex items-center justify-center h-20 border-b border-gray-200">
         <img src={logo} alt="FSR Logo" className="h-12 w-auto" />
       </div>
 
@@ -32,8 +32,8 @@ export default function Sidebar() {
                 to="/dashboard"
                 end
                 className={({ isActive }) =>
-                  `flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                    isActive ? 'bg-gray-200 dark:bg-gray-700 font-bold' : ''
+                  `flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 ${
+                    isActive ? 'bg-gray-200 font-bold' : ''
                   }`
                 }
               >
@@ -46,8 +46,8 @@ export default function Sidebar() {
                 <NavLink
                   to={item.href}
                   className={({ isActive }) =>
-                    `flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                      isActive ? 'bg-gray-200 dark:bg-gray-700 font-bold' : ''
+                    `flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 ${
+                      isActive ? 'bg-gray-200 font-bold' : ''
                     }`
                   }
                 >
@@ -61,10 +61,10 @@ export default function Sidebar() {
       </div>
 
       {/* Contenedor inferior con botón de cerrar sesión */}
-      <div className="p-4 border-t dark:border-gray-700">
+      <div className="p-4 border-t border-gray-200">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          className="w-full flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <LuLogOut className="h-6 w-6" />
           <span className="ml-4">Cerrar Sesión</span>

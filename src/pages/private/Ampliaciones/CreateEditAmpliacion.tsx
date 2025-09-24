@@ -4,26 +4,23 @@ import { LuArrowLeft, LuArrowRight, LuX, LuInfo } from 'react-icons/lu';
 import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
-
-import type { ConformidadFormData, FormStep, UploadedDocument } from '@/types/conformidad.types';
-import { StepAdministrado } from '@/components/utils/Steps';
-import StepModalidad from './StepConformidad/StepModalidad';
-import StepDocumentosIniciales from './StepConformidad/StepDocumentosIniciales';
-import StepAntecedentes from './StepConformidad/StepAntecedentes';
-import StepDocumentosExpediente from './StepConformidad/StepDocumentosExpediente';
-import StepVerificacion from './StepConformidad/StepVerificacion';
-import { ResumenConformidad } from './components';
+import { ResumenAmpliacion } from './components';
+import StepProyectoPersonalizado from './StepAmpliacion/StepProyectoPersonalizado';
+import StepLicencias from './StepAmpliacion/StepLicencias';
+import StepAntecedentes from './StepAmpliacion/StepAntecedentes';
+import StepDocumentacion from './StepAmpliacion/StepDocumentacion';
+import StepTramiteMunicipal from './StepAmpliacion/StepTramiteMunicipal';
+import type { AmpliacionFormData, FormStep, UploadedDocument } from '@/types/ampliacion.types';
 
 const stepLabels = [
-  'Administrado',
-  'Modalidad',
-  'Documentos Iniciales',
+  'Información del Proyecto',
+  'Licencias y Normativas',
   'Antecedentes',
-  'Documentos Expediente',
-  'Verificación'
+  'Documentación Técnica',
+  'Trámite Municipal'
 ];
 
-export default function CreateEditConformidad() {
+export default function CreateEditAmpliacion() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { setHeader } = useHeaderStore();
@@ -37,55 +34,84 @@ export default function CreateEditConformidad() {
   
   // Estado para manejar los pasos del formulario
   const [steps, setSteps] = useState<FormStep[]>([
-    { id: 1, title: 'Administrado', completed: false },
-    { id: 2, title: 'Modalidad', completed: false },
-    { id: 3, title: 'Documentos Iniciales', completed: false },
-    { id: 4, title: 'Antecedentes', completed: false },
-    { id: 5, title: 'Documentos Expediente', completed: false },
-    { id: 6, title: 'Verificación', completed: false },
+    { id: 1, title: 'Información del Proyecto', completed: false },
+    { id: 2, title: 'Licencias y Normativas', completed: false },
+    { id: 3, title: 'Antecedentes', completed: false },
+    { id: 4, title: 'Documentación Técnica', completed: false },
+    { id: 5, title: 'Trámite Municipal', completed: false },
   ]);
   
-  const [formData, setFormData] = useState<ConformidadFormData>({
-    // Información General
+  const [formData, setFormData] = useState<AmpliacionFormData>({
+    // Paso 1: Información del Proyecto
+    nombre_proyecto: '',
     selectedClient: null,
-    modalidad: '',
 
-    // Sin Variaciones - Documentos del Cliente
-    licencia_obra_sv: [],
-    planos_aprobados_sv: [],
+    // Paso 2: Licencias
+    tipo_licencia_edificacion: '',
+    modalidad: 'B',
+    link_normativas: '',
+    archivo_normativo: [],
+
+    // Paso 3: Antecedentes
+    gestionado_por_fsr: false,
+    proyecto_fsr_id: '',
+    certificado_parametros: [],
+    licencia_obra: [],
+    conformidad_obra: [],
+    declaratoria_fabrica: [],
+    planos_fabrica: [],
+    partida_registral: [],
+
+    // Paso 4: Documentación Técnica
+    fue: [],
     
-    // Sin Variaciones - Verificación Preliminar
-    verificacion_campo_sv: false,
-    fecha_verificacion_sv: '',
-
-    // Con Variaciones - Información Inicial
-    servicios_previos_fsr: false,
+    // Arquitectura
+    arquitectura_intervencion: [],
+    arquitectura_resultante: [],
+    arquitectura_memoria: [],
     
-    // Con Variaciones - Documentos Iniciales del Cliente
-    licencia_obra_cv: [],
-    planos_aprobados_licencia_cv: [],
-    planos_digitales_cad_cv: [],
+    // Estructuras
+    estructuras_intervencion: [],
+    estructuras_resultante: [],
+    
+    // Sanitarias
+    sanitarias_intervencion: [],
+    sanitarias_resultante: [],
+    sanitarias_sedapal: [],
+    
+    // Eléctricas
+    electricas_resultante: [],
+    electricas_luz_del_sur: [],
+    
+    // Mecánicas
+    mecanicas_ficha_tecnica: [],
+    
+    // Gas
+    gas_resultante: [],
+    gas_calidda: [],
+    
+    // Casos Especiales
+    es_condominio: false,
+    tiene_junta: 'no',
+    autorizacion_condominio: [],
+    observaciones_condominio: '',
 
-    // Con Variaciones - Análisis de Antecedentes
-    primer_expediente: true,
-    descripcion_antecedentes: '',
-    expedientes_anteriores: [],
-
-    // Con Variaciones - Documentos del Expediente (Elaboración FSR)
-    fue_conformidad: [],
-    planos_conformidad: [],
-    memoria_descriptiva: [],
-    cuaderno_obra: [],
-    protocolos: [],
-    declaraciones_juradas: [],
-    sustentos_tecnicos: [],
+    // Paso 5: Trámite Municipal
+    fecha_ingreso_municipalidad: '',
+    cargo_ingreso: [],
+    fecha_comision: '',
+    dictamen_comision: 'conforme',
+    acta_comision: [],
+    
+    // Seguimiento
+    seguimiento: [],
   });
 
   const isEdit = Boolean(id);
 
   useEffect(() => {
     setHeader(
-      isEdit ? 'Editar Conformidad de Obra' : 'Nueva Conformidad de Obra',
+      isEdit ? 'Editar Ampliación/Remodelación/Demolición' : 'Nueva Ampliación/Remodelación/Demolición',
       'Gestiona todos tus trámites y servicios en un solo lugar'
     );
     
@@ -94,7 +120,7 @@ export default function CreateEditConformidad() {
     };
   }, [setHeader, isEdit]);
 
-  const handleInputChange = (field: keyof ConformidadFormData, value: any) => {
+  const handleInputChange = (field: keyof AmpliacionFormData, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -114,11 +140,12 @@ export default function CreateEditConformidad() {
     }
   };
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File, documentKey: string) => {
     // Simular upload
     const uploadedDoc: UploadedDocument = {
-      id: Date.now().toString(),
+      key: documentKey,
       name: file.name,
+      file_id: Date.now().toString(),
       url: URL.createObjectURL(file),
       size: file.size,
       type: file.type,
@@ -132,50 +159,53 @@ export default function CreateEditConformidad() {
     const newErrors: Record<string, string> = {};
 
     switch (step) {
-      case 0: // Administrado
+      case 0: // Información del Proyecto
+        if (!formData.nombre_proyecto.trim()) {
+          newErrors.nombre_proyecto = 'El nombre del proyecto es requerido';
+        }
         if (!formData.selectedClient) {
           newErrors.selectedClient = 'Debe seleccionar un administrado';
         }
         break;
-      case 1: // Modalidad
+        
+      case 1: // Licencias y Normativas
+        if (!formData.tipo_licencia_edificacion?.trim()) {
+          newErrors.tipo_licencia_edificacion = 'El tipo de licencia es requerido';
+        }
         if (!formData.modalidad) {
           newErrors.modalidad = 'Debe seleccionar una modalidad';
         }
         break;
-      case 2: // Documentos Iniciales
-        if (formData.modalidad === 'sin_variaciones') {
-          if (formData.licencia_obra_sv.length === 0) {
-            newErrors.licencia_obra_sv = 'La licencia de obra es requerida';
-          }
-          if (formData.planos_aprobados_sv.length === 0) {
-            newErrors.planos_aprobados_sv = 'Los planos aprobados son requeridos';
-          }
-        } else if (formData.modalidad === 'con_variaciones' || formData.modalidad === 'casco_habitable') {
-          if (!formData.servicios_previos_fsr && formData.licencia_obra_cv.length === 0) {
-            newErrors.licencia_obra_cv = 'La licencia de obra es requerida';
-          }
+        
+      case 2: // Antecedentes
+        if (!formData.certificado_parametros || formData.certificado_parametros.length === 0) {
+          newErrors.certificado_parametros = 'El certificado de parámetros urbanísticos es requerido';
+        }
+        if (formData.gestionado_por_fsr && !formData.proyecto_fsr_id) {
+          newErrors.proyecto_fsr_id = 'Debe seleccionar un proyecto FSR';
         }
         break;
-      case 3: // Antecedentes
-        // Validaciones opcionales para antecedentes
-        if (!formData.primer_expediente && !formData.descripcion_antecedentes) {
-          newErrors.descripcion_antecedentes = 'La descripción de antecedentes es requerida';
+        
+      case 3: // Documentación Técnica
+        if (!formData.fue || formData.fue.length === 0) {
+          newErrors.fue = 'El FUE es requerido';
+        }
+        if (!formData.arquitectura_intervencion || formData.arquitectura_intervencion.length === 0) {
+          newErrors.arquitectura_intervencion = 'Los planos de intervención de arquitectura son requeridos';
+        }
+        if (!formData.arquitectura_resultante || formData.arquitectura_resultante.length === 0) {
+          newErrors.arquitectura_resultante = 'Los planos resultantes de arquitectura son requeridos';
+        }
+        if (!formData.arquitectura_memoria || formData.arquitectura_memoria.length === 0) {
+          newErrors.arquitectura_memoria = 'La memoria descriptiva es requerida';
+        }
+        if (formData.es_condominio && (!formData.autorizacion_condominio || formData.autorizacion_condominio.length === 0)) {
+          newErrors.autorizacion_condominio = 'La autorización de condominio es requerida';
         }
         break;
-      case 4: // Documentos Expediente
-        if (formData.modalidad === 'con_variaciones' || formData.modalidad === 'casco_habitable') {
-          if (formData.fue_conformidad.length === 0) {
-            newErrors.fue_conformidad = 'El FUE de conformidad es requerido';
-          }
-          if (formData.planos_conformidad.length === 0) {
-            newErrors.planos_conformidad = 'Los planos de conformidad son requeridos';
-          }
-        }
-        break;
-      case 5: // Verificación
-        if (formData.modalidad === 'sin_variaciones' && !formData.fecha_verificacion_sv) {
-          newErrors.fecha_verificacion_sv = 'La fecha de verificación es requerida';
-        }
+        
+      case 4: // Trámite Municipal
+        // Validaciones opcionales para trámite municipal
         break;
     }
 
@@ -231,8 +261,8 @@ export default function CreateEditConformidad() {
     try {
       // Simular guardado
       await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Conformidad guardada:', formData);
-      navigate('/dashboard/conformidades');
+      console.log('Ampliación guardada:', formData);
+      navigate('/dashboard/ampliaciones');
     } catch (error) {
       console.error('Error al guardar:', error);
     } finally {
@@ -244,29 +274,30 @@ export default function CreateEditConformidad() {
     switch (currentStep) {
       case 0:
         return (
-          <StepAdministrado
+          <StepProyectoPersonalizado
             formData={formData}
-            clients={clients || []}
-            errors={errors}
-            onInputChange={(field: string, value: any) => handleInputChange(field as keyof ConformidadFormData, value)}
-            title="Paso 1: Seleccionar Administrado"
-            description="Seleccione el administrado para este trámite de conformidad de obra"
-          />
-        );
-      case 1:
-        return (
-          <StepModalidad
-            formData={formData}
+            clients={clients}
             errors={errors}
             onInputChange={handleInputChange}
           />
         );
-      case 2:
+      case 1:
         return (
-          <StepDocumentosIniciales
+          <StepLicencias
             formData={formData}
             errors={errors}
-            conformidadId={id || 'new'}
+            ampliacionId={id || 'new'}
+            uploadedDocuments={uploadedDocuments}
+            onInputChange={handleInputChange}
+            onFileUpload={handleFileUpload}
+          />
+        );
+      case 2:
+        return (
+          <StepAntecedentes
+            formData={formData}
+            errors={errors}
+            ampliacionId={id || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
@@ -274,10 +305,10 @@ export default function CreateEditConformidad() {
         );
       case 3:
         return (
-          <StepAntecedentes
+          <StepDocumentacion
             formData={formData}
             errors={errors}
-            conformidadId={id || 'new'}
+            ampliacionId={id || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
@@ -285,21 +316,10 @@ export default function CreateEditConformidad() {
         );
       case 4:
         return (
-          <StepDocumentosExpediente
+          <StepTramiteMunicipal
             formData={formData}
             errors={errors}
-            conformidadId={id || 'new'}
-            uploadedDocuments={uploadedDocuments}
-            onInputChange={handleInputChange}
-            onFileUpload={handleFileUpload}
-          />
-        );
-      case 5:
-        return (
-          <StepVerificacion
-            formData={formData}
-            errors={errors}
-            conformidadId={id || 'new'}
+            ampliacionId={id || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
@@ -397,7 +417,7 @@ export default function CreateEditConformidad() {
               <div className="flex items-center gap-4">
                 <Button
                   variant="bordered"
-                  onClick={() => navigate('/dashboard/conformidades')}
+                  onClick={() => navigate('/dashboard/ampliaciones')}
                   startContent={<LuX className="w-4 h-4" />}
                 >
                   Cancelar
@@ -415,7 +435,7 @@ export default function CreateEditConformidad() {
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => navigate('/dashboard/conformidades')}
+                    onClick={() => navigate('/dashboard/ampliaciones')}
                     style={{ backgroundColor: 'var(--primary-color)' }}
                     className="text-white hover:opacity-90"
                   >
@@ -429,11 +449,11 @@ export default function CreateEditConformidad() {
 
         {/* Resumen */}
         <div className="lg:col-span-1">
-          <ResumenConformidad
+          <ResumenAmpliacion
             formData={formData}
             currentStep={currentStep}
             steps={steps}
-            conformidadId={id || 'new'}
+            ampliacionId={id || 'new'}
             onSave={handleSave}
             isSaving={isSaving}
             uploadedDocuments={uploadedDocuments}

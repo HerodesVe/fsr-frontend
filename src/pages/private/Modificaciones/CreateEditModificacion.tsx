@@ -5,7 +5,7 @@ import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
 import { ResumenModificacion } from './components';
-import StepAdministrado from './StepModificacion/StepAdministrado';
+import { StepAdministrado } from '@/components/utils/Steps';
 import StepLicencia from './StepModificacion/StepLicencia';
 import StepAntecedentes from './StepModificacion/StepAntecedentes';
 import StepElaboracion from './StepModificacion/StepElaboracion';
@@ -239,7 +239,9 @@ export default function CreateEditModificacion() {
             formData={formData}
             clients={clients}
             errors={errors}
-            onInputChange={handleInputChange}
+            onInputChange={(field: string, value: any) => handleInputChange(field as keyof ModificacionFormData, value)}
+            title="Paso 1: Seleccionar Administrado"
+            description="Seleccione el administrado para este trámite de modificación de obra"
           />
         );
       case 1:

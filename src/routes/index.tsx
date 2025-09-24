@@ -13,6 +13,8 @@ import Demoliciones from '@/pages/private/Demoliciones';
 import CreateEditDemolicion from '@/pages/private/Demoliciones/CreateEditDemolicion';
 import { Conformidades, CreateEditConformidad } from '@/pages/private/Conformidades';
 import { Modificaciones, CreateEditModificacion } from '@/pages/private/Modificaciones';
+import { Regularizaciones, CreateEditRegularizacion } from '@/pages/private/Regularizaciones';
+import { Ampliaciones, CreateEditAmpliacion } from '@/pages/private/Ampliaciones';
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { isAuthenticated } = useAuthStore();
@@ -68,6 +70,12 @@ export default function AppRoutes() {
         <Route path="dashboard/modificaciones" element={<Modificaciones />} />
         <Route path="dashboard/modificaciones/create" element={<CreateEditModificacion />} />
         <Route path="dashboard/modificaciones/edit/:id" element={<CreateEditModificacion />} />
+        <Route path="dashboard/regularizaciones" element={<Regularizaciones />} />
+        <Route path="dashboard/regularizaciones/create" element={<CreateEditRegularizacion />} />
+        <Route path="dashboard/regularizaciones/edit/:id" element={<CreateEditRegularizacion />} />
+        <Route path="dashboard/ampliaciones" element={<Ampliaciones />} />
+        <Route path="dashboard/ampliaciones/create" element={<CreateEditAmpliacion />} />
+        <Route path="dashboard/ampliaciones/edit/:id" element={<CreateEditAmpliacion />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" />} />

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
 import { ResumenDemolicion } from './components';
-import StepAdministrado from './StepDemolicion/StepAdministrado';
+import { StepAdministrado } from '@/components/utils/Steps';
 import StepDocumentacion from './StepDemolicion/StepDocumentacion';
 import StepMedidasPerimetricas from './StepDemolicion/StepMedidasPerimetricas';
 import StepGestionMunicipal from './StepDemolicion/StepGestionMunicipal';
@@ -276,7 +276,9 @@ export default function CreateEditDemolicion() {
             formData={formData}
             clients={clients}
             errors={errors}
-            onInputChange={handleInputChange}
+            onInputChange={(field: string, value: any) => handleInputChange(field as keyof DemolicionFormData, value)}
+            title="Paso 1: Vincular Administrado"
+            description="Seleccione el administrado para este servicio de demolición total"
           />
         );
       case 1:

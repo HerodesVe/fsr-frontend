@@ -5,14 +5,16 @@ import type { Proyecto } from '@/types/proyecto.types';
 import type { Demolicion } from '@/types/demolicion.types';
 import type { Conformidad } from '@/types/conformidad.types';
 import type { Modificacion } from '@/types/modificacion.types';
+import type { Regularizacion } from '@/types/regularizacion.types';
+import type { Ampliacion } from '@/types/ampliacion.types';
 
-// Tipo genérico que puede ser Anteproyecto, Proyecto, Demolicion, Conformidad o Modificacion
-type ProyectoItem = Anteproyecto | Proyecto | Demolicion | Conformidad | Modificacion;
+// Tipo genérico que puede ser Anteproyecto, Proyecto, Demolicion, Conformidad, Modificacion, Regularizacion o Ampliacion
+type ProyectoItem = Anteproyecto | Proyecto | Demolicion | Conformidad | Modificacion | Regularizacion | Ampliacion;
 
 interface ProyectoCardProps {
   item: ProyectoItem;
   onClick: (item: ProyectoItem) => void;
-  type?: 'anteproyecto' | 'proyecto' | 'demolicion' | 'conformidad' | 'modificacion';
+  type?: 'anteproyecto' | 'proyecto' | 'demolicion' | 'conformidad' | 'modificacion' | 'regularizacion' | 'ampliacion';
 }
 
 export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type = 'proyecto' }) => {
@@ -81,6 +83,8 @@ export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type 
         return 'N° de Demolición:';
       case 'conformidad':
         return 'N° de Conformidad:';
+      case 'regularizacion':
+        return 'N° de Regularización:';
       default:
         return 'N° de Proyecto:';
     }
@@ -101,6 +105,8 @@ export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type 
               ? (item.data as any)?.nombre_proyecto || 'Demolición sin título'
               : type === 'conformidad'
               ? (item.data as any)?.nombre_proyecto || 'Conformidad sin título'
+              : type === 'regularizacion'
+              ? (item.data as any)?.titulo_proceso || 'Regularización sin título'
               : (item.data as any)?.titulo_proyecto || 'Proyecto sin título'
             }
           </h3>
