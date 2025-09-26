@@ -16,6 +16,7 @@ import { Modificaciones, CreateEditModificacion } from '@/pages/private/Modifica
 import { Regularizaciones, CreateEditRegularizacion } from '@/pages/private/Regularizaciones';
 import { Ampliaciones, CreateEditAmpliacion } from '@/pages/private/Ampliaciones';
 import { GestionAnexo, CreateEditGestionAnexo } from '@/pages/private/GestionAnexo';
+import { HabilitacionesUrbanas, CreateEditHabilitacionUrbana } from '@/pages/private/HabilitacionesUrbanas';
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { isAuthenticated } = useAuthStore();
@@ -80,6 +81,9 @@ export default function AppRoutes() {
         <Route path="dashboard/gestion-anexo" element={<GestionAnexo />} />
         <Route path="dashboard/gestion-anexo/create" element={<CreateEditGestionAnexo />} />
         <Route path="dashboard/gestion-anexo/edit/:id" element={<CreateEditGestionAnexo />} />
+        <Route path="dashboard/habilitaciones-urbanas" element={<HabilitacionesUrbanas />} />
+        <Route path="dashboard/habilitaciones-urbanas/create" element={<CreateEditHabilitacionUrbana />} />
+        <Route path="dashboard/habilitaciones-urbanas/edit/:id" element={<CreateEditHabilitacionUrbana />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" />} />
