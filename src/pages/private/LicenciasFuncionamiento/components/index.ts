@@ -1,0 +1,1 @@
+export { ResumenLicenciaFuncionamiento } from './ResumenLicenciaFuncionamiento';

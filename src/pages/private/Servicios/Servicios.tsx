@@ -94,6 +94,14 @@ export default function Servicios() {
     navigate('/dashboard/habilitaciones-urbanas');
   };
 
+  const handleLicenciasFuncionamientoClick = () => {
+    navigate('/dashboard/licencias-funcionamiento');
+  };
+
+  const handleRectificacionLinderosClick = () => {
+    navigate('/dashboard/rectificacion-linderos');
+  };
+
   if (error) {
     return (
       <div className="p-6">
@@ -369,6 +377,64 @@ export default function Servicios() {
             </p>
             <div className="flex items-center text-teal-600 font-medium text-sm">
               <span>Acceder a Habilitaciones Urbanas</span>
+              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Card de Licencia de Funcionamiento */}
+          <div
+            onClick={handleLicenciasFuncionamientoClick}
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">🏪</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Licencia de Funcionamiento
+                </h3>
+                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Licencias comerciales y ITSE
+                </p>
+              </div>
+            </div>
+            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
+              Gestiona el proceso completo de licencias de funcionamiento, desde la consulta inicial hasta la entrega de certificados ITSE.
+            </p>
+            <div className="flex items-center text-teal-600 font-medium text-sm">
+              <span>Acceder a Licencias de Funcionamiento</span>
+              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Card de Rectificación de Linderos */}
+          <div
+            onClick={handleRectificacionLinderosClick}
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">📐</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Rectificación de Linderos
+                </h3>
+                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Elaboración y gestión
+                </p>
+              </div>
+            </div>
+            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
+              Gestiona el proceso completo de rectificación de linderos y áreas perimétricas, desde la elaboración hasta la aprobación final.
+            </p>
+            <div className="flex items-center text-teal-600 font-medium text-sm">
+              <span>Acceder a Rectificación de Linderos</span>
               <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
