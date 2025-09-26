@@ -1,5 +1,6 @@
 import { Input, Select, FileUpload } from '@/components/ui';
 import type { LicenciaFuncionamientoFormData, UploadedDocument } from '@/types/licenciaFuncionamiento.types';
+import { ResultadoInspeccion } from '@/types/licenciaFuncionamiento.types';
 
 interface StepInspeccionMunicipalProps {
   formData: LicenciaFuncionamientoFormData;
@@ -80,7 +81,11 @@ export default function StepInspeccionMunicipal({
               onUpload={onFileUpload}
               documentKey="acta_inspeccion"
               anteproyectoId={licenciaId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 

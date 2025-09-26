@@ -98,7 +98,11 @@ export default function StepClasificacionRiesgo({
                     onUpload={onFileUpload}
                     documentKey="planos_arquitectura"
                     anteproyectoId={licenciaId}
-                    uploadedFiles={uploadedDocuments}
+                    uploadedFiles={uploadedDocuments.map(doc => ({
+                      key: doc.key || '',
+                      name: doc.name,
+                      file_id: doc.id
+                    }))}
                   />
                 </div>
 
@@ -122,7 +126,11 @@ export default function StepClasificacionRiesgo({
                     onUpload={onFileUpload}
                     documentKey="planos_seguridad"
                     anteproyectoId={licenciaId}
-                    uploadedFiles={uploadedDocuments}
+                    uploadedFiles={uploadedDocuments.map(doc => ({
+                      key: doc.key || '',
+                      name: doc.name,
+                      file_id: doc.id
+                    }))}
                   />
                 </div>
 
@@ -146,7 +154,11 @@ export default function StepClasificacionRiesgo({
                     onUpload={onFileUpload}
                     documentKey="planos_electricos"
                     anteproyectoId={licenciaId}
-                    uploadedFiles={uploadedDocuments}
+                    uploadedFiles={uploadedDocuments.map(doc => ({
+                      key: doc.key || '',
+                      name: doc.name,
+                      file_id: doc.id
+                    }))}
                   />
                 </div>
 
@@ -170,7 +182,11 @@ export default function StepClasificacionRiesgo({
                     onUpload={onFileUpload}
                     documentKey="plan_seguridad"
                     anteproyectoId={licenciaId}
-                    uploadedFiles={uploadedDocuments}
+                    uploadedFiles={uploadedDocuments.map(doc => ({
+                      key: doc.key || '',
+                      name: doc.name,
+                      file_id: doc.id
+                    }))}
                   />
                 </div>
               </div>

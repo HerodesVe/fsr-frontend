@@ -57,7 +57,11 @@ export default function StepEmisionEntrega({
                 onUpload={onFileUpload}
                 documentKey="certificado_itse"
                 anteproyectoId={licenciaId}
-                uploadedFiles={uploadedDocuments}
+                uploadedFiles={uploadedDocuments.map(doc => ({
+                  key: doc.key || '',
+                  name: doc.name,
+                  file_id: doc.id
+                }))}
               />
             </div>
 
@@ -81,7 +85,11 @@ export default function StepEmisionEntrega({
                 onUpload={onFileUpload}
                 documentKey="licencia_funcionamiento"
                 anteproyectoId={licenciaId}
-                uploadedFiles={uploadedDocuments}
+                uploadedFiles={uploadedDocuments.map(doc => ({
+                  key: doc.key || '',
+                  name: doc.name,
+                  file_id: doc.id
+                }))}
               />
             </div>
 
@@ -105,7 +113,11 @@ export default function StepEmisionEntrega({
                 onUpload={onFileUpload}
                 documentKey="acta_entrega_firmada"
                 anteproyectoId={licenciaId}
-                uploadedFiles={uploadedDocuments}
+                uploadedFiles={uploadedDocuments.map(doc => ({
+                  key: doc.key || '',
+                  name: doc.name,
+                  file_id: doc.id
+                }))}
               />
             </div>
           </div>

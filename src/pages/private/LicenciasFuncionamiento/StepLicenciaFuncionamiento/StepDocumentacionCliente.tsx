@@ -47,7 +47,11 @@ export default function StepDocumentacionCliente({
               onUpload={onFileUpload}
               documentKey="vigencia_poder"
               anteproyectoId={licenciaId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -71,7 +75,11 @@ export default function StepDocumentacionCliente({
               onUpload={onFileUpload}
               documentKey="hrpu"
               anteproyectoId={licenciaId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -95,7 +103,11 @@ export default function StepDocumentacionCliente({
               onUpload={onFileUpload}
               documentKey="declaratoria_fabrica"
               anteproyectoId={licenciaId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -119,7 +131,11 @@ export default function StepDocumentacionCliente({
               onUpload={onFileUpload}
               documentKey="certificado_pozo_tierra"
               anteproyectoId={licenciaId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
         </div>

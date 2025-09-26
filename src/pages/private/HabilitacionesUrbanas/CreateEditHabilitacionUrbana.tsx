@@ -14,7 +14,7 @@ import {
   StepRevisionObservaciones,
   StepAprobacionFinal
 } from './StepHabilitacion';
-import type { HabilitacionUrbanaFormData, FormStep, UploadedDocument, TabConfig } from '@/types/habilitacionUrbana.types';
+import type { HabilitacionUrbanaFormData, FormStep, UploadedDocument } from '@/types/habilitacionUrbana.types';
 
 const elaboracionSteps = [
   'Administrado',

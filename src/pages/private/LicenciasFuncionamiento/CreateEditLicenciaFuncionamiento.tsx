@@ -17,10 +17,6 @@ import type {
   LicenciaFuncionamientoFormData, 
   FormStep, 
   UploadedDocument, 
-  NivelRiesgoITSE,
-  EstadoLocal,
-  EstadoTramite,
-  ResultadoInspeccion
 } from '@/types/licenciaFuncionamiento.types';
 
 const stepLabels = [

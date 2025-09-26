@@ -41,7 +41,11 @@ export default function StepRevisionObservaciones({
               onUpload={onFileUpload}
               documentKey="acta_observaciones"
               anteproyectoId={habilitacionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -72,7 +76,11 @@ export default function StepRevisionObservaciones({
               onUpload={onFileUpload}
               documentKey="documentacion_rectificada"
               anteproyectoId={habilitacionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
         </div>

@@ -35,7 +35,7 @@ export default function StepIngresoExpediente({
               value={formData.fecha_ingreso}
               onChange={(value) => onInputChange('fecha_ingreso', value)}
               error={errors.fecha_ingreso}
-              isRequired
+              required
             />
           </div>
 
@@ -52,7 +52,11 @@ export default function StepIngresoExpediente({
               onUpload={onFileUpload}
               documentKey="cargo_ingreso"
               anteproyectoId={habilitacionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
               error={errors.cargo_ingreso}
             />
           </div>

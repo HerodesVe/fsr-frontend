@@ -46,7 +46,11 @@ export default function StepAprobacionFinal({
                   onUpload={onFileUpload}
                   documentKey="acta_dictamen_conforme"
                   anteproyectoId={habilitacionId}
-                  uploadedFiles={uploadedDocuments}
+                  uploadedFiles={uploadedDocuments.map(doc => ({
+                    key: doc.key || '',
+                    name: doc.name,
+                    file_id: doc.id
+                  }))}
                 />
               </div>
 
@@ -63,7 +67,11 @@ export default function StepAprobacionFinal({
                   onUpload={onFileUpload}
                   documentKey="resolucion_habilitacion_urbana"
                   anteproyectoId={habilitacionId}
-                  uploadedFiles={uploadedDocuments}
+                  uploadedFiles={uploadedDocuments.map(doc => ({
+                    key: doc.key || '',
+                    name: doc.name,
+                    file_id: doc.id
+                  }))}
                 />
               </div>
             </div>
@@ -87,7 +95,11 @@ export default function StepAprobacionFinal({
                 onUpload={onFileUpload}
                 documentKey="proyecto_reconsideracion_apelacion"
                 anteproyectoId={habilitacionId}
-                uploadedFiles={uploadedDocuments}
+                uploadedFiles={uploadedDocuments.map(doc => ({
+                  key: doc.key || '',
+                  name: doc.name,
+                  file_id: doc.id
+                }))}
               />
             </div>
           </div>
@@ -110,7 +122,11 @@ export default function StepAprobacionFinal({
                 onUpload={onFileUpload}
                 documentKey="cargo_entrega_cliente"
                 anteproyectoId={habilitacionId}
-                uploadedFiles={uploadedDocuments}
+                uploadedFiles={uploadedDocuments.map(doc => ({
+                  key: doc.key || '',
+                  name: doc.name,
+                  file_id: doc.id
+                }))}
               />
             </div>
           </div>

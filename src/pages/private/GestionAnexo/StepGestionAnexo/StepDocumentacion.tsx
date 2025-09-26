@@ -12,7 +12,6 @@ interface StepDocumentacionProps {
 export default function StepDocumentacion({
   formData,
   onInputChange,
-  onFileUpload,
 }: StepDocumentacionProps) {
 
   const handleFileChange = async (field: keyof GestionAnexoFormData, files: File[]) => {
@@ -38,7 +37,7 @@ export default function StepDocumentacion({
                 label="Anexo H (Formato)"
                 accept=".pdf,.doc,.docx"
                 multiple={false}
-                files={formData.anexo_h_formato || []}
+                value={formData.anexo_h_formato || []}
                 onChange={(files) => handleFileChange('anexo_h_formato', files)}
                 required
               />
@@ -50,7 +49,7 @@ export default function StepDocumentacion({
                 label="Contrato Supervisor o Convenio de Visitas"
                 accept=".pdf,.doc,.docx"
                 multiple={false}
-                files={formData.contrato_supervisor || []}
+                value={formData.contrato_supervisor || []}
                 onChange={(files) => handleFileChange('contrato_supervisor', files)}
                 required
               />
@@ -62,7 +61,7 @@ export default function StepDocumentacion({
                 label="Póliza CAR"
                 accept=".pdf,.doc,.docx"
                 multiple={false}
-                files={formData.poliza_car || []}
+                value={formData.poliza_car || []}
                 onChange={(files) => handleFileChange('poliza_car', files)}
                 required
               />
@@ -74,7 +73,7 @@ export default function StepDocumentacion({
                 label="Resolución de Licencia de Obra"
                 accept=".pdf,.doc,.docx"
                 multiple={false}
-                files={formData.resolucion_licencia_obra || []}
+                value={formData.resolucion_licencia_obra || []}
                 onChange={(files) => handleFileChange('resolucion_licencia_obra', files)}
                 required
               />
@@ -86,7 +85,7 @@ export default function StepDocumentacion({
                 label="Cronograma de Visitas"
                 accept=".pdf,.doc,.docx,.xls,.xlsx"
                 multiple={false}
-                files={formData.cronograma_visitas || []}
+                value={formData.cronograma_visitas || []}
                 onChange={(files) => handleFileChange('cronograma_visitas', files)}
                 required
               />
@@ -98,7 +97,7 @@ export default function StepDocumentacion({
                 label="Cronograma de Obra"
                 accept=".pdf,.doc,.docx,.xls,.xlsx"
                 multiple={false}
-                files={formData.cronograma_obra || []}
+                value={formData.cronograma_obra || []}
                 onChange={(files) => handleFileChange('cronograma_obra', files)}
                 required
               />
@@ -110,7 +109,7 @@ export default function StepDocumentacion({
                 label="Otros Documentos (Opcional)"
                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                 multiple={true}
-                files={formData.otros_documentos || []}
+                value={formData.otros_documentos || []}
                 onChange={(files) => handleFileChange('otros_documentos', files)}
                 required={false}
               />

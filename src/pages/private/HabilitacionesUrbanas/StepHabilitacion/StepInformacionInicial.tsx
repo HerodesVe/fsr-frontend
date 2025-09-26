@@ -1,4 +1,4 @@
-import { FileUpload, Input, Select, Textarea } from '@/components/ui';
+import { FileUpload, Select, Textarea } from '@/components/ui';
 import type { HabilitacionUrbanaFormData, UploadedDocument } from '@/types/habilitacionUrbana.types';
 
 interface StepInformacionInicialProps {
@@ -64,7 +64,11 @@ export default function StepInformacionInicial({
                     onUpload={onFileUpload}
                     documentKey="ficha_registros_publicos"
                     anteproyectoId={habilitacionId}
-                    uploadedFiles={uploadedDocuments}
+                    uploadedFiles={uploadedDocuments.map(doc => ({
+                      key: doc.key || '',
+                      name: doc.name,
+                      file_id: doc.id
+                    }))}
                     error={errors.ficha_registros_publicos}
                   />
                 </div>
@@ -82,7 +86,11 @@ export default function StepInformacionInicial({
                     onUpload={onFileUpload}
                     documentKey="recibos_servicios"
                     anteproyectoId={habilitacionId}
-                    uploadedFiles={uploadedDocuments}
+                    uploadedFiles={uploadedDocuments.map(doc => ({
+                      key: doc.key || '',
+                      name: doc.name,
+                      file_id: doc.id
+                    }))}
                   />
                 </div>
               </div>

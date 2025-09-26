@@ -48,7 +48,11 @@ export default function StepElaboracionPlano({
               onUpload={onFileUpload}
               documentKey="plano_propuesto"
               anteproyectoId={rectificacionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
               error={errors.plano_propuesto}
             />
           </div>

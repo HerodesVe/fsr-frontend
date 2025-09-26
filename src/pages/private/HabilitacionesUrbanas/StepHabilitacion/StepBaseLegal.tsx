@@ -102,7 +102,11 @@ export default function StepBaseLegal({
                     onUpload={onFileUpload}
                     documentKey={`norma_${norma.id}`}
                     anteproyectoId={habilitacionId}
-                    uploadedFiles={uploadedDocuments}
+                    uploadedFiles={uploadedDocuments.map(doc => ({
+                      key: doc.key || '',
+                      name: doc.name,
+                      file_id: doc.id
+                    }))}
                   />
                 </div>
               </div>

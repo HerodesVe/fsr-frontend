@@ -64,7 +64,11 @@ export default function StepSeguimientoObservaciones({
               onUpload={onFileUpload}
               documentKey="documento_observaciones"
               anteproyectoId={rectificacionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 

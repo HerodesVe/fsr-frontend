@@ -48,7 +48,11 @@ export default function StepAprobacionFinal({
               onUpload={onFileUpload}
               documentKey="documento_aprobacion"
               anteproyectoId={rectificacionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
               error={errors.documento_aprobacion}
             />
           </div>

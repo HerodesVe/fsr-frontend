@@ -36,10 +36,9 @@ export default function StepPresentacion({
                 label="Hoja de Trámite (Cargo)"
                 accept=".pdf,.jpg,.jpeg,.png"
                 multiple={false}
-                files={formData.hoja_tramite_cargo || []}
+                value={formData.hoja_tramite_cargo || []}
                 onChange={(files) => handleFileChange('hoja_tramite_cargo', files)}
                 required
-                description="Cargar cargo de la municipalidad"
               />
             </div>
 

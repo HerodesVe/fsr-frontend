@@ -36,10 +36,9 @@ export default function StepCierre({
               label="Cargo de Entrega al Administrado"
               accept=".pdf,.jpg,.jpeg,.png"
               multiple={false}
-              files={formData.cargo_entrega_administrado || []}
+              value={formData.cargo_entrega_administrado || []}
               onChange={(files) => handleFileChange('cargo_entrega_administrado', files)}
               required
-              description="Cargar evidencia de entrega"
             />
           </div>
 

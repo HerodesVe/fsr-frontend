@@ -46,7 +46,11 @@ export default function StepDocumentacionTecnica({
                   onUpload={onFileUpload}
                   documentKey="levantamiento_topografico"
                   anteproyectoId={habilitacionId}
-                  uploadedFiles={uploadedDocuments}
+                  uploadedFiles={uploadedDocuments.map(doc => ({
+                    key: doc.key || '',
+                    name: doc.name,
+                    file_id: doc.id
+                  }))}
                 />
               </div>
 
@@ -63,7 +67,11 @@ export default function StepDocumentacionTecnica({
                   onUpload={onFileUpload}
                   documentKey="estudio_mecanica_suelos"
                   anteproyectoId={habilitacionId}
-                  uploadedFiles={uploadedDocuments}
+                  uploadedFiles={uploadedDocuments.map(doc => ({
+                    key: doc.key || '',
+                    name: doc.name,
+                    file_id: doc.id
+                  }))}
                 />
               </div>
 
@@ -80,7 +88,11 @@ export default function StepDocumentacionTecnica({
                   onUpload={onFileUpload}
                   documentKey="planos_tecnicos_proyecto"
                   anteproyectoId={habilitacionId}
-                  uploadedFiles={uploadedDocuments}
+                  uploadedFiles={uploadedDocuments.map(doc => ({
+                    key: doc.key || '',
+                    name: doc.name,
+                    file_id: doc.id
+                  }))}
                 />
               </div>
 
@@ -97,7 +109,11 @@ export default function StepDocumentacionTecnica({
                   onUpload={onFileUpload}
                   documentKey="formulario_unico_fuhu"
                   anteproyectoId={habilitacionId}
-                  uploadedFiles={uploadedDocuments}
+                  uploadedFiles={uploadedDocuments.map(doc => ({
+                    key: doc.key || '',
+                    name: doc.name,
+                    file_id: doc.id
+                  }))}
                 />
               </div>
             </div>
@@ -122,7 +138,11 @@ export default function StepDocumentacionTecnica({
                   onUpload={onFileUpload}
                   documentKey="certificado_zonificacion_vias"
                   anteproyectoId={habilitacionId}
-                  uploadedFiles={uploadedDocuments}
+                  uploadedFiles={uploadedDocuments.map(doc => ({
+                    key: doc.key || '',
+                    name: doc.name,
+                    file_id: doc.id
+                  }))}  
                 />
               </div>
 
@@ -139,7 +159,11 @@ export default function StepDocumentacionTecnica({
                   onUpload={onFileUpload}
                   documentKey="factibilidad_servicios_electricos"
                   anteproyectoId={habilitacionId}
-                  uploadedFiles={uploadedDocuments}
+                  uploadedFiles={uploadedDocuments.map(doc => ({
+                    key: doc.key || '',
+                    name: doc.name,
+                    file_id: doc.id
+                  }))}
                 />
               </div>
 
@@ -156,7 +180,11 @@ export default function StepDocumentacionTecnica({
                   onUpload={onFileUpload}
                   documentKey="factibilidad_agua_desague"
                   anteproyectoId={habilitacionId}
-                  uploadedFiles={uploadedDocuments}
+                  uploadedFiles={uploadedDocuments.map(doc => ({
+                    key: doc.key || '',
+                    name: doc.name,
+                    file_id: doc.id
+                  }))}
                 />
               </div>
             </div>
@@ -181,7 +209,11 @@ export default function StepDocumentacionTecnica({
                   onUpload={onFileUpload}
                   documentKey="sira_cultura"
                   anteproyectoId={habilitacionId}
-                  uploadedFiles={uploadedDocuments}
+                  uploadedFiles={uploadedDocuments.map(doc => ({
+                    key: doc.key || '',
+                    name: doc.name,
+                    file_id: doc.id
+                  }))}
                 />
               </div>
 
@@ -198,7 +230,11 @@ export default function StepDocumentacionTecnica({
                   onUpload={onFileUpload}
                   documentKey="estudio_impacto_ambiental"
                   anteproyectoId={habilitacionId}
-                  uploadedFiles={uploadedDocuments}
+                  uploadedFiles={uploadedDocuments.map(doc => ({
+                    key: doc.key || '',
+                    name: doc.name,
+                    file_id: doc.id
+                  }))}
                 />
               </div>
 
@@ -215,7 +251,11 @@ export default function StepDocumentacionTecnica({
                   onUpload={onFileUpload}
                   documentKey="estudio_impacto_vial"
                   anteproyectoId={habilitacionId}
-                  uploadedFiles={uploadedDocuments}
+                  uploadedFiles={uploadedDocuments.map(doc => ({
+                    key: doc.key || '',
+                    name: doc.name,
+                    file_id: doc.id
+                  }))}
                 />
               </div>
 
@@ -232,7 +272,11 @@ export default function StepDocumentacionTecnica({
                   onUpload={onFileUpload}
                   documentKey="permisos_ana_mtc"
                   anteproyectoId={habilitacionId}
-                  uploadedFiles={uploadedDocuments}
+                  uploadedFiles={uploadedDocuments.map(doc => ({
+                    key: doc.key || '',
+                    name: doc.name,
+                    file_id: doc.id
+                  }))}
                 />
               </div>
             </div>

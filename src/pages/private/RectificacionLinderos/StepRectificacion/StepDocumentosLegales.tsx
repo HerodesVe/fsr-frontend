@@ -48,8 +48,12 @@ export default function StepDocumentosLegales({
               onUpload={onFileUpload}
               documentKey="titulo_propiedad"
               anteproyectoId={rectificacionId}
-              uploadedFiles={uploadedDocuments}
-              error={errors.titulo_propiedad}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
+              error={errors.titulo_propiedad} 
             />
           </div>
 
@@ -72,7 +76,11 @@ export default function StepDocumentosLegales({
               onUpload={onFileUpload}
               documentKey="planos_anteriores"
               anteproyectoId={rectificacionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -95,7 +103,11 @@ export default function StepDocumentosLegales({
               onUpload={onFileUpload}
               documentKey="memoria_original"
               anteproyectoId={rectificacionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
             />
           </div>
 
@@ -118,7 +130,11 @@ export default function StepDocumentosLegales({
               onUpload={onFileUpload}
               documentKey="documento_identidad"
               anteproyectoId={rectificacionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
               error={errors.documento_identidad}
             />
           </div>
@@ -142,7 +158,11 @@ export default function StepDocumentosLegales({
               onUpload={onFileUpload}
               documentKey="pago_predial"
               anteproyectoId={rectificacionId}
-              uploadedFiles={uploadedDocuments}
+              uploadedFiles={uploadedDocuments.map(doc => ({
+                key: doc.key || '',
+                name: doc.name,
+                file_id: doc.id
+              }))}
               error={errors.pago_predial}
             />
           </div>

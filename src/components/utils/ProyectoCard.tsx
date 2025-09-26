@@ -7,14 +7,17 @@ import type { Conformidad } from '@/types/conformidad.types';
 import type { Modificacion } from '@/types/modificacion.types';
 import type { Regularizacion } from '@/types/regularizacion.types';
 import type { Ampliacion } from '@/types/ampliacion.types';
+import type { LicenciaFuncionamiento } from '@/types/licenciaFuncionamiento.types';
+import type { HabilitacionUrbana } from '@/types/habilitacionUrbana.types';
+import type { GestionAnexoItem } from '@/types/gestionAnexo.types';
 
-// Tipo genérico que puede ser Anteproyecto, Proyecto, Demolicion, Conformidad, Modificacion, Regularizacion o Ampliacion
-type ProyectoItem = Anteproyecto | Proyecto | Demolicion | Conformidad | Modificacion | Regularizacion | Ampliacion;
+// Tipo genérico que puede ser Anteproyecto, Proyecto, Demolicion, Conformidad, Modificacion, Regularizacion, Ampliacion, LicenciaFuncionamiento, HabilitacionUrbana o GestionAnexoItem
+type ProyectoItem = Anteproyecto | Proyecto | Demolicion | Conformidad | Modificacion | Regularizacion | Ampliacion | LicenciaFuncionamiento | HabilitacionUrbana | GestionAnexoItem;
 
 interface ProyectoCardProps {
   item: ProyectoItem;
   onClick: (item: ProyectoItem) => void;
-  type?: 'anteproyecto' | 'proyecto' | 'demolicion' | 'conformidad' | 'modificacion' | 'regularizacion' | 'ampliacion';
+  type?: 'anteproyecto' | 'proyecto' | 'demolicion' | 'conformidad' | 'modificacion' | 'regularizacion' | 'ampliacion' | 'rectificacion-linderos' | 'licencia-funcionamiento' | 'habilitacion-urbana' | 'gestion-anexo';
 }
 
 export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type = 'proyecto' }) => {
@@ -85,6 +88,14 @@ export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type 
         return 'N° de Conformidad:';
       case 'regularizacion':
         return 'N° de Regularización:';
+      case 'rectificacion-linderos':
+        return 'N° de Rectificación:';
+      case 'licencia-funcionamiento':
+        return 'N° de Licencia:';
+      case 'habilitacion-urbana':
+        return 'N° de Habilitación:';
+      case 'gestion-anexo':
+        return 'N° de Gestión:';
       default:
         return 'N° de Proyecto:';
     }
@@ -107,6 +118,14 @@ export const ProyectoCard: React.FC<ProyectoCardProps> = ({ item, onClick, type 
               ? (item.data as any)?.nombre_proyecto || 'Conformidad sin título'
               : type === 'regularizacion'
               ? (item.data as any)?.titulo_proceso || 'Regularización sin título'
+              : type === 'rectificacion-linderos'
+              ? (item.data as any)?.nombre_proyecto || 'Rectificación sin título'
+              : type === 'licencia-funcionamiento'
+              ? (item.data as any)?.giro_negocio || 'Licencia sin título'
+              : type === 'habilitacion-urbana'
+              ? (item.data as any)?.nombre_proyecto || 'Habilitación sin título'
+              : type === 'gestion-anexo'
+              ? (item.data as any)?.nombre_proyecto || 'Gestión sin título'
               : (item.data as any)?.titulo_proyecto || 'Proyecto sin título'
             }
           </h3>
