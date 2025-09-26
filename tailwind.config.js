@@ -7,7 +7,6 @@ export default {
     './src/**/*.{js,ts,jsx,tsx}',
     './node_modules/@heroui/react/dist/**/*.{js,ts,jsx,tsx}',
   ],
-  darkMode: 'class', // Cambiado de 'media' (por defecto) a 'class' para control manual
   theme: {
     extend: {
       colors: {

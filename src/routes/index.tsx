@@ -15,6 +15,7 @@ import { Conformidades, CreateEditConformidad } from '@/pages/private/Conformida
 import { Modificaciones, CreateEditModificacion } from '@/pages/private/Modificaciones';
 import { Regularizaciones, CreateEditRegularizacion } from '@/pages/private/Regularizaciones';
 import { Ampliaciones, CreateEditAmpliacion } from '@/pages/private/Ampliaciones';
+import { GestionAnexo, CreateEditGestionAnexo } from '@/pages/private/GestionAnexo';
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { isAuthenticated } = useAuthStore();
@@ -76,6 +77,9 @@ export default function AppRoutes() {
         <Route path="dashboard/ampliaciones" element={<Ampliaciones />} />
         <Route path="dashboard/ampliaciones/create" element={<CreateEditAmpliacion />} />
         <Route path="dashboard/ampliaciones/edit/:id" element={<CreateEditAmpliacion />} />
+        <Route path="dashboard/gestion-anexo" element={<GestionAnexo />} />
+        <Route path="dashboard/gestion-anexo/create" element={<CreateEditGestionAnexo />} />
+        <Route path="dashboard/gestion-anexo/edit/:id" element={<CreateEditGestionAnexo />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" />} />
