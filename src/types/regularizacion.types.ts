@@ -63,6 +63,12 @@ export interface RegularizacionFormData {
   actaObservacion: File[];
   docSubsanacion: File[];
   resolucionFinal: File[];
+
+  // Paso 6: Entrega al Administrado
+  fecha_entrega_administrado: string;
+  receptor_administrado: string;
+  cargo_entrega_administrado: File[];
+  observaciones_entrega: string;
 }
 
 export interface StepStatus {

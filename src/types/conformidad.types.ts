@@ -37,6 +37,12 @@ export interface ConformidadFormData {
 
   // Casco Habitable (reutiliza campos de Con Variaciones)
   // Se pueden agregar campos específicos si es necesario
+
+  // Paso 7: Entrega al Administrado
+  fecha_entrega_administrado: string;
+  receptor_administrado: string;
+  cargo_entrega_administrado: UploadedDocument[];
+  observaciones_entrega: string;
 }
 
 export interface Conformidad {

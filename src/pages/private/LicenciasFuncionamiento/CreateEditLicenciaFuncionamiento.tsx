@@ -5,7 +5,7 @@ import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
 import { ResumenLicenciaFuncionamiento } from './components';
-import { StepAdministrado } from '@/components/utils/Steps';
+import { StepAdministrado, StepCargo } from '@/components/utils/Steps';
 import StepConsultaInicial from './StepLicenciaFuncionamiento/StepConsultaInicial';
 import StepDocumentacionCliente from './StepLicenciaFuncionamiento/StepDocumentacionCliente';
 import StepVisitasVerificacion from './StepLicenciaFuncionamiento/StepVisitasVerificacion';
@@ -27,7 +27,8 @@ const stepLabels = [
   'Clasificación',
   'Ingreso Expediente',
   'Inspección',
-  'Entrega Final'
+  'Entrega Final',
+  'Cargo'
 ];
 
 export default function CreateEditLicenciaFuncionamiento() {
@@ -52,6 +53,7 @@ export default function CreateEditLicenciaFuncionamiento() {
     { id: 6, title: 'Ingreso Expediente', completed: false },
     { id: 7, title: 'Inspección', completed: false },
     { id: 8, title: 'Entrega Final', completed: false },
+    { id: 9, title: 'Entrega al Administrado', completed: false },
   ]);
   
   const [formData, setFormData] = useState<LicenciaFuncionamientoFormData>({
@@ -97,6 +99,12 @@ export default function CreateEditLicenciaFuncionamiento() {
     licencia_funcionamiento: [],
     acta_entrega_firmada: [],
     fecha_entrega_cliente: '',
+
+    // Paso 9: Entrega al Administrado
+    fecha_entrega_administrado: '',
+    receptor_administrado: '',
+    cargo_entrega_administrado: [],
+    observaciones_entrega: '',
   });
 
   const isEdit = Boolean(id);
@@ -217,6 +225,17 @@ export default function CreateEditLicenciaFuncionamiento() {
         }
         if (!formData.acta_entrega_firmada || formData.acta_entrega_firmada.length === 0) {
           newErrors.acta_entrega_firmada = 'El acta de entrega firmada es requerida';
+        }
+        break;
+      case 8: // Entrega al Administrado
+        if (!formData.fecha_entrega_administrado) {
+          newErrors.fecha_entrega_administrado = 'La fecha de entrega es requerida';
+        }
+        if (!formData.receptor_administrado) {
+          newErrors.receptor_administrado = 'El nombre del receptor es requerido';
+        }
+        if (!formData.cargo_entrega_administrado || formData.cargo_entrega_administrado.length === 0) {
+          newErrors.cargo_entrega_administrado = 'El cargo de entrega es requerido';
         }
         break;
     }
@@ -358,6 +377,19 @@ export default function CreateEditLicenciaFuncionamiento() {
             errors={errors}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+          />
+        );
+      case 8:
+        return (
+          <StepCargo
+            formData={formData}
+            projectId={id || 'new'}
+            uploadedDocuments={uploadedDocuments}
+            errors={errors}
+            onInputChange={(field: string, value: any) => handleInputChange(field as keyof LicenciaFuncionamientoFormData, value)}
+            onFileUpload={handleFileUpload}
+            title="Entrega de Licencia de Funcionamiento"
+            description="Complete la información de la entrega final de la licencia de funcionamiento al administrado"
           />
         );
       default:

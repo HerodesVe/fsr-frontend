@@ -30,6 +30,12 @@ export interface RectificacionLinderosFormData {
   // Paso 7: Aprobación Final (Gestión)
   documento_aprobacion: File[];
   fecha_aprobacion: string;
+
+  // Paso 5: Entrega al Administrado (solo para elaboración)
+  fecha_entrega_administrado: string;
+  receptor_administrado: string;
+  cargo_entrega_administrado: File[];
+  observaciones_entrega: string;
 }
 
 export interface RectificacionLinderos {

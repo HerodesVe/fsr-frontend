@@ -5,7 +5,7 @@ import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
 import { ResumenRegularizacion } from './components';
-import { StepAdministrado } from '@/components/utils/Steps';
+import { StepAdministrado, StepCargo } from '@/components/utils/Steps';
 import StepDocumentacionInicial from './StepRegularizacion/StepDocumentacionInicial';
 import StepDatosPredio from './StepRegularizacion/StepDatosPredio';
 import StepFueFirmado from './StepRegularizacion/StepFueFirmado';
@@ -17,7 +17,8 @@ const stepLabels = [
   'Documentación Inicial', 
   'Datos del Predio',
   'FUE Firmado',
-  'Gestión Municipal'
+  'Gestión Municipal',
+  'Entrega al Administrado'
 ];
 
 export default function CreateEditRegularizacion() {
@@ -39,6 +40,7 @@ export default function CreateEditRegularizacion() {
     { id: 3, title: 'Datos del Predio', completed: false },
     { id: 4, title: 'FUE Firmado', completed: false },
     { id: 5, title: 'Gestión Municipal', completed: false },
+    { id: 6, title: 'Entrega al Administrado', completed: false },
   ]);
   
   const [formData, setFormData] = useState<RegularizacionFormData>({
@@ -71,6 +73,12 @@ export default function CreateEditRegularizacion() {
     actaObservacion: [],
     docSubsanacion: [],
     resolucionFinal: [],
+
+    // Paso 6: Entrega al Administrado
+    fecha_entrega_administrado: '',
+    receptor_administrado: '',
+    cargo_entrega_administrado: [],
+    observaciones_entrega: '',
   });
 
   const isEdit = Boolean(id);
@@ -164,6 +172,17 @@ export default function CreateEditRegularizacion() {
         break;
       case 4: // Gestión Municipal
         // Validaciones opcionales para gestión municipal
+        break;
+      case 5: // Entrega al Administrado
+        if (!formData.fecha_entrega_administrado) {
+          newErrors.fecha_entrega_administrado = 'La fecha de entrega es requerida';
+        }
+        if (!formData.receptor_administrado) {
+          newErrors.receptor_administrado = 'El nombre del receptor es requerido';
+        }
+        if (!formData.cargo_entrega_administrado || formData.cargo_entrega_administrado.length === 0) {
+          newErrors.cargo_entrega_administrado = 'El cargo de entrega es requerido';
+        }
         break;
     }
 
@@ -278,6 +297,19 @@ export default function CreateEditRegularizacion() {
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+          />
+        );
+      case 5:
+        return (
+          <StepCargo
+            formData={formData}
+            projectId={id || 'new'}
+            uploadedDocuments={uploadedDocuments}
+            errors={errors}
+            onInputChange={(field: string, value: any) => handleInputChange(field as keyof RegularizacionFormData, value)}
+            onFileUpload={handleFileUpload}
+            title="Cargo"
+            description="Complete la información de la entrega final de la regularización al administrado"
           />
         );
       default:

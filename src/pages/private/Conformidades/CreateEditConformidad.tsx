@@ -6,7 +6,7 @@ import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
 
 import type { ConformidadFormData, FormStep, UploadedDocument } from '@/types/conformidad.types';
-import { StepAdministrado } from '@/components/utils/Steps';
+import { StepAdministrado, StepCargo } from '@/components/utils/Steps';
 import StepModalidad from './StepConformidad/StepModalidad';
 import StepDocumentosIniciales from './StepConformidad/StepDocumentosIniciales';
 import StepAntecedentes from './StepConformidad/StepAntecedentes';
@@ -20,7 +20,8 @@ const stepLabels = [
   'Documentos Iniciales',
   'Antecedentes',
   'Documentos Expediente',
-  'Verificación'
+  'Verificación',
+  'Cargo'
 ];
 
 export default function CreateEditConformidad() {
@@ -43,6 +44,7 @@ export default function CreateEditConformidad() {
     { id: 4, title: 'Antecedentes', completed: false },
     { id: 5, title: 'Documentos Expediente', completed: false },
     { id: 6, title: 'Verificación', completed: false },
+    { id: 7, title: 'Entrega al Administrado', completed: false },
   ]);
   
   const [formData, setFormData] = useState<ConformidadFormData>({
@@ -79,6 +81,12 @@ export default function CreateEditConformidad() {
     protocolos: [],
     declaraciones_juradas: [],
     sustentos_tecnicos: [],
+
+    // Paso 7: Entrega al Administrado
+    fecha_entrega_administrado: '',
+    receptor_administrado: '',
+    cargo_entrega_administrado: [],
+    observaciones_entrega: '',
   });
 
   const isEdit = Boolean(id);
@@ -175,6 +183,17 @@ export default function CreateEditConformidad() {
       case 5: // Verificación
         if (formData.modalidad === 'sin_variaciones' && !formData.fecha_verificacion_sv) {
           newErrors.fecha_verificacion_sv = 'La fecha de verificación es requerida';
+        }
+        break;
+      case 6: // Entrega al Administrado
+        if (!formData.fecha_entrega_administrado) {
+          newErrors.fecha_entrega_administrado = 'La fecha de entrega es requerida';
+        }
+        if (!formData.receptor_administrado) {
+          newErrors.receptor_administrado = 'El nombre del receptor es requerido';
+        }
+        if (!formData.cargo_entrega_administrado || formData.cargo_entrega_administrado.length === 0) {
+          newErrors.cargo_entrega_administrado = 'El cargo de entrega es requerido';
         }
         break;
     }
@@ -303,6 +322,19 @@ export default function CreateEditConformidad() {
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+          />
+        );
+      case 6:
+        return (
+          <StepCargo
+            formData={formData}
+            projectId={id || 'new'}
+            uploadedDocuments={uploadedDocuments}
+            errors={errors}
+            onInputChange={(field: string, value: any) => handleInputChange(field as keyof ConformidadFormData, value)}
+            onFileUpload={handleFileUpload}
+            title="Entrega de Conformidad de Obra"
+            description="Complete la información de la entrega final de la conformidad de obra al administrado"
           />
         );
       default:

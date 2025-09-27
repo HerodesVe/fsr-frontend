@@ -1,0 +1,1 @@
+export { ResumenGestionProyecto } from './ResumenGestionProyecto';

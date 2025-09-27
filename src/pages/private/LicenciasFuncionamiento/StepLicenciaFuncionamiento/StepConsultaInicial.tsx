@@ -109,3 +109,10 @@ export default function StepConsultaInicial({
     </div>
   );
 }
+
+
+
+
+
+
+

@@ -47,6 +47,12 @@ export interface DemolicionFormData {
   fecha_respuesta_municipal: string;
   cargo_entrega_administrado: File[];
   fecha_entrega_administrado: string;
+
+  // Paso 5: Entrega al Administrado
+  fecha_entrega_final_administrado: string;
+  receptor_administrado: string;
+  cargo_entrega_final_administrado: File[];
+  observaciones_entrega: string;
 }
 
 export interface CitaTecnico {

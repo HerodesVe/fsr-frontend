@@ -5,6 +5,7 @@ import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
 import { ResumenAmpliacion } from './components';
+import { StepCargo } from '@/components/utils/Steps';
 import StepProyectoPersonalizado from './StepAmpliacion/StepProyectoPersonalizado';
 import StepLicencias from './StepAmpliacion/StepLicencias';
 import StepAntecedentes from './StepAmpliacion/StepAntecedentes';
@@ -17,7 +18,8 @@ const stepLabels = [
   'Licencias y Normativas',
   'Antecedentes',
   'Documentación Técnica',
-  'Trámite Municipal'
+  'Trámite Municipal',
+  'Entrega al Administrado'
 ];
 
 export default function CreateEditAmpliacion() {
@@ -39,6 +41,7 @@ export default function CreateEditAmpliacion() {
     { id: 3, title: 'Antecedentes', completed: false },
     { id: 4, title: 'Documentación Técnica', completed: false },
     { id: 5, title: 'Trámite Municipal', completed: false },
+    { id: 6, title: 'Entrega al Administrado', completed: false },
   ]);
   
   const [formData, setFormData] = useState<AmpliacionFormData>({
@@ -105,6 +108,12 @@ export default function CreateEditAmpliacion() {
     
     // Seguimiento
     seguimiento: [],
+
+    // Paso 6: Entrega al Administrado
+    fecha_entrega_administrado: '',
+    receptor_administrado: '',
+    cargo_entrega_administrado: [],
+    observaciones_entrega: '',
   });
 
   const isEdit = Boolean(id);
@@ -206,6 +215,17 @@ export default function CreateEditAmpliacion() {
         
       case 4: // Trámite Municipal
         // Validaciones opcionales para trámite municipal
+        break;
+      case 5: // Entrega al Administrado
+        if (!formData.fecha_entrega_administrado) {
+          newErrors.fecha_entrega_administrado = 'La fecha de entrega es requerida';
+        }
+        if (!formData.receptor_administrado) {
+          newErrors.receptor_administrado = 'El nombre del receptor es requerido';
+        }
+        if (!formData.cargo_entrega_administrado || formData.cargo_entrega_administrado.length === 0) {
+          newErrors.cargo_entrega_administrado = 'El cargo de entrega es requerido';
+        }
         break;
     }
 
@@ -323,6 +343,19 @@ export default function CreateEditAmpliacion() {
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+          />
+        );
+      case 5:
+        return (
+          <StepCargo
+            formData={formData}
+            projectId={id || 'new'}
+            uploadedDocuments={uploadedDocuments}
+            errors={errors}
+            onInputChange={(field: string, value: any) => handleInputChange(field as keyof AmpliacionFormData, value)}
+            onFileUpload={handleFileUpload}
+            title="Cargo"
+            description="Complete la información de la entrega final de la ampliación al administrado"
           />
         );
       default:

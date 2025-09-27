@@ -5,7 +5,7 @@ import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
 import { ResumenDemolicion } from './components';
-import { StepAdministrado } from '@/components/utils/Steps';
+import { StepAdministrado, StepCargo } from '@/components/utils/Steps';
 import StepDocumentacion from './StepDemolicion/StepDocumentacion';
 import StepMedidasPerimetricas from './StepDemolicion/StepMedidasPerimetricas';
 import StepGestionMunicipal from './StepDemolicion/StepGestionMunicipal';
@@ -16,7 +16,8 @@ const stepLabels = [
   'Administrado',
   'Documentación',
   'Medidas Perimétricas',
-  'Gestión Municipal'
+  'Gestión Municipal',
+  'Entrega al Administrado'
 ];
 
 export default function CreateEditDemolicion() {
@@ -37,6 +38,7 @@ export default function CreateEditDemolicion() {
     { id: 2, title: 'Documentación', completed: false },
     { id: 3, title: 'Medidas Perimétricas', completed: false },
     { id: 4, title: 'Gestión Municipal', completed: false },
+    { id: 5, title: 'Entrega al Administrado', completed: false },
   ]);
   
   const [formData, setFormData] = useState<DemolicionFormData>({
@@ -88,6 +90,12 @@ export default function CreateEditDemolicion() {
     fecha_respuesta_municipal: '',
     cargo_entrega_administrado: [],
     fecha_entrega_administrado: '',
+
+    // Paso 5: Entrega al Administrado
+    fecha_entrega_final_administrado: '',
+    receptor_administrado: '',
+    cargo_entrega_final_administrado: [],
+    observaciones_entrega: '',
   });
 
   const isEdit = Boolean(id);
@@ -205,6 +213,17 @@ export default function CreateEditDemolicion() {
       case 3: // Gestión Municipal
         // Validaciones opcionales para gestión municipal
         break;
+      case 4: // Entrega al Administrado
+        if (!formData.fecha_entrega_final_administrado) {
+          newErrors.fecha_entrega_final_administrado = 'La fecha de entrega es requerida';
+        }
+        if (!formData.receptor_administrado) {
+          newErrors.receptor_administrado = 'El nombre del receptor es requerido';
+        }
+        if (!formData.cargo_entrega_final_administrado || formData.cargo_entrega_final_administrado.length === 0) {
+          newErrors.cargo_entrega_final_administrado = 'El cargo de entrega es requerido';
+        }
+        break;
     }
 
     setErrors(newErrors);
@@ -307,6 +326,31 @@ export default function CreateEditDemolicion() {
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+          />
+        );
+      case 4:
+        return (
+          <StepCargo
+            formData={{
+              ...formData,
+              fecha_entrega_administrado: formData.fecha_entrega_final_administrado,
+              cargo_entrega_administrado: formData.cargo_entrega_final_administrado,
+            }}
+            projectId={id || 'new'}
+            uploadedDocuments={uploadedDocuments}
+            errors={errors}
+            onInputChange={(field: string, value: any) => {
+              if (field === 'fecha_entrega_administrado') {
+                handleInputChange('fecha_entrega_final_administrado', value);
+              } else if (field === 'cargo_entrega_administrado') {
+                handleInputChange('cargo_entrega_final_administrado', value);
+              } else {
+                handleInputChange(field as keyof DemolicionFormData, value);
+              }
+            }}
+            onFileUpload={handleFileUpload}
+            title="Entrega de Demolición"
+            description="Complete la información de la entrega final de la demolición al administrado"
           />
         );
       default:

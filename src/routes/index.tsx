@@ -19,6 +19,8 @@ import { GestionAnexo, CreateEditGestionAnexo } from '@/pages/private/GestionAne
 import { HabilitacionesUrbanas, CreateEditHabilitacionUrbana } from '@/pages/private/HabilitacionesUrbanas';
 import { LicenciasFuncionamiento, CreateEditLicenciaFuncionamiento } from '@/pages/private/LicenciasFuncionamiento';
 import { RectificacionLinderos, CreateEditRectificacionLinderos } from '@/pages/private/RectificacionLinderos';
+import { GestionAnteproyectos, CreateEditGestionAnteproyecto } from '@/pages/private/GestionAnteproyectos';
+import { GestionProyectos, CreateEditGestionProyecto } from '@/pages/private/GestionProyectos';
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { isAuthenticated } = useAuthStore();
@@ -92,6 +94,12 @@ export default function AppRoutes() {
         <Route path="dashboard/rectificacion-linderos" element={<RectificacionLinderos />} />
         <Route path="dashboard/rectificacion-linderos/create" element={<CreateEditRectificacionLinderos />} />
         <Route path="dashboard/rectificacion-linderos/edit/:id" element={<CreateEditRectificacionLinderos />} />
+        <Route path="dashboard/gestion-anteproyectos" element={<GestionAnteproyectos />} />
+        <Route path="dashboard/gestion-anteproyectos/create" element={<CreateEditGestionAnteproyecto />} />
+        <Route path="dashboard/gestion-anteproyectos/edit/:id" element={<CreateEditGestionAnteproyecto />} />
+        <Route path="dashboard/gestion-proyectos" element={<GestionProyectos />} />
+        <Route path="dashboard/gestion-proyectos/create" element={<CreateEditGestionProyecto />} />
+        <Route path="dashboard/gestion-proyectos/edit/:id" element={<CreateEditGestionProyecto />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" />} />

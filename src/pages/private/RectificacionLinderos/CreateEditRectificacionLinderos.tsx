@@ -5,7 +5,7 @@ import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
 import { ResumenRectificacion } from './components';
-import { StepAdministrado } from '@/components/utils/Steps';
+import { StepAdministrado, StepCargo } from '@/components/utils/Steps';
 import {
   StepSeleccionAnteproyecto,
   StepDocumentosLegales,
@@ -20,7 +20,8 @@ const elaboracionSteps = [
   'Administrado',
   'Selección Anteproyecto',
   'Documentos Legales',
-  'Elaboración Plano'
+  'Elaboración Plano',
+  'Entrega al Administrado'
 ];
 
 const gestionSteps = [
@@ -49,6 +50,7 @@ export default function CreateEditRectificacionLinderos() {
     { id: 2, title: 'Selección Anteproyecto', completed: false },
     { id: 3, title: 'Documentos Legales', completed: false },
     { id: 4, title: 'Elaboración Plano', completed: false },
+    { id: 5, title: 'Entrega al Administrado', completed: false },
   ]);
   
   const [gestionStepsState, setGestionStepsState] = useState<FormStep[]>([
@@ -94,6 +96,12 @@ export default function CreateEditRectificacionLinderos() {
     // Paso 7: Aprobación Final (Gestión)
     documento_aprobacion: [],
     fecha_aprobacion: '',
+
+    // Paso 5: Entrega al Administrado (solo para elaboración)
+    fecha_entrega_administrado: '',
+    receptor_administrado: '',
+    cargo_entrega_administrado: [],
+    observaciones_entrega: '',
   });
 
   const isEdit = Boolean(id);
@@ -185,6 +193,17 @@ export default function CreateEditRectificacionLinderos() {
           }
           if (!formData.fecha_elaboracion_plano) {
             newErrors.fecha_elaboracion_plano = 'La fecha de elaboración es requerida';
+          }
+          break;
+        case 4: // Entrega al Administrado (solo para elaboración)
+          if (!formData.fecha_entrega_administrado) {
+            newErrors.fecha_entrega_administrado = 'La fecha de entrega es requerida';
+          }
+          if (!formData.receptor_administrado) {
+            newErrors.receptor_administrado = 'El nombre del receptor es requerido';
+          }
+          if (!formData.cargo_entrega_administrado || formData.cargo_entrega_administrado.length === 0) {
+            newErrors.cargo_entrega_administrado = 'El cargo de entrega es requerido';
           }
           break;
       }
@@ -342,6 +361,19 @@ export default function CreateEditRectificacionLinderos() {
               errors={errors}
               onInputChange={handleInputChange}
               onFileUpload={handleFileUpload}
+            />
+          );
+        case 4:
+          return (
+            <StepCargo
+              formData={formData}
+              projectId={id || 'new'}
+              uploadedDocuments={uploadedDocuments}
+              errors={errors}
+              onInputChange={(field: string, value: any) => handleInputChange(field as keyof RectificacionLinderosFormData, value)}
+              onFileUpload={handleFileUpload}
+              title="Cargo"
+              description="Complete la información de la entrega final de la rectificación de linderos al administrado"
             />
           );
         default:

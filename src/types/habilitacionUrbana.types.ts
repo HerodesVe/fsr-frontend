@@ -44,6 +44,12 @@ export interface HabilitacionUrbanaFormData {
   resolucion_habilitacion_urbana: File[];
   proyecto_reconsideracion_apelacion: File[];
   cargo_entrega_cliente: File[];
+
+  // Paso 8: Entrega al Administrado (solo para elaboración)
+  fecha_entrega_administrado: string;
+  receptor_administrado: string;
+  cargo_entrega_administrado: File[];
+  observaciones_entrega: string;
 }
 
 export interface NormaAplicada {

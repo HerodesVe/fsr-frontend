@@ -289,3 +289,10 @@ export const ResumenLicenciaFuncionamiento: React.FC<ResumenLicenciaFuncionamien
 };
 
 export default ResumenLicenciaFuncionamiento;
+
+
+
+
+
+
+

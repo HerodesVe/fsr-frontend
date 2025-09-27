@@ -5,7 +5,7 @@ import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
 import { ResumenHabilitacion } from './components';
-import { StepAdministrado } from '@/components/utils/Steps';
+import { StepAdministrado, StepCargo } from '@/components/utils/Steps';
 import {
   StepInformacionInicial,
   StepDocumentacionTecnica,
@@ -23,7 +23,8 @@ const elaboracionSteps = [
   'Base Legal',
   'Ingreso Expediente',
   'Revisión',
-  'Aprobación Final'
+  'Aprobación Final',
+  'Cargo'
 ];
 
 const gestionSteps = [
@@ -57,6 +58,7 @@ export default function CreateEditHabilitacionUrbana() {
     { id: 5, title: 'Ingreso Expediente', completed: false },
     { id: 6, title: 'Revisión', completed: false },
     { id: 7, title: 'Aprobación Final', completed: false },
+    { id: 8, title: 'Entrega al Administrado', completed: false },
   ]);
   
   const [gestionStepsState, setGestionStepsState] = useState<FormStep[]>([
@@ -114,6 +116,12 @@ export default function CreateEditHabilitacionUrbana() {
     resolucion_habilitacion_urbana: [],
     proyecto_reconsideracion_apelacion: [],
     cargo_entrega_cliente: [],
+
+    // Paso 8: Entrega al Administrado (solo para elaboración)
+    fecha_entrega_administrado: '',
+    receptor_administrado: '',
+    cargo_entrega_administrado: [],
+    observaciones_entrega: '',
   });
 
   const isEdit = Boolean(id);
@@ -220,6 +228,17 @@ export default function CreateEditHabilitacionUrbana() {
           }
           if (!formData.numero_expediente) {
             newErrors.numero_expediente = 'El número de expediente es requerido';
+          }
+          break;
+        case 7: // Entrega al Administrado (solo para elaboración)
+          if (!formData.fecha_entrega_administrado) {
+            newErrors.fecha_entrega_administrado = 'La fecha de entrega es requerida';
+          }
+          if (!formData.receptor_administrado) {
+            newErrors.receptor_administrado = 'El nombre del receptor es requerido';
+          }
+          if (!formData.cargo_entrega_administrado || formData.cargo_entrega_administrado.length === 0) {
+            newErrors.cargo_entrega_administrado = 'El cargo de entrega es requerido';
           }
           break;
       }
@@ -400,6 +419,19 @@ export default function CreateEditHabilitacionUrbana() {
               uploadedDocuments={uploadedDocuments}
               onInputChange={handleInputChange}
               onFileUpload={handleFileUpload}
+            />
+          );
+        case 7:
+          return (
+            <StepCargo
+              formData={formData}
+              projectId={id || 'new'}
+              uploadedDocuments={uploadedDocuments}
+              errors={errors}
+              onInputChange={(field: string, value: any) => handleInputChange(field as keyof HabilitacionUrbanaFormData, value)}
+              onFileUpload={handleFileUpload}
+              title="Entrega de Habilitación Urbana"
+              description="Complete la información de la entrega final de la habilitación urbana al administrado"
             />
           );
         default:

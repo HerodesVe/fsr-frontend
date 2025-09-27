@@ -43,6 +43,12 @@ export interface LicenciaFuncionamientoFormData {
   licencia_funcionamiento: File[];
   acta_entrega_firmada: File[];
   fecha_entrega_cliente: string;
+
+  // Paso 9: Entrega al Administrado
+  fecha_entrega_administrado: string;
+  receptor_administrado: string;
+  cargo_entrega_administrado: File[];
+  observaciones_entrega: string;
 }
 
 export interface VisitaVerificacion {

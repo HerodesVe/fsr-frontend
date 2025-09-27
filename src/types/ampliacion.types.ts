@@ -63,6 +63,12 @@ export interface AmpliacionFormData {
   
   // Seguimiento
   seguimiento: SeguimientoItem[];
+
+  // Paso 6: Entrega al Administrado
+  fecha_entrega_administrado: string;
+  receptor_administrado: string;
+  cargo_entrega_administrado: UploadedDocument[];
+  observaciones_entrega: string;
 }
 
 export interface SeguimientoItem {
