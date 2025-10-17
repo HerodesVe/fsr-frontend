@@ -8,7 +8,7 @@ import { useAnteproyectos, useAnteproyectoById } from '@/hooks/useAnteproyectos'
 import { useClients } from '@/hooks/useClients';
 import { useDepartments, useProvinces, useDistricts } from '@/hooks/useUbigeo';
 import { ResumenExpediente } from './components/ResumenExpediente';
-import type { AnteproyectoFormData, FormStep, StepStatus } from '@/types/anteproyecto.types';
+import type { AnteproyectoFormData, FormStep, StepStatus, UploadedDocument } from '@/types/anteproyecto.types';
 import { DocumentStatus } from '@/types/anteproyecto.types';
 
 export default function CreateEditAnteproyecto() {
@@ -128,6 +128,62 @@ export default function CreateEditAnteproyecto() {
       }
     }
   }, [isEditing, anteproyectoData, isLoadingAnteproyecto, clients]);
+
+  // Función para extraer documentos subidos del objeto data
+  const getUploadedDocuments = (): UploadedDocument[] => {
+    if (!anteproyectoData?.data) return [];
+
+    const uploadedDocs: UploadedDocument[] = [];
+    const data = anteproyectoData.data;
+
+    // Lista de todas las posibles claves de documentos en el objeto data
+    const documentKeys = [
+      'partida_registral',
+      'plano_arquitectura_adm',
+      'pago_derecho_revision_factura',
+      'memoria_descriptiva_arquitectura',
+      'memoria_descriptiva_seguridad',
+      'formulario_unico_edificacion',
+      'presupuesto',
+      'plano_seguridad',
+      'pago_derecho_revision_liquidacion',
+    ];
+
+    // También incluir archivo_normativo de licencias_normativas
+    const archivoNormativo = data.licencias_normativas?.archivo_normativo;
+    if (archivoNormativo?.name) {
+      // Incluir el documento si tiene un name, incluso si file_reference está vacío
+      uploadedDocs.push({
+        key: 'archivo_normativo',
+        name: archivoNormativo.name || 'Archivo Normativo',
+        file_id: archivoNormativo.file_reference || 'pending', // Usar 'pending' si no hay file_reference
+      });
+    }
+
+    // Iterar sobre las claves de documentos y extraer aquellos que tienen name
+    documentKeys.forEach(key => {
+      const doc = data[key as keyof typeof data];
+      if (
+        doc && 
+        typeof doc === 'object' && 
+        'name' in doc && 
+        doc.name
+      ) {
+        // Incluir el documento si tiene un name, incluso si file_reference está vacío o null
+        const fileReference = ('file_reference' in doc && doc.file_reference && typeof doc.file_reference === 'string' && doc.file_reference.trim() !== '')
+          ? doc.file_reference
+          : 'pending'; // Usar 'pending' si no hay file_reference válido
+
+        uploadedDocs.push({
+          key,
+          name: doc.name || key,
+          file_id: fileReference,
+        });
+      }
+    });
+
+    return uploadedDocs;
+  };
 
   const handleInputChange = (field: keyof AnteproyectoFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -367,7 +423,7 @@ export default function CreateEditAnteproyecto() {
             formData={formData}
             errors={errors}
             anteproyectoId={anteproyectoId}
-            uploadedDocuments={anteproyectoData?.uploaded_documents || []}
+            uploadedDocuments={getUploadedDocuments()}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
           />
@@ -390,7 +446,7 @@ export default function CreateEditAnteproyecto() {
           <StepDocumentos
             formData={formData}
             anteproyectoId={anteproyectoId}
-            uploadedDocuments={anteproyectoData?.uploaded_documents || []}
+            uploadedDocuments={getUploadedDocuments()}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
           />
@@ -502,7 +558,7 @@ export default function CreateEditAnteproyecto() {
             expedienteId={anteproyectoId}
             onSave={handleSaveExpediente}
             isSaving={false}
-            uploadedDocuments={anteproyectoData?.uploaded_documents || []}
+            uploadedDocuments={getUploadedDocuments()}
           />
         </div>
       </div>

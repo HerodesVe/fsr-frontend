@@ -52,8 +52,13 @@ export const useAnteproyectos = () => {
 
   const updateMutation = useMutation({
     mutationFn: updateAnteproyecto,
-    onSuccess: () => {
+    onSuccess: (updatedAnteproyecto) => {
+      // Invalidar la consulta del anteproyecto específico para recargar los datos
+      queryClient.invalidateQueries({ queryKey: ['anteproyecto', updatedAnteproyecto.id] });
+      
+      // También invalidar las consultas generales para mantener consistencia
       queryClient.invalidateQueries({ queryKey: ['anteproyectos'] });
+      
       toast.success('Anteproyecto actualizado exitosamente');
     },
     onError: (err: any) => {
@@ -81,7 +86,10 @@ export const useAnteproyectos = () => {
       // Actualizar la cache del anteproyecto específico con los datos actualizados
       queryClient.setQueryData(['anteproyecto', variables.id], updatedAnteproyecto);
       
-      // También invalidar las consultas para mantener consistencia
+      // Invalidar la consulta del anteproyecto específico para recargar los datos
+      queryClient.invalidateQueries({ queryKey: ['anteproyecto', variables.id] });
+      
+      // También invalidar las consultas generales para mantener consistencia
       queryClient.invalidateQueries({ queryKey: ['anteproyectos'] });
       
       toast.success('Documento subido exitosamente');
@@ -98,7 +106,10 @@ export const useAnteproyectos = () => {
       // Actualizar la cache del anteproyecto específico con los datos actualizados
       queryClient.setQueryData(['anteproyecto', variables.id], updatedAnteproyecto);
       
-      // También invalidar las consultas para mantener consistencia
+      // Invalidar la consulta del anteproyecto específico para recargar los datos
+      queryClient.invalidateQueries({ queryKey: ['anteproyecto', variables.id] });
+      
+      // También invalidar las consultas generales para mantener consistencia
       queryClient.invalidateQueries({ queryKey: ['anteproyectos'] });
       
       toast.success('Documentos subidos exitosamente');

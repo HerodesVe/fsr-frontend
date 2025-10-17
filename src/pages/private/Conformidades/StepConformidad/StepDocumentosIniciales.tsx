@@ -1,6 +1,7 @@
 import { Switch } from '@/components/ui';
 import { FileUpload } from '@/components/ui';
 import type { StepProps } from '@/types/conformidad.types';
+import { UploadedFilesList } from '../components';
 
 export default function StepDocumentosIniciales({
   formData,
@@ -10,9 +11,24 @@ export default function StepDocumentosIniciales({
 }: StepProps) {
 
   const handleFileChange = async (files: File[], fieldName: keyof typeof formData) => {
+    // Obtener los archivos actuales del campo
+    const currentFiles = (formData[fieldName] as any[]) || [];
+    
+    // Subir los nuevos archivos
     const uploadPromises = files.map(file => onFileUpload(file));
     const uploadedFiles = await Promise.all(uploadPromises);
-    onInputChange(fieldName, uploadedFiles);
+    
+    // Combinar los archivos actuales con los nuevos
+    const allFiles = [...currentFiles, ...uploadedFiles];
+    
+    // Actualizar el formData con todos los archivos
+    onInputChange(fieldName, allFiles);
+  };
+
+  const handleRemoveFile = (fieldName: keyof typeof formData, fileId: string) => {
+    const currentFiles = (formData[fieldName] as any[]) || [];
+    const updatedFiles = currentFiles.filter(file => file.id !== fileId);
+    onInputChange(fieldName, updatedFiles);
   };
 
   const renderSinVariaciones = () => (
@@ -32,6 +48,10 @@ export default function StepDocumentosIniciales({
           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
           multiple={false}
         />
+        <UploadedFilesList
+          documents={formData.licencia_obra_sv || []}
+          onRemove={(fileId) => handleRemoveFile('licencia_obra_sv', fileId)}
+        />
         {errors?.licencia_obra_sv && (
           <p className="mt-2 text-sm text-red-600" style={{ fontFamily: 'Inter, sans-serif' }}>
             {errors.licencia_obra_sv}
@@ -47,6 +67,10 @@ export default function StepDocumentosIniciales({
           onChange={(files) => handleFileChange(files, 'planos_aprobados_sv')}
           accept=".pdf,.dwg,.jpg,.jpeg,.png"
           multiple={true}
+        />
+        <UploadedFilesList
+          documents={formData.planos_aprobados_sv || []}
+          onRemove={(fileId) => handleRemoveFile('planos_aprobados_sv', fileId)}
         />
         {errors?.planos_aprobados_sv && (
           <p className="mt-2 text-sm text-red-600" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -107,6 +131,10 @@ export default function StepDocumentosIniciales({
               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
               multiple={false}
             />
+            <UploadedFilesList
+              documents={formData.licencia_obra_cv || []}
+              onRemove={(fileId) => handleRemoveFile('licencia_obra_cv', fileId)}
+            />
             {errors?.licencia_obra_cv && (
               <p className="mt-2 text-sm text-red-600" style={{ fontFamily: 'Inter, sans-serif' }}>
                 {errors.licencia_obra_cv}
@@ -123,6 +151,10 @@ export default function StepDocumentosIniciales({
               accept=".pdf,.dwg,.jpg,.jpeg,.png"
               multiple={true}
             />
+            <UploadedFilesList
+              documents={formData.planos_aprobados_licencia_cv || []}
+              onRemove={(fileId) => handleRemoveFile('planos_aprobados_licencia_cv', fileId)}
+            />
             {errors?.planos_aprobados_licencia_cv && (
               <p className="mt-2 text-sm text-red-600" style={{ fontFamily: 'Inter, sans-serif' }}>
                 {errors.planos_aprobados_licencia_cv}
@@ -138,6 +170,10 @@ export default function StepDocumentosIniciales({
               onChange={(files) => handleFileChange(files, 'planos_digitales_cad_cv')}
               accept=".dwg,.dxf,.rvt"
               multiple={true}
+            />
+            <UploadedFilesList
+              documents={formData.planos_digitales_cad_cv || []}
+              onRemove={(fileId) => handleRemoveFile('planos_digitales_cad_cv', fileId)}
             />
             {errors?.planos_digitales_cad_cv && (
               <p className="mt-2 text-sm text-red-600" style={{ fontFamily: 'Inter, sans-serif' }}>

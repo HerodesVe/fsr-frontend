@@ -48,10 +48,11 @@ export const Select: React.FC<CustomSelectProps> = ({
             "hover:bg-gray-100",
             "group-data-[focused=true]:bg-gray-100",
             "group-data-[open=true]:bg-gray-100",
-            "border-0",
-            "hover:border-0",
-            "group-data-[focused=true]:border-0",
-            "group-data-[open=true]:border-0",
+            error ? "border-2" : "border-0",
+            error ? "border-red-500" : "",
+            error ? "hover:border-red-500" : "hover:border-0",
+            error ? "group-data-[focused=true]:border-red-500" : "group-data-[focused=true]:border-0",
+            error ? "group-data-[open=true]:border-red-500" : "group-data-[open=true]:border-0",
             "rounded-lg",
             "min-h-[48px]",
             "h-12",
@@ -65,7 +66,7 @@ export const Select: React.FC<CustomSelectProps> = ({
           ],
           mainWrapper: "bg-gray-100",
           innerWrapper: "bg-gray-100",
-          selectorIcon: "text-gray-500",
+          selectorIcon: error ? "text-red-500" : "text-gray-500",
           listbox: [
             "bg-white",
             "border",
@@ -80,6 +81,12 @@ export const Select: React.FC<CustomSelectProps> = ({
             "p-0",
           ],
           listboxWrapper: "bg-white max-h-[200px] overflow-y-auto",
+          errorMessage: [
+            "text-red-600",
+            "text-sm",
+            "mt-1",
+            "font-medium",
+          ],
         }}
         className={className}
       >

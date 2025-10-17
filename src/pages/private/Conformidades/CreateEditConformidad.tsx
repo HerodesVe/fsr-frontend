@@ -122,18 +122,24 @@ export default function CreateEditConformidad() {
     }
   };
 
-  const handleFileUpload = async (file: File) => {
-    // Simular upload
-    const uploadedDoc: UploadedDocument = {
-      id: Date.now().toString(),
-      name: file.name,
-      url: URL.createObjectURL(file),
-      size: file.size,
-      type: file.type,
-    };
-    
-    setUploadedDocuments(prev => [...prev, uploadedDoc]);
-    return uploadedDoc;
+  const handleFileUpload = async (file: File): Promise<UploadedDocument> => {
+    // Simular upload - crear un objeto de documento subido
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const uploadedDoc: UploadedDocument = {
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: file.name,
+          url: URL.createObjectURL(file),
+          size: file.size,
+          type: file.type,
+        };
+        
+        // Agregar a la lista global de documentos subidos
+        setUploadedDocuments(prev => [...prev, uploadedDoc]);
+        
+        resolve(uploadedDoc);
+      }, 500); // Simular un pequeño delay de red
+    });
   };
 
   const validateStep = (step: number): boolean => {

@@ -21,8 +21,40 @@ const validationSchema = Yup.object({
     .email('Email inválido')
     .required('El email es requerido'),
   password: Yup.string()
-    .min(6, 'La contraseña debe tener al menos 6 caracteres')
-    .required('La contraseña es requerida'),
+    .required('La contraseña es requerida')
+    .test('password-requirements', 'Contraseña inválida', function(value) {
+      if (!value) return true; // Si está vacío, el required lo maneja
+      
+      const errors: string[] = [];
+      
+      if (value.length < 8) {
+        errors.push('al menos 8 caracteres');
+      }
+      
+      if (!/(?=.*[a-z])/.test(value)) {
+        errors.push('una letra minúscula');
+      }
+      
+      if (!/(?=.*[A-Z])/.test(value)) {
+        errors.push('una letra mayúscula');
+      }
+      
+      if (!/(?=.*[0-9])/.test(value)) {
+        errors.push('un número');
+      }
+      
+      if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(value)) {
+        errors.push('un caracter especial (!@#$%^&*...)');
+      }
+      
+      if (errors.length > 0) {
+        return this.createError({
+          message: `La contraseña debe contener: ${errors.join(', ')}`
+        });
+      }
+      
+      return true;
+    }),
   first_name: Yup.string()
     .required('El nombre es requerido'),
   last_name: Yup.string()
@@ -134,6 +166,52 @@ export const ModalUser: React.FC<ModalUserProps> = ({
     onClose();
   };
 
+  const handleSubmitClick = async () => {
+    // Marcar todos los campos como tocados para mostrar errores
+    formik.setTouched({
+      email: true,
+      password: true,
+      first_name: true,
+      last_name: true,
+      dni: true,
+      worker_code: true,
+      role: true,
+    });
+
+    // Validar el formulario
+    const errors = await formik.validateForm();
+    
+    // Si hay errores, mostrar toast con TODOS los errores consolidados
+    if (Object.keys(errors).length > 0) {
+      const errorMessages = Object.entries(errors).map(([field, message]) => {
+        const fieldNames: Record<string, string> = {
+          email: 'Email',
+          password: 'Contraseña',
+          first_name: 'Nombres',
+          last_name: 'Apellidos',
+          dni: 'DNI',
+          worker_code: 'Código de Trabajador',
+          role: 'Rol',
+        };
+        return `• ${fieldNames[field] || field}: ${message}`;
+      }).join('\n');
+
+      toast.error(
+        <div className="whitespace-pre-line">
+          <strong>Por favor, corrige los siguientes errores:</strong>
+          {'\n' + errorMessages}
+        </div>,
+        {
+          duration: 8000,
+        }
+      );
+      return;
+    }
+
+    // Si no hay errores, proceder con el submit
+    formik.handleSubmit();
+  };
+
   // Si no está abierto, no renderizar nada
   if (!isOpen) {
     return null;
@@ -156,8 +234,8 @@ export const ModalUser: React.FC<ModalUserProps> = ({
             Cancelar
           </button>
           <button
-            type="submit"
-            onClick={() => formik.handleSubmit()}
+            type="button"
+            onClick={handleSubmitClick}
             disabled={isLoading}
             style={{ backgroundColor: 'var(--primary-color)', fontFamily: 'Inter, sans-serif' }}
             className="px-6 py-2 text-white rounded-lg hover:opacity-90 disabled:opacity-50"

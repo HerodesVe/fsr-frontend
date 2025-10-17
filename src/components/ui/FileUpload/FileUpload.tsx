@@ -222,29 +222,50 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           {/* Archivos ya subidos */}
           {uploadedFiles
             .filter(uploadedFile => uploadedFile.key === documentKey)
-            .map((uploadedFile, index) => (
-              <div
-                key={`uploaded-${uploadedFile.file_id}-${index}`}
-                className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
-              >
-                <div className="flex items-center space-x-3 min-w-0 flex-1">
-                  <LuCheck className="h-5 w-5 text-green-500 flex-shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      {uploadedFile.name}
-                    </p>
-                    <p className="text-xs text-green-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      Documento subido • ID: {uploadedFile.file_id}
-                    </p>
+            .map((uploadedFile, index) => {
+              const isPending = uploadedFile.file_id === 'pending' || !uploadedFile.file_id;
+              
+              return (
+                <div
+                  key={`uploaded-${uploadedFile.file_id}-${index}`}
+                  className={`flex items-center justify-between p-3 rounded-lg ${
+                    isPending 
+                      ? 'bg-yellow-50 border border-yellow-200' 
+                      : 'bg-green-50 border border-green-200'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3 min-w-0 flex-1">
+                    {isPending ? (
+                      <LuLoader className="h-5 w-5 text-yellow-500 flex-shrink-0 animate-spin" />
+                    ) : (
+                      <LuCheck className="h-5 w-5 text-green-500 flex-shrink-0" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        {uploadedFile.name}
+                      </p>
+                      <p className={`text-xs ${isPending ? 'text-yellow-600' : 'text-green-600'}`} style={{ fontFamily: 'Inter, sans-serif' }}>
+                        {isPending ? 'Procesando documento...' : `Documento subido • ID: ${uploadedFile.file_id}`}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
-          {/* Archivos seleccionados localmente */}
+          {/* Archivos seleccionados localmente (nuevos) */}
           {value.map((file, index) => {
             const fileId = `${file.name}-${file.size}-${file.lastModified}`;
             const isUploading = uploadingFiles.has(fileId);
+            
+            // Evitar mostrar archivos duplicados (si ya está en uploadedFiles con el mismo nombre)
+            const isDuplicate = uploadedFiles.some(
+              uploaded => uploaded.key === documentKey && uploaded.name === file.name
+            );
+            
+            if (isDuplicate && !isUploading) {
+              return null; // No mostrar el archivo local si ya está en uploadedFiles
+            }
             
             return (
               <div

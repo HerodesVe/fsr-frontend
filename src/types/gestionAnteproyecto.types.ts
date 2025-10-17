@@ -94,3 +94,5 @@ export enum DocumentStatus {
   APROBADO = 'Aprobado',
   RECHAZADO = 'Rechazado',
 }
+
+

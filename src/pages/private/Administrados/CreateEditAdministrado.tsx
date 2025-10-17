@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { LuArrowLeft } from 'react-icons/lu';
+import toast from 'react-hot-toast';
 
 import { useHeaderStore } from '@/store/headerStore';
 import { Button, Input, Select } from '@/components/ui';
@@ -113,20 +114,38 @@ export default function CreateEditAdministrado() {
   const createMutation = useMutation({
     mutationFn: createClient,
     onSuccess: () => {
+      toast.success('Administrado creado exitosamente', {
+        duration: 4000,
+      });
       navigate('/dashboard/administrados');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error creating client:', error);
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Error al crear el administrado';
+      toast.error(errorMessage, {
+        duration: 6000,
+      });
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: updateClient,
     onSuccess: () => {
+      toast.success('Administrado actualizado exitosamente', {
+        duration: 4000,
+      });
       navigate('/dashboard/administrados');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error updating client:', error);
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Error al actualizar el administrado';
+      toast.error(errorMessage, {
+        duration: 6000,
+      });
     },
   });
 
@@ -207,7 +226,7 @@ export default function CreateEditAdministrado() {
     }
   };
 
-  const validateForm = (): boolean => {
+  const validateForm = (): { isValid: boolean; errors: Partial<FormData> } => {
     const newErrors: Partial<FormData> = {};
 
     if (formData.clientType === 'natural') {
@@ -268,13 +287,33 @@ export default function CreateEditAdministrado() {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return { isValid: Object.keys(newErrors).length === 0, errors: newErrors };
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    const validation = validateForm();
+    
+    if (!validation.isValid) {
+      // Mostrar toast simple indicando que hay errores
+      const errorCount = Object.keys(validation.errors).length;
+      toast.error(
+        `Por favor, completa todos los campos obligatorios. ${errorCount} ${errorCount === 1 ? 'campo tiene errores' : 'campos tienen errores'}.`,
+        {
+          duration: 5000,
+        }
+      );
+      
+      // Hacer scroll al primer campo con error
+      const firstErrorField = Object.keys(validation.errors)[0];
+      const element = document.querySelector(`[name="${firstErrorField}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      return;
+    }
 
     const baseData: Omit<CreateClientRequest, 'id'> = {
       clientType: formData.clientType,
@@ -440,6 +479,7 @@ export default function CreateEditAdministrado() {
                     Nombres <span className="text-red-500">*</span>
                   </label>
                   <Input
+                    name="names"
                     placeholder="Ingrese nombres"
                     value={formData.names}
                     onChange={(e) => handleInputChange('names', e.target.value)}
@@ -452,6 +492,7 @@ export default function CreateEditAdministrado() {
                     Apellido Paterno <span className="text-red-500">*</span>
                   </label>
                   <Input
+                    name="paternalSurname"
                     placeholder="Ingrese apellido paterno"
                     value={formData.paternalSurname}
                     onChange={(e) => handleInputChange('paternalSurname', e.target.value)}
@@ -464,6 +505,7 @@ export default function CreateEditAdministrado() {
                     Apellido Materno <span className="text-red-500">*</span>
                   </label>
                   <Input
+                    name="maternalSurname"
                     placeholder="Ingrese apellido materno"
                     value={formData.maternalSurname}
                     onChange={(e) => handleInputChange('maternalSurname', e.target.value)}
@@ -494,6 +536,7 @@ export default function CreateEditAdministrado() {
                     Número de Documento <span className="text-red-500">*</span>
                   </label>
                   <Input
+                    name="docNumber"
                     placeholder="Ingrese número"
                     value={formData.docNumber}
                     onChange={(e) => handleInputChange('docNumber', e.target.value)}
@@ -525,6 +568,7 @@ export default function CreateEditAdministrado() {
                     Teléfono <span className="text-red-500">*</span>
                   </label>
                   <Input
+                    name="phone"
                     placeholder="Ingrese teléfono"
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
@@ -538,6 +582,7 @@ export default function CreateEditAdministrado() {
                     Email <span className="text-red-500">*</span>
                   </label>
                   <Input
+                    name="email"
                     type="email"
                     placeholder="Ingrese email"
                     value={formData.email}
@@ -560,6 +605,7 @@ export default function CreateEditAdministrado() {
                         Nombres <span className="text-red-500">*</span>
                       </label>
                       <Input
+                        name="spouseNames"
                         placeholder="Nombres del cónyuge"
                         value={formData.spouseNames}
                         onChange={(e) => handleInputChange('spouseNames', e.target.value)}
@@ -572,6 +618,7 @@ export default function CreateEditAdministrado() {
                         Apellido Paterno <span className="text-red-500">*</span>
                       </label>
                       <Input
+                        name="spousePaternalSurname"
                         placeholder="Apellido paterno"
                         value={formData.spousePaternalSurname}
                         onChange={(e) => handleInputChange('spousePaternalSurname', e.target.value)}
@@ -584,6 +631,7 @@ export default function CreateEditAdministrado() {
                         Apellido Materno <span className="text-red-500">*</span>
                       </label>
                       <Input
+                        name="spouseMaternalSurname"
                         placeholder="Apellido materno"
                         value={formData.spouseMaternalSurname}
                         onChange={(e) => handleInputChange('spouseMaternalSurname', e.target.value)}
@@ -613,6 +661,7 @@ export default function CreateEditAdministrado() {
                         Número <span className="text-red-500">*</span>
                       </label>
                       <Input
+                        name="spouseDocNumber"
                         placeholder="Número"
                         value={formData.spouseDocNumber}
                         onChange={(e) => handleInputChange('spouseDocNumber', e.target.value)}
@@ -658,6 +707,7 @@ export default function CreateEditAdministrado() {
                   Razón Social o Denominación <span className="text-red-500">*</span>
                 </label>
                 <Input
+                  name="businessName"
                   placeholder="Ingrese razón social"
                   value={formData.businessName}
                   onChange={(e) => handleInputChange('businessName', e.target.value)}
@@ -669,6 +719,7 @@ export default function CreateEditAdministrado() {
                   Número de RUC <span className="text-red-500">*</span>
                 </label>
                 <Input
+                  name="ruc"
                   placeholder="Ingrese RUC"
                   value={formData.ruc}
                   onChange={(e) => handleInputChange('ruc', e.target.value)}
