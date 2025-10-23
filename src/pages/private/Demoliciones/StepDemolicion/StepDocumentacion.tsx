@@ -47,7 +47,7 @@ export default function StepDocumentacion({
               accept=".pdf"
               multiple
               onUpload={onFileUpload}
-              documentKey="partida_registral"
+              documentKey="documentacion_administrado.partida_registral"
               anteproyectoId={demolicionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
             />
@@ -71,7 +71,7 @@ export default function StepDocumentacion({
               accept=".pdf"
               multiple
               onUpload={onFileUpload}
-              documentKey="fue"
+              documentKey="documentacion_administrado.fue"
               anteproyectoId={demolicionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
             />
@@ -95,7 +95,7 @@ export default function StepDocumentacion({
               accept=".pdf"
               multiple
               onUpload={onFileUpload}
-              documentKey="documentos_antecedentes"
+              documentKey="documentacion_administrado.documentos_antecedentes"
               anteproyectoId={demolicionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
             />
@@ -131,7 +131,7 @@ export default function StepDocumentacion({
                     accept=".pdf"
                     multiple
                     onUpload={onFileUpload}
-                    documentKey="licencia_obra_nueva"
+                    documentKey="documentacion_administrado.licencia_obra_nueva"
                     anteproyectoId={demolicionId}
                     uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
                   />
@@ -182,7 +182,7 @@ export default function StepDocumentacion({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="memoria_descriptiva"
+              documentKey="documentacion_fsr.memoria_descriptiva"
               anteproyectoId={demolicionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
             />
@@ -206,7 +206,7 @@ export default function StepDocumentacion({
               accept=".pdf,.dwg"
               multiple
               onUpload={onFileUpload}
-              documentKey="plano_ubicacion"
+              documentKey="documentacion_fsr.plano_ubicacion"
               anteproyectoId={demolicionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
             />
@@ -230,7 +230,7 @@ export default function StepDocumentacion({
               accept=".pdf,.dwg"
               multiple
               onUpload={onFileUpload}
-              documentKey="plano_arquitectura"
+              documentKey="documentacion_fsr.plano_arquitectura"
               anteproyectoId={demolicionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
             />
@@ -254,7 +254,7 @@ export default function StepDocumentacion({
               accept=".pdf,.dwg"
               multiple
               onUpload={onFileUpload}
-              documentKey="plano_cerco"
+              documentKey="documentacion_fsr.plano_cerco"
               anteproyectoId={demolicionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
             />
@@ -275,7 +275,7 @@ export default function StepDocumentacion({
               accept=".pdf,.dwg"
               multiple
               onUpload={onFileUpload}
-              documentKey="plano_sostenimiento"
+              documentKey="documentacion_fsr.plano_sostenimiento"
               anteproyectoId={demolicionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
             />
@@ -308,7 +308,7 @@ export default function StepDocumentacion({
               accept="image/*"
               multiple
               onUpload={onFileUpload}
-              documentKey="fotografias"
+              documentKey="panel_fotografico.fotografias"
               anteproyectoId={demolicionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
             />

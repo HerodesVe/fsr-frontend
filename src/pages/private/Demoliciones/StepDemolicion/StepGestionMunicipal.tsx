@@ -40,7 +40,7 @@ export default function StepGestionMunicipal({
                 accept=".pdf"
                 multiple
                 onUpload={onFileUpload}
-                documentKey="cargo_ingreso_municipalidad"
+                documentKey="gestion_municipal.cargo_ingreso_municipalidad"
                 anteproyectoId={demolicionId}
                 uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
               />
@@ -68,7 +68,7 @@ export default function StepGestionMunicipal({
                 accept=".pdf"
                 multiple
                 onUpload={onFileUpload}
-                documentKey="respuesta_resolucion_municipal"
+                documentKey="gestion_municipal.respuesta_resolucion_municipal"
                 anteproyectoId={demolicionId}
                 uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
               />
@@ -96,7 +96,7 @@ export default function StepGestionMunicipal({
                 accept=".pdf"
                 multiple
                 onUpload={onFileUpload}
-                documentKey="cargo_entrega_administrado"
+                documentKey="gestion_municipal.cargo_entrega_administrado"
                 anteproyectoId={demolicionId}
                 uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
               />

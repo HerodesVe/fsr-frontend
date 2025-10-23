@@ -293,20 +293,30 @@ export default function CreateEditConformidad() {
 
   // Función para construir el request de creación
   const buildCreateRequest = (): CreateConformidadRequest => {
-    const baseData: CreateConformidadRequest = {
+    // Helper para manejar fechas: solo incluye si tiene valor, sino omite el campo
+    const getDateOrUndefined = (dateString: string) => {
+      return dateString && dateString.trim() !== '' ? dateString : undefined;
+    };
+
+    const baseData: any = {
       client_id: formData.selectedClient?.id || '',
       data: {
         service_type: 'conformidad_obra',
         nombre_proyecto: formData.nombre_proyecto,
         modalidad: formData.modalidad as 'sin_variaciones' | 'con_variaciones' | 'casco_habitable',
         entrega_final: {
-          fecha_entrega_administrado: formData.fecha_entrega_administrado,
           receptor_administrado: formData.receptor_administrado,
           cargo_entrega_administrado: createDocumentInfo('Cargo Entrega Administrado', false),
           observaciones_entrega: formData.observaciones_entrega,
         },
       },
     };
+
+    // Solo agregar fecha de entrega si tiene valor
+    const fechaEntrega = getDateOrUndefined(formData.fecha_entrega_administrado);
+    if (fechaEntrega) {
+      baseData.data.entrega_final.fecha_entrega_administrado = fechaEntrega;
+    }
 
     // Agregar datos según modalidad
     if (formData.modalidad === 'sin_variaciones') {
@@ -316,8 +326,13 @@ export default function CreateEditConformidad() {
       };
       baseData.data.verificacion_sv = {
         verificacion_campo_sv: formData.verificacion_campo_sv,
-        fecha_verificacion_sv: formData.fecha_verificacion_sv,
       };
+      
+      // Solo agregar fecha de verificación si tiene valor
+      const fechaVerificacion = getDateOrUndefined(formData.fecha_verificacion_sv);
+      if (fechaVerificacion) {
+        baseData.data.verificacion_sv.fecha_verificacion_sv = fechaVerificacion;
+      }
     } else if (formData.modalidad === 'con_variaciones' || formData.modalidad === 'casco_habitable') {
       baseData.data.informacion_inicial_cv = {
         servicios_previos_fsr: formData.servicios_previos_fsr,

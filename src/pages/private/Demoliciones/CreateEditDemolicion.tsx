@@ -321,7 +321,13 @@ export default function CreateEditDemolicion() {
 
   // Función para construir el request de creación
   const buildCreateRequest = (): CreateDemolicionRequest => {
-    return {
+    // Helper para manejar fechas: solo incluye si tiene valor, sino omite el campo
+    const getDateOrUndefined = (dateString: string) => {
+      return dateString && dateString.trim() !== '' ? dateString : undefined;
+    };
+
+    // Construir objeto base
+    const requestData: any = {
       client_id: formData.selectedClient?.id || '',
       data: {
         service_type: 'demolicion_total',
@@ -360,20 +366,39 @@ export default function CreateEditDemolicion() {
         },
         gestion_municipal: {
           cargo_ingreso_municipalidad: createDocumentInfo('Cargo Ingreso Municipalidad', false),
-          fecha_ingreso_municipalidad: formData.fecha_ingreso_municipalidad,
           respuesta_resolucion_municipal: createDocumentInfo('Respuesta Resolución Municipal', false),
-          fecha_respuesta_municipal: formData.fecha_respuesta_municipal,
           cargo_entrega_administrado: createDocumentInfo('Cargo Entrega Administrado', false),
-          fecha_entrega_administrado: formData.fecha_entrega_administrado,
         },
         entrega_final: {
-          fecha_entrega_final_administrado: formData.fecha_entrega_final_administrado,
           receptor_administrado: formData.receptor_administrado,
           cargo_entrega_final_administrado: createDocumentInfo('Cargo Entrega Final', false),
           observaciones_entrega: formData.observaciones_entrega,
         },
       },
     };
+
+    // Solo agregar fechas si tienen valor
+    const fechaIngresoMuni = getDateOrUndefined(formData.fecha_ingreso_municipalidad);
+    if (fechaIngresoMuni) {
+      requestData.data.gestion_municipal.fecha_ingreso_municipalidad = fechaIngresoMuni;
+    }
+
+    const fechaRespuestaMuni = getDateOrUndefined(formData.fecha_respuesta_municipal);
+    if (fechaRespuestaMuni) {
+      requestData.data.gestion_municipal.fecha_respuesta_municipal = fechaRespuestaMuni;
+    }
+
+    const fechaEntregaAdmin = getDateOrUndefined(formData.fecha_entrega_administrado);
+    if (fechaEntregaAdmin) {
+      requestData.data.gestion_municipal.fecha_entrega_administrado = fechaEntregaAdmin;
+    }
+
+    const fechaEntregaFinal = getDateOrUndefined(formData.fecha_entrega_final_administrado);
+    if (fechaEntregaFinal) {
+      requestData.data.entrega_final.fecha_entrega_final_administrado = fechaEntregaFinal;
+    }
+
+    return requestData;
   };
 
   // Función para construir el request de actualización

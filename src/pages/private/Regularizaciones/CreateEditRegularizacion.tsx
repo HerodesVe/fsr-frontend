@@ -291,13 +291,17 @@ export default function CreateEditRegularizacion() {
 
   // Función para construir el request de creación
   const buildCreateRequest = (): CreateRegularizacionRequest => {
-    return {
+    // Helper para manejar fechas: solo incluye si tiene valor, sino omite el campo
+    const getDateOrUndefined = (dateString: string) => {
+      return dateString && dateString.trim() !== '' ? dateString : undefined;
+    };
+
+    const requestData: any = {
       client_id: formData.selectedClient?.id || '',
       data: {
         service_type: 'regularizacion_licencia',
         titulo_proceso: formData.titulo_proceso,
         documentacion_inicial: {
-          fecha_culminacion: formData.fechaCulminacion,
           licencia_anterior: createDocumentInfo('Licencia Anterior', false),
           declaratoria_fabrica: createDocumentInfo('Declaratoria de Fábrica', false),
           planos_antecedentes: createDocumentInfo('Planos Antecedentes', false),
@@ -319,13 +323,26 @@ export default function CreateEditRegularizacion() {
           resolucion_final: createDocumentInfo('Resolución Final', false),
         },
         entrega_final: {
-          fecha_entrega_administrado: formData.fecha_entrega_administrado,
           receptor_administrado: formData.receptor_administrado,
           cargo_entrega_administrado: createDocumentInfo('Cargo Entrega Administrado', false),
           observaciones_entrega: formData.observaciones_entrega,
         },
       },
     };
+
+    // Solo agregar fecha de culminación si tiene valor
+    const fechaCulminacion = getDateOrUndefined(formData.fechaCulminacion);
+    if (fechaCulminacion) {
+      requestData.data.documentacion_inicial.fecha_culminacion = fechaCulminacion;
+    }
+
+    // Solo agregar fecha de entrega si tiene valor
+    const fechaEntrega = getDateOrUndefined(formData.fecha_entrega_administrado);
+    if (fechaEntrega) {
+      requestData.data.entrega_final.fecha_entrega_administrado = fechaEntrega;
+    }
+
+    return requestData;
   };
 
   // Función para construir el request de actualización
