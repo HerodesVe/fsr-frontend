@@ -4,77 +4,12 @@ import { LuPlus } from 'react-icons/lu';
 import { useHeaderStore } from '@/store/headerStore';
 import { Button, Filter } from '@/components/ui';
 import { ProyectoCard } from '@/components/utils/ProyectoCard';
-import { Demolicion, DemolicionStatus } from '@/types/demolicion.types';
-
-// Data dummy para desarrollo
-const demolicionesDummy: Demolicion[] = [
-  {
-    id: '1',
-    instance_code: 'DEM-2024-001',
-    administrado: 'Constructora Lima S.A.C.',
-    responsable: 'Carlos Mendoza',
-    fecha_creacion: '15/01/2024',
-    fecha_culminacion: '20/01/2024',
-    status: 'Completado',
-    created_at: '2024-01-15T00:00:00Z',
-    scheduled_completion_date: '2024-01-20T00:00:00Z',
-    data: {
-      nombre_proyecto: 'Demolición Edificio Central'
-    },
-    steps_status: {
-      administrado: 'Completada',
-      documentacion: 'Completada',
-      medidas_perimetricas: 'Completada',
-      gestion_municipal: 'Completada'
-    }
-  },
-  {
-    id: '2',
-    instance_code: 'DEM-2024-002',
-    administrado: 'Inversiones Norte S.A.C.',
-    responsable: 'Ana García',
-    fecha_creacion: '18/01/2024',
-    fecha_culminacion: '',
-    status: 'Pendiente',
-    created_at: '2024-01-18T00:00:00Z',
-    scheduled_completion_date: null,
-    data: {
-      nombre_proyecto: 'Demolición Residencial San Isidro'
-    },
-    steps_status: {
-      administrado: 'Completada',
-      documentacion: 'En progreso',
-      medidas_perimetricas: 'Pendiente',
-      gestion_municipal: 'Pendiente'
-    }
-  },
-  {
-    id: '3',
-    instance_code: 'DEM-2024-003',
-    administrado: 'Desarrollos Sur S.A.C.',
-    responsable: 'Miguel Torres',
-    fecha_creacion: '22/01/2024',
-    fecha_culminacion: '',
-    status: 'Pendiente',
-    created_at: '2024-01-22T00:00:00Z',
-    scheduled_completion_date: null,
-    data: {
-      nombre_proyecto: 'Demolición Comercial Miraflores'
-    },
-    steps_status: {
-      administrado: 'Completada',
-      documentacion: 'Pendiente',
-      medidas_perimetricas: 'Pendiente',
-      gestion_municipal: 'Pendiente'
-    }
-  }
-];
+import { DemolicionStatus } from '@/types/demolicion.types';
+import { useDemoliciones } from '@/hooks/useDemoliciones';
 
 export default function Demoliciones() {
   const navigate = useNavigate();
-  const [demoliciones] = useState<Demolicion[]>(demolicionesDummy);
-  const [isLoading] = useState(false);
-  const [error] = useState<Error | null>(null);
+  const { demoliciones, isLoading, error } = useDemoliciones();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<DemolicionStatus>(DemolicionStatus.TODOS);
   const { setHeader } = useHeaderStore();

@@ -4,13 +4,20 @@ import { LuArrowLeft, LuArrowRight, LuX, LuInfo } from 'react-icons/lu';
 import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
+import { useRegularizacion } from '@/hooks/useRegularizaciones';
 import { ResumenRegularizacion } from './components';
 import { StepAdministrado, StepCargo } from '@/components/utils/Steps';
 import StepDocumentacionInicial from './StepRegularizacion/StepDocumentacionInicial';
 import StepDatosPredio from './StepRegularizacion/StepDatosPredio';
 import StepFueFirmado from './StepRegularizacion/StepFueFirmado';
 import StepGestionMunicipal from './StepRegularizacion/StepGestionMunicipal';
-import type { RegularizacionFormData, FormStep, UploadedDocument } from '@/types/regularizacion.types';
+import type { 
+  RegularizacionFormData, 
+  FormStep, 
+  UploadedDocument,
+  CreateRegularizacionRequest,
+  DocumentInfo
+} from '@/types/regularizacion.types';
 
 const stepLabels = [
   'Administrado',
@@ -26,12 +33,14 @@ export default function CreateEditRegularizacion() {
   const navigate = useNavigate();
   const { setHeader } = useHeaderStore();
   const { clients, isLoading: clientsLoading } = useClients();
+  const { regularizacion, isLoading: regularizacionLoading, createNew, update, uploadDocs, downloadDoc } = useRegularizacion(id);
   
   const [currentStep, setCurrentStep] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showValidationError, setShowValidationError] = useState(false);
+  const [regularizacionId, setRegularizacionId] = useState<string | null>(id || null);
   
   // Estado para manejar los pasos del formulario
   const [steps, setSteps] = useState<FormStep[]>([
@@ -46,6 +55,7 @@ export default function CreateEditRegularizacion() {
   const [formData, setFormData] = useState<RegularizacionFormData>({
     // Paso 1: Administrado
     selectedClient: null,
+    titulo_proceso: '',
     administrado: '',
     fue_nombre: '',
     fue_dni: '',
@@ -83,6 +93,17 @@ export default function CreateEditRegularizacion() {
 
   const isEdit = Boolean(id);
 
+  // Cargar datos de la regularización cuando se edita
+  useEffect(() => {
+    if (regularizacion && isEdit) {
+      setFormData(prev => ({
+        ...prev,
+        titulo_proceso: regularizacion.data?.titulo_proceso || '',
+        // TODO: Cargar más campos según la estructura del backend
+      }));
+    }
+  }, [regularizacion, isEdit]);
+
   useEffect(() => {
     setHeader(
       isEdit ? 'Editar Regularización de Licencia' : 'Nueva Regularización de Licencia',
@@ -115,7 +136,7 @@ export default function CreateEditRegularizacion() {
   };
 
   const handleFileUpload = async (file: File, documentKey: string) => {
-    // Simular upload
+    // Crear objeto local inmediatamente
     const uploadedDoc: UploadedDocument = {
       key: documentKey,
       name: file.name,
@@ -123,7 +144,29 @@ export default function CreateEditRegularizacion() {
     };
     
     setUploadedDocuments(prev => [...prev, uploadedDoc]);
+
+    // Si ya tenemos un ID de regularización, subir el archivo inmediatamente
+    if (regularizacionId) {
+      try {
+        await uploadDocs(regularizacionId, [file], [documentKey]);
+      } catch (error) {
+        console.error('Error uploading file:', error);
+      }
+    }
+    
     return uploadedDoc;
+  };
+
+  // Función para descargar un documento
+  const handleDownloadDocument = async (documentId: string, fileName: string) => {
+    if (regularizacionId) {
+      try {
+        await downloadDoc(regularizacionId, documentId, fileName);
+      } catch (error) {
+        console.error('Error downloading document:', error);
+        alert('Error al descargar el documento');
+      }
+    }
   };
 
   const validateStep = (step: number): boolean => {
@@ -133,6 +176,9 @@ export default function CreateEditRegularizacion() {
       case 0: // Administrado
         if (!formData.selectedClient && !formData.fue_nombre) {
           newErrors.selectedClient = 'Debe seleccionar un administrado o crear uno nuevo';
+        }
+        if (!formData.titulo_proceso || formData.titulo_proceso.trim() === '') {
+          newErrors.titulo_proceso = 'El título del proceso es requerido';
         }
         if (!formData.selectedClient) {
           if (!formData.fue_nombre) {
@@ -190,7 +236,7 @@ export default function CreateEditRegularizacion() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validateStep(currentStep)) {
       // Mostrar mensaje de error de validación
       setShowValidationError(true);
@@ -204,6 +250,33 @@ export default function CreateEditRegularizacion() {
     // Ocultar mensaje de error si está visible
     setShowValidationError(false);
 
+    // Si es el primer paso y no hay regularizacionId, crear la regularización
+    if (currentStep === 0 && !regularizacionId) {
+      try {
+        setIsSaving(true);
+        const requestData = buildCreateRequest();
+        const newRegularizacion = await createNew(requestData);
+        setRegularizacionId(newRegularizacion.id);
+      } catch (error) {
+        console.error('Error creating regularizacion:', error);
+        setShowValidationError(true);
+        return;
+      } finally {
+        setIsSaving(false);
+      }
+    } else if (regularizacionId) {
+      // Si ya existe, actualizar
+      try {
+        setIsSaving(true);
+        const updateData = buildUpdateRequest();
+        await update(regularizacionId, updateData);
+      } catch (error) {
+        console.error('Error updating regularizacion:', error);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+
     // Marcar paso como completado y avanzar
     setSteps(prevSteps => 
       prevSteps.map((step, index) => 
@@ -214,6 +287,61 @@ export default function CreateEditRegularizacion() {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
+  };
+
+  // Función para construir el request de creación
+  const buildCreateRequest = (): CreateRegularizacionRequest => {
+    return {
+      client_id: formData.selectedClient?.id || '',
+      data: {
+        service_type: 'regularizacion_licencia',
+        titulo_proceso: formData.titulo_proceso,
+        documentacion_inicial: {
+          fecha_culminacion: formData.fechaCulminacion,
+          licencia_anterior: createDocumentInfo('Licencia Anterior', false),
+          declaratoria_fabrica: createDocumentInfo('Declaratoria de Fábrica', false),
+          planos_antecedentes: createDocumentInfo('Planos Antecedentes', false),
+          otros_documentos: createDocumentInfo('Otros Documentos', false),
+        },
+        datos_predio: {
+          fue_ubicacion: formData.fue_ubicacion,
+          fue_partida: formData.fue_partida,
+          fue_modalidad: formData.fue_modalidad,
+          fue_presupuesto: formData.fue_presupuesto,
+        },
+        fue: {
+          fue_firmado: createDocumentInfo('FUE Firmado', true),
+        },
+        gestion_municipal: {
+          cargo_municipal: createDocumentInfo('Cargo Municipal', false),
+          acta_observacion: createDocumentInfo('Acta de Observación', false),
+          doc_subsanacion: createDocumentInfo('Documento de Subsanación', false),
+          resolucion_final: createDocumentInfo('Resolución Final', false),
+        },
+        entrega_final: {
+          fecha_entrega_administrado: formData.fecha_entrega_administrado,
+          receptor_administrado: formData.receptor_administrado,
+          cargo_entrega_administrado: createDocumentInfo('Cargo Entrega Administrado', false),
+          observaciones_entrega: formData.observaciones_entrega,
+        },
+      },
+    };
+  };
+
+  // Función para construir el request de actualización
+  const buildUpdateRequest = () => {
+    return buildCreateRequest();
+  };
+
+  // Función helper para crear DocumentInfo
+  const createDocumentInfo = (name: string, is_mandatory: boolean): DocumentInfo => {
+    return {
+      name,
+      is_mandatory,
+      status: 'Pendiente',
+      file_reference: '',
+      observation: '',
+    };
   };
 
   const handlePrevious = () => {
@@ -236,9 +364,10 @@ export default function CreateEditRegularizacion() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Simular guardado
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Regularización guardada:', formData);
+      if (regularizacionId) {
+        const updateData = buildUpdateRequest();
+        await update(regularizacionId, updateData);
+      }
       navigate('/dashboard/regularizaciones');
     } catch (error) {
       console.error('Error al guardar:', error);
@@ -259,13 +388,14 @@ export default function CreateEditRegularizacion() {
             title="Paso 1: Datos del Administrado"
             description="Seleccione o ingrese la información del cliente (administrado) para este trámite de regularización."
             showCreateButton={true}
+            showProjectName={true}
           />
         );
       case 1:
         return (
           <StepDocumentacionInicial
             formData={formData}
-            regularizacionId={id || 'new'}
+            regularizacionId={regularizacionId || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
@@ -283,7 +413,7 @@ export default function CreateEditRegularizacion() {
         return (
           <StepFueFirmado
             formData={formData}
-            regularizacionId={id || 'new'}
+            regularizacionId={regularizacionId || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
@@ -293,7 +423,7 @@ export default function CreateEditRegularizacion() {
         return (
           <StepGestionMunicipal
             formData={formData}
-            regularizacionId={id || 'new'}
+            regularizacionId={regularizacionId || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
@@ -303,7 +433,7 @@ export default function CreateEditRegularizacion() {
         return (
           <StepCargo
             formData={formData}
-            projectId={id || 'new'}
+            projectId={regularizacionId || 'new'}
             uploadedDocuments={uploadedDocuments}
             errors={errors}
             onInputChange={(field: string, value: any) => handleInputChange(field as keyof RegularizacionFormData, value)}
@@ -317,7 +447,7 @@ export default function CreateEditRegularizacion() {
     }
   };
 
-  if (clientsLoading) {
+  if (clientsLoading || (isEdit && regularizacionLoading)) {
     return (
       <div className="p-6">
         <div className="animate-pulse">
@@ -443,7 +573,7 @@ export default function CreateEditRegularizacion() {
             formData={formData}
             currentStep={currentStep}
             steps={steps}
-            regularizacionId={id || 'new'}
+            regularizacionId={regularizacionId || 'new'}
             onSave={handleSave}
             isSaving={isSaving}
             uploadedDocuments={uploadedDocuments}

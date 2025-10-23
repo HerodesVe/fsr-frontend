@@ -4,8 +4,15 @@ import { LuArrowLeft, LuArrowRight, LuX, LuInfo } from 'react-icons/lu';
 import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
+import { useConformidad } from '@/hooks/useConformidades';
 
-import type { ConformidadFormData, FormStep, UploadedDocument } from '@/types/conformidad.types';
+import type { 
+  ConformidadFormData, 
+  FormStep, 
+  UploadedDocument,
+  CreateConformidadRequest,
+  DocumentInfo 
+} from '@/types/conformidad.types';
 import { StepAdministrado, StepCargo } from '@/components/utils/Steps';
 import StepModalidad from './StepConformidad/StepModalidad';
 import StepDocumentosIniciales from './StepConformidad/StepDocumentosIniciales';
@@ -29,12 +36,14 @@ export default function CreateEditConformidad() {
   const navigate = useNavigate();
   const { setHeader } = useHeaderStore();
   const { clients, isLoading: clientsLoading } = useClients();
+  const { conformidad, isLoading: conformidadLoading, createNew, update, uploadDocs } = useConformidad(id);
   
   const [currentStep, setCurrentStep] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showValidationError, setShowValidationError] = useState(false);
+  const [conformidadId, setConformidadId] = useState<string | null>(id || null);
   
   // Estado para manejar los pasos del formulario
   const [steps, setSteps] = useState<FormStep[]>([
@@ -50,6 +59,7 @@ export default function CreateEditConformidad() {
   const [formData, setFormData] = useState<ConformidadFormData>({
     // Información General
     selectedClient: null,
+    nombre_proyecto: '',
     modalidad: '',
 
     // Sin Variaciones - Documentos del Cliente
@@ -91,6 +101,18 @@ export default function CreateEditConformidad() {
 
   const isEdit = Boolean(id);
 
+  // Cargar datos de la conformidad cuando se edita
+  useEffect(() => {
+    if (conformidad && isEdit) {
+      setFormData(prev => ({
+        ...prev,
+        nombre_proyecto: conformidad.data?.nombre_proyecto || '',
+        modalidad: conformidad.data?.modalidad || '',
+        // TODO: Cargar más campos según la estructura del backend
+      }));
+    }
+  }, [conformidad, isEdit]);
+
   useEffect(() => {
     setHeader(
       isEdit ? 'Editar Conformidad de Obra' : 'Nueva Conformidad de Obra',
@@ -122,24 +144,29 @@ export default function CreateEditConformidad() {
     }
   };
 
-  const handleFileUpload = async (file: File): Promise<UploadedDocument> => {
-    // Simular upload - crear un objeto de documento subido
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const uploadedDoc: UploadedDocument = {
-          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          name: file.name,
-          url: URL.createObjectURL(file),
-          size: file.size,
-          type: file.type,
-        };
-        
-        // Agregar a la lista global de documentos subidos
-        setUploadedDocuments(prev => [...prev, uploadedDoc]);
-        
-        resolve(uploadedDoc);
-      }, 500); // Simular un pequeño delay de red
-    });
+  const handleFileUpload = async (file: File, documentKey?: string): Promise<UploadedDocument> => {
+    // Crear objeto local inmediatamente
+    const uploadedDoc: UploadedDocument = {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: file.name,
+      url: URL.createObjectURL(file),
+      size: file.size,
+      type: file.type,
+    };
+    
+    // Agregar a la lista global de documentos subidos
+    setUploadedDocuments(prev => [...prev, uploadedDoc]);
+
+    // Si ya tenemos un ID de conformidad, subir el archivo inmediatamente
+    if (conformidadId && documentKey) {
+      try {
+        await uploadDocs(conformidadId, [file], [documentKey]);
+      } catch (error) {
+        console.error('Error uploading file:', error);
+      }
+    }
+    
+    return uploadedDoc;
   };
 
   const validateStep = (step: number): boolean => {
@@ -149,6 +176,9 @@ export default function CreateEditConformidad() {
       case 0: // Administrado
         if (!formData.selectedClient) {
           newErrors.selectedClient = 'Debe seleccionar un administrado';
+        }
+        if (!formData.nombre_proyecto || formData.nombre_proyecto.trim() === '') {
+          newErrors.nombre_proyecto = 'El nombre del proyecto es requerido';
         }
         break;
       case 1: // Modalidad
@@ -208,7 +238,7 @@ export default function CreateEditConformidad() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validateStep(currentStep)) {
       // Mostrar mensaje de error de validación
       setShowValidationError(true);
@@ -222,6 +252,33 @@ export default function CreateEditConformidad() {
     // Ocultar mensaje de error si está visible
     setShowValidationError(false);
 
+    // Si es el primer paso y no hay conformidadId, crear la conformidad
+    if (currentStep === 0 && !conformidadId) {
+      try {
+        setIsSaving(true);
+        const requestData = buildCreateRequest();
+        const newConformidad = await createNew(requestData);
+        setConformidadId(newConformidad.id);
+      } catch (error) {
+        console.error('Error creating conformidad:', error);
+        setShowValidationError(true);
+        return;
+      } finally {
+        setIsSaving(false);
+      }
+    } else if (conformidadId) {
+      // Si ya existe, actualizar
+      try {
+        setIsSaving(true);
+        const updateData = buildUpdateRequest();
+        await update(conformidadId, updateData);
+      } catch (error) {
+        console.error('Error updating conformidad:', error);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+
     // Marcar paso como completado y avanzar
     setSteps(prevSteps => 
       prevSteps.map((step, index) => 
@@ -232,6 +289,77 @@ export default function CreateEditConformidad() {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
+  };
+
+  // Función para construir el request de creación
+  const buildCreateRequest = (): CreateConformidadRequest => {
+    const baseData: CreateConformidadRequest = {
+      client_id: formData.selectedClient?.id || '',
+      data: {
+        service_type: 'conformidad_obra',
+        nombre_proyecto: formData.nombre_proyecto,
+        modalidad: formData.modalidad as 'sin_variaciones' | 'con_variaciones' | 'casco_habitable',
+        entrega_final: {
+          fecha_entrega_administrado: formData.fecha_entrega_administrado,
+          receptor_administrado: formData.receptor_administrado,
+          cargo_entrega_administrado: createDocumentInfo('Cargo Entrega Administrado', false),
+          observaciones_entrega: formData.observaciones_entrega,
+        },
+      },
+    };
+
+    // Agregar datos según modalidad
+    if (formData.modalidad === 'sin_variaciones') {
+      baseData.data.documentos_iniciales_sv = {
+        licencia_obra_sv: createDocumentInfo('Licencia de Obra', true),
+        planos_aprobados_sv: createDocumentInfo('Planos Aprobados', true),
+      };
+      baseData.data.verificacion_sv = {
+        verificacion_campo_sv: formData.verificacion_campo_sv,
+        fecha_verificacion_sv: formData.fecha_verificacion_sv,
+      };
+    } else if (formData.modalidad === 'con_variaciones' || formData.modalidad === 'casco_habitable') {
+      baseData.data.informacion_inicial_cv = {
+        servicios_previos_fsr: formData.servicios_previos_fsr,
+      };
+      baseData.data.documentos_iniciales_cv = {
+        licencia_obra_cv: createDocumentInfo('Licencia de Obra', !formData.servicios_previos_fsr),
+        planos_aprobados_licencia_cv: createDocumentInfo('Planos Aprobados Licencia', !formData.servicios_previos_fsr),
+        planos_digitales_cad_cv: createDocumentInfo('Planos Digitales CAD', false),
+      };
+      baseData.data.antecedentes_cv = {
+        primer_expediente: formData.primer_expediente,
+        descripcion_antecedentes: formData.descripcion_antecedentes,
+        expedientes_anteriores: createDocumentInfo('Expedientes Anteriores', false),
+      };
+      baseData.data.documentos_expediente = {
+        fue_conformidad: createDocumentInfo('FUE Conformidad', true),
+        planos_conformidad: createDocumentInfo('Planos Conformidad', true),
+        memoria_descriptiva: createDocumentInfo('Memoria Descriptiva', false),
+        cuaderno_obra: createDocumentInfo('Cuaderno de Obra', false),
+        protocolos: createDocumentInfo('Protocolos', false),
+        declaraciones_juradas: createDocumentInfo('Declaraciones Juradas', false),
+        sustentos_tecnicos: createDocumentInfo('Sustentos Técnicos', false),
+      };
+    }
+
+    return baseData;
+  };
+
+  // Función para construir el request de actualización
+  const buildUpdateRequest = () => {
+    return buildCreateRequest();
+  };
+
+  // Función helper para crear DocumentInfo
+  const createDocumentInfo = (name: string, is_mandatory: boolean): DocumentInfo => {
+    return {
+      name,
+      is_mandatory,
+      status: 'Pendiente',
+      file_reference: '',
+      observation: '',
+    };
   };
 
   const handlePrevious = () => {
@@ -254,9 +382,10 @@ export default function CreateEditConformidad() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Simular guardado
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Conformidad guardada:', formData);
+      if (conformidadId) {
+        const updateData = buildUpdateRequest();
+        await update(conformidadId, updateData);
+      }
       navigate('/dashboard/conformidades');
     } catch (error) {
       console.error('Error al guardar:', error);
@@ -276,6 +405,7 @@ export default function CreateEditConformidad() {
             onInputChange={(field: string, value: any) => handleInputChange(field as keyof ConformidadFormData, value)}
             title="Paso 1: Seleccionar Administrado"
             description="Seleccione el administrado para este trámite de conformidad de obra"
+            showProjectName={true}
           />
         );
       case 1:
@@ -291,7 +421,7 @@ export default function CreateEditConformidad() {
           <StepDocumentosIniciales
             formData={formData}
             errors={errors}
-            conformidadId={id || 'new'}
+            conformidadId={conformidadId || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
@@ -302,7 +432,7 @@ export default function CreateEditConformidad() {
           <StepAntecedentes
             formData={formData}
             errors={errors}
-            conformidadId={id || 'new'}
+            conformidadId={conformidadId || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
@@ -313,7 +443,7 @@ export default function CreateEditConformidad() {
           <StepDocumentosExpediente
             formData={formData}
             errors={errors}
-            conformidadId={id || 'new'}
+            conformidadId={conformidadId || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
@@ -324,7 +454,7 @@ export default function CreateEditConformidad() {
           <StepVerificacion
             formData={formData}
             errors={errors}
-            conformidadId={id || 'new'}
+            conformidadId={conformidadId || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
@@ -334,7 +464,7 @@ export default function CreateEditConformidad() {
         return (
           <StepCargo
             formData={formData}
-            projectId={id || 'new'}
+            projectId={conformidadId || 'new'}
             uploadedDocuments={uploadedDocuments}
             errors={errors}
             onInputChange={(field: string, value: any) => handleInputChange(field as keyof ConformidadFormData, value)}
@@ -348,7 +478,7 @@ export default function CreateEditConformidad() {
     }
   };
 
-  if (clientsLoading) {
+  if (clientsLoading || (isEdit && conformidadLoading)) {
     return (
       <div className="p-6">
         <div className="animate-pulse">
@@ -471,7 +601,7 @@ export default function CreateEditConformidad() {
             formData={formData}
             currentStep={currentStep}
             steps={steps}
-            conformidadId={id || 'new'}
+            conformidadId={conformidadId || 'new'}
             onSave={handleSave}
             isSaving={isSaving}
             uploadedDocuments={uploadedDocuments}

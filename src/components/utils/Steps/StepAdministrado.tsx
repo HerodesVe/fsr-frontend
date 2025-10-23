@@ -1,10 +1,11 @@
-import { Button, Select } from '@/components/ui';
+import { Button, Select, Input } from '@/components/ui';
 import { useNavigate } from 'react-router-dom';
 import type { ClientOut } from '@/types/client.types';
 
 interface StepAdministradoProps {
   formData: {
     selectedClient: any | null;
+    nombre_proyecto?: string;
     [key: string]: any;
   };
   clients: ClientOut[] | undefined;
@@ -13,6 +14,7 @@ interface StepAdministradoProps {
   title?: string;
   description?: string;
   showCreateButton?: boolean;
+  showProjectName?: boolean;
 }
 
 export default function StepAdministrado({
@@ -23,6 +25,7 @@ export default function StepAdministrado({
   title = "Seleccionar Administrado",
   description = "Seleccione el administrado para este servicio",
   showCreateButton = false,
+  showProjectName = false,
 }: StepAdministradoProps) {
   const navigate = useNavigate();
   
@@ -48,6 +51,20 @@ export default function StepAdministrado({
         </p>
         
         <div className="space-y-6">
+          {/* Campo de nombre del proyecto (opcional) */}
+          {showProjectName && (
+            <div>
+              <Input
+                label="Nombre del Proyecto"
+                placeholder="Ingrese el nombre del proyecto..."
+                value={formData.nombre_proyecto || ''}
+                onChange={(e) => onInputChange('nombre_proyecto', e.target.value)}
+                error={errors.nombre_proyecto}
+                required
+              />
+            </div>
+          )}
+
           {/* Selector de administrado con botón opcional */}
           <div className={showCreateButton ? "p-4 border-l-4 border-teal-500 bg-teal-50" : ""}>
             <div className={showCreateButton ? "flex items-center justify-between" : ""}>

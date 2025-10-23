@@ -4,86 +4,12 @@ import { LuPlus } from 'react-icons/lu';
 import { useHeaderStore } from '@/store/headerStore';
 import { Button, Filter } from '@/components/ui';
 import { ProyectoCard } from '@/components/utils/ProyectoCard';
-import { Conformidad, ConformidadStatus } from '@/types/conformidad.types';
-
-// Data dummy para desarrollo
-const conformidadesDummy: Conformidad[] = [
-  {
-    id: '1',
-    instance_code: 'COB-2024-001',
-    administrado: 'Constructora Lima S.A.C.',
-    responsable: 'Carlos Mendoza',
-    fecha_creacion: '15/01/2024',
-    fecha_culminacion: '20/01/2024',
-    status: 'Completado',
-    created_at: '2024-01-15T00:00:00Z',
-    scheduled_completion_date: '2024-01-20T00:00:00Z',
-    data: {
-      nombre_proyecto: 'Conformidad Edificio Residencial',
-      modalidad: 'sin_variaciones'
-    },
-    steps_status: {
-      administrado: 'Completada',
-      modalidad: 'Completada',
-      documentos_iniciales: 'Completada',
-      antecedentes: 'Completada',
-      documentos_expediente: 'Completada',
-      verificacion: 'Completada'
-    }
-  },
-  {
-    id: '2',
-    instance_code: 'COB-2024-002',
-    administrado: 'Inversiones Norte S.A.C.',
-    responsable: 'Ana García',
-    fecha_creacion: '18/01/2024',
-    fecha_culminacion: '',
-    status: 'Pendiente',
-    created_at: '2024-01-18T00:00:00Z',
-    scheduled_completion_date: null,
-    data: {
-      nombre_proyecto: 'Conformidad Centro Comercial',
-      modalidad: 'con_variaciones'
-    },
-    steps_status: {
-      administrado: 'Completada',
-      modalidad: 'Completada',
-      documentos_iniciales: 'En progreso',
-      antecedentes: 'Pendiente',
-      documentos_expediente: 'Pendiente',
-      verificacion: 'Pendiente'
-    }
-  },
-  {
-    id: '3',
-    instance_code: 'COB-2024-003',
-    administrado: 'Desarrollos Sur S.A.C.',
-    responsable: 'Miguel Torres',
-    fecha_creacion: '22/01/2024',
-    fecha_culminacion: '',
-    status: 'Pendiente',
-    created_at: '2024-01-22T00:00:00Z',
-    scheduled_completion_date: null,
-    data: {
-      nombre_proyecto: 'Conformidad Edificio Oficinas',
-      modalidad: 'casco_habitable'
-    },
-    steps_status: {
-      administrado: 'Completada',
-      modalidad: 'Pendiente',
-      documentos_iniciales: 'Pendiente',
-      antecedentes: 'Pendiente',
-      documentos_expediente: 'Pendiente',
-      verificacion: 'Pendiente'
-    }
-  }
-];
+import { ConformidadStatus } from '@/types/conformidad.types';
+import { useConformidades } from '@/hooks/useConformidades';
 
 export default function Conformidades() {
   const navigate = useNavigate();
-  const [conformidades] = useState<Conformidad[]>(conformidadesDummy);
-  const [isLoading] = useState(false);
-  const [error] = useState<Error | null>(null);
+  const { conformidades, isLoading, error } = useConformidades();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<ConformidadStatus>(ConformidadStatus.TODOS);
   const { setHeader } = useHeaderStore();

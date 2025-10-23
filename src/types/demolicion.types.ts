@@ -1,6 +1,75 @@
+// Interfaces para documentos
+export interface DocumentInfo {
+  name: string;
+  is_mandatory: boolean;
+  status: 'Pendiente' | 'Aprobado' | 'Rechazado';
+  file_reference: string;
+  emission_date?: string;
+  observation?: string;
+}
+
+// Interfaces para el backend
+export interface CreateDemolicionRequest {
+  client_id: string;
+  data: {
+    service_type: 'demolicion_total';
+    nombre_proyecto: string;
+    documentacion_administrado: {
+      partida_registral: DocumentInfo;
+      fue: DocumentInfo;
+      documentos_antecedentes: DocumentInfo;
+      es_zona_reglamentacion_especial: boolean;
+      licencia_obra_nueva: DocumentInfo;
+      comentarios_adicionales: string;
+    };
+    documentacion_fsr: {
+      memoria_descriptiva: DocumentInfo;
+      plano_ubicacion: DocumentInfo;
+      plano_arquitectura: DocumentInfo;
+      plano_cerco: DocumentInfo;
+      plano_sostenimiento: DocumentInfo;
+    };
+    panel_fotografico: {
+      fotografias: DocumentInfo;
+      link_video: string;
+    };
+    medidas_perimetricas: {
+      frente_partida: number;
+      fondo_partida: number;
+      derecha_partida: number;
+      izquierda_partida: number;
+      area_total_partida: number;
+      frente_real: number;
+      fondo_real: number;
+      derecha_real: number;
+      izquierda_real: number;
+      area_total_real: number;
+      observaciones_medidas: string;
+    };
+    gestion_municipal: {
+      cargo_ingreso_municipalidad: DocumentInfo;
+      fecha_ingreso_municipalidad: string;
+      respuesta_resolucion_municipal: DocumentInfo;
+      fecha_respuesta_municipal: string;
+      cargo_entrega_administrado: DocumentInfo;
+      fecha_entrega_administrado: string;
+    };
+    entrega_final: {
+      fecha_entrega_final_administrado: string;
+      receptor_administrado: string;
+      cargo_entrega_final_administrado: DocumentInfo;
+      observaciones_entrega: string;
+    };
+  };
+}
+
+export interface UpdateDemolicionRequest extends Partial<CreateDemolicionRequest> {}
+
+// Interfaz para el formulario local
 export interface DemolicionFormData {
   // Paso 1: Administrado
   selectedClient: any | null;
+  nombre_proyecto: string;
 
   // Paso 2: Documentación
   // 2.1: Documentación del Administrado
@@ -95,7 +164,15 @@ export interface Demolicion {
   created_at: string;
   scheduled_completion_date: string | null;
   data?: {
+    service_type?: string;
     nombre_proyecto?: string;
+    documentacion_administrado?: any;
+    documentacion_fsr?: any;
+    panel_fotografico?: any;
+    medidas_perimetricas?: any;
+    gestion_municipal?: any;
+    entrega_final?: any;
+    [key: string]: any;
   };
   steps_status: Record<string, string>;
 }

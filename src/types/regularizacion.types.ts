@@ -10,6 +10,16 @@ export enum DocumentStatus {
   OBSERVADO = 'Observado',
 }
 
+// Interface para documentos del backend
+export interface DocumentInfo {
+  name: string;
+  is_mandatory: boolean;
+  status: 'Pendiente' | 'Aprobado' | 'Rechazado';
+  file_reference: string;
+  emission_date?: string;
+  observation?: string;
+}
+
 export interface DocumentFile {
   name: string;
   is_mandatory: boolean;
@@ -34,6 +44,7 @@ export interface FormStep {
 export interface RegularizacionFormData {
   // Paso 1: Administrado
   selectedClient: any | null;
+  titulo_proceso: string;
   
   // Datos adicionales del administrado (si se crea nuevo)
   administrado: string;
@@ -122,7 +133,18 @@ export interface Regularizacion {
   progress_percentage: number;
   created_at: string;
   scheduled_completion_date?: string;
-  data: RegularizacionData;
+  data?: {
+    service_type?: string;
+    titulo_proceso?: string;
+    tipo_regularizacion?: string;
+    descripcion?: string;
+    documentacion_inicial?: any;
+    datos_predio?: any;
+    fue?: any;
+    gestion_municipal?: any;
+    entrega_final?: any;
+    [key: string]: any;
+  };
   steps_status: StepStatus;
   next_step: string;
   uploaded_documents: UploadedDocument[];
@@ -133,14 +155,44 @@ export interface Regularizacion {
   fecha_culminacion?: string;
 }
 
+// Request para crear/actualizar regularización
 export interface CreateRegularizacionRequest {
   client_id: string;
-  data: RegularizacionData;
+  data: {
+    service_type: 'regularizacion_licencia';
+    titulo_proceso: string;
+    documentacion_inicial: {
+      fecha_culminacion: string;
+      licencia_anterior: DocumentInfo;
+      declaratoria_fabrica: DocumentInfo;
+      planos_antecedentes: DocumentInfo;
+      otros_documentos: DocumentInfo;
+    };
+    datos_predio: {
+      fue_ubicacion: string;
+      fue_partida: string;
+      fue_modalidad: string;
+      fue_presupuesto: string;
+    };
+    fue: {
+      fue_firmado: DocumentInfo;
+    };
+    gestion_municipal: {
+      cargo_municipal: DocumentInfo;
+      acta_observacion: DocumentInfo;
+      doc_subsanacion: DocumentInfo;
+      resolucion_final: DocumentInfo;
+    };
+    entrega_final: {
+      fecha_entrega_administrado: string;
+      receptor_administrado: string;
+      cargo_entrega_administrado: DocumentInfo;
+      observaciones_entrega: string;
+    };
+  };
 }
 
-export interface UpdateRegularizacionRequest extends CreateRegularizacionRequest {
-  id: string;
-}
+export interface UpdateRegularizacionRequest extends Partial<CreateRegularizacionRequest> {}
 
 export interface UploadDocumentRequest {
   files: File[];

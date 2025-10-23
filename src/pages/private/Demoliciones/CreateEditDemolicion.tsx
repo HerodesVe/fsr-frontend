@@ -4,12 +4,19 @@ import { LuArrowLeft, LuArrowRight, LuX, LuInfo } from 'react-icons/lu';
 import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
+import { useDemolicion } from '@/hooks/useDemoliciones';
 import { ResumenDemolicion } from './components';
 import { StepAdministrado, StepCargo } from '@/components/utils/Steps';
 import StepDocumentacion from './StepDemolicion/StepDocumentacion';
 import StepMedidasPerimetricas from './StepDemolicion/StepMedidasPerimetricas';
 import StepGestionMunicipal from './StepDemolicion/StepGestionMunicipal';
-import type { DemolicionFormData, FormStep, UploadedDocument } from '@/types/demolicion.types';
+import type { 
+  DemolicionFormData, 
+  FormStep, 
+  UploadedDocument,
+  CreateDemolicionRequest,
+  DocumentInfo 
+} from '@/types/demolicion.types';
 
 
 const stepLabels = [
@@ -25,12 +32,14 @@ export default function CreateEditDemolicion() {
   const navigate = useNavigate();
   const { setHeader } = useHeaderStore();
   const { clients, isLoading: clientsLoading } = useClients();
+  const { demolicion, isLoading: demolicionLoading, createNew, update, uploadDocs } = useDemolicion(id);
   
   const [currentStep, setCurrentStep] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showValidationError, setShowValidationError] = useState(false);
+  const [demolicionId, setDemolicionId] = useState<string | null>(id || null);
   
   // Estado para manejar los pasos del formulario
   const [steps, setSteps] = useState<FormStep[]>([
@@ -44,6 +53,7 @@ export default function CreateEditDemolicion() {
   const [formData, setFormData] = useState<DemolicionFormData>({
     // Paso 1: Administrado
     selectedClient: null,
+    nombre_proyecto: '',
 
     // Paso 2: Documentación
     // 2.1: Documentación del Administrado
@@ -100,6 +110,19 @@ export default function CreateEditDemolicion() {
 
   const isEdit = Boolean(id);
 
+  // Cargar datos de la demolición cuando se edita
+  useEffect(() => {
+    if (demolicion && isEdit) {
+      // Aquí cargaríamos los datos del backend al formulario
+      // Por ahora solo cargamos el nombre del proyecto
+      setFormData(prev => ({
+        ...prev,
+        nombre_proyecto: demolicion.data?.nombre_proyecto || '',
+        // TODO: Cargar más campos según la estructura del backend
+      }));
+    }
+  }, [demolicion, isEdit]);
+
   useEffect(() => {
     setHeader(
       isEdit ? 'Editar Demolición Total' : 'Nueva Demolición Total',
@@ -131,8 +154,8 @@ export default function CreateEditDemolicion() {
     }
   };
 
-  const handleFileUpload = async (file: File) => {
-    // Simular upload
+  const handleFileUpload = async (file: File, documentKey?: string) => {
+    // Crear objeto local inmediatamente
     const uploadedDoc: UploadedDocument = {
       id: Date.now().toString(),
       name: file.name,
@@ -142,6 +165,16 @@ export default function CreateEditDemolicion() {
     };
     
     setUploadedDocuments(prev => [...prev, uploadedDoc]);
+
+    // Si ya tenemos un ID de demolición, subir el archivo inmediatamente
+    if (demolicionId && documentKey) {
+      try {
+        await uploadDocs(demolicionId, [file], [documentKey]);
+      } catch (error) {
+        console.error('Error uploading file:', error);
+      }
+    }
+    
     return uploadedDoc;
   };
 
@@ -152,6 +185,9 @@ export default function CreateEditDemolicion() {
       case 0: // Administrado
         if (!formData.selectedClient) {
           newErrors.selectedClient = 'Debe seleccionar un administrado';
+        }
+        if (!formData.nombre_proyecto || formData.nombre_proyecto.trim() === '') {
+          newErrors.nombre_proyecto = 'El nombre del proyecto es requerido';
         }
         break;
       case 1: // Documentación
@@ -230,7 +266,7 @@ export default function CreateEditDemolicion() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validateStep(currentStep)) {
       // Mostrar mensaje de error de validación
       setShowValidationError(true);
@@ -244,6 +280,33 @@ export default function CreateEditDemolicion() {
     // Ocultar mensaje de error si está visible
     setShowValidationError(false);
 
+    // Si es el primer paso y no hay demolicionId, crear la demolición
+    if (currentStep === 0 && !demolicionId) {
+      try {
+        setIsSaving(true);
+        const requestData = buildCreateRequest();
+        const newDemolicion = await createNew(requestData);
+        setDemolicionId(newDemolicion.id);
+      } catch (error) {
+        console.error('Error creating demolicion:', error);
+        setShowValidationError(true);
+        return;
+      } finally {
+        setIsSaving(false);
+      }
+    } else if (demolicionId) {
+      // Si ya existe, actualizar
+      try {
+        setIsSaving(true);
+        const updateData = buildUpdateRequest();
+        await update(demolicionId, updateData);
+      } catch (error) {
+        console.error('Error updating demolicion:', error);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+
     // Marcar paso como completado y avanzar
     setSteps(prevSteps => 
       prevSteps.map((step, index) => 
@@ -254,6 +317,79 @@ export default function CreateEditDemolicion() {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
+  };
+
+  // Función para construir el request de creación
+  const buildCreateRequest = (): CreateDemolicionRequest => {
+    return {
+      client_id: formData.selectedClient?.id || '',
+      data: {
+        service_type: 'demolicion_total',
+        nombre_proyecto: formData.nombre_proyecto,
+        documentacion_administrado: {
+          partida_registral: createDocumentInfo('Partida Registral', true),
+          fue: createDocumentInfo('FUE', true),
+          documentos_antecedentes: createDocumentInfo('Documentos Antecedentes', false),
+          es_zona_reglamentacion_especial: formData.es_zona_reglamentacion_especial,
+          licencia_obra_nueva: createDocumentInfo('Licencia Obra Nueva', false),
+          comentarios_adicionales: formData.comentarios_adicionales,
+        },
+        documentacion_fsr: {
+          memoria_descriptiva: createDocumentInfo('Memoria Descriptiva', true),
+          plano_ubicacion: createDocumentInfo('Plano de Ubicación', true),
+          plano_arquitectura: createDocumentInfo('Plano de Arquitectura', true),
+          plano_cerco: createDocumentInfo('Plano de Cerco', true),
+          plano_sostenimiento: createDocumentInfo('Plano de Sostenimiento', false),
+        },
+        panel_fotografico: {
+          fotografias: createDocumentInfo('Fotografías', false),
+          link_video: formData.link_video,
+        },
+        medidas_perimetricas: {
+          frente_partida: parseFloat(formData.frente_partida) || 0,
+          fondo_partida: parseFloat(formData.fondo_partida) || 0,
+          derecha_partida: parseFloat(formData.derecha_partida) || 0,
+          izquierda_partida: parseFloat(formData.izquierda_partida) || 0,
+          area_total_partida: parseFloat(formData.area_total_partida) || 0,
+          frente_real: parseFloat(formData.frente_real) || 0,
+          fondo_real: parseFloat(formData.fondo_real) || 0,
+          derecha_real: parseFloat(formData.derecha_real) || 0,
+          izquierda_real: parseFloat(formData.izquierda_real) || 0,
+          area_total_real: parseFloat(formData.area_total_real) || 0,
+          observaciones_medidas: formData.observaciones_medidas,
+        },
+        gestion_municipal: {
+          cargo_ingreso_municipalidad: createDocumentInfo('Cargo Ingreso Municipalidad', false),
+          fecha_ingreso_municipalidad: formData.fecha_ingreso_municipalidad,
+          respuesta_resolucion_municipal: createDocumentInfo('Respuesta Resolución Municipal', false),
+          fecha_respuesta_municipal: formData.fecha_respuesta_municipal,
+          cargo_entrega_administrado: createDocumentInfo('Cargo Entrega Administrado', false),
+          fecha_entrega_administrado: formData.fecha_entrega_administrado,
+        },
+        entrega_final: {
+          fecha_entrega_final_administrado: formData.fecha_entrega_final_administrado,
+          receptor_administrado: formData.receptor_administrado,
+          cargo_entrega_final_administrado: createDocumentInfo('Cargo Entrega Final', false),
+          observaciones_entrega: formData.observaciones_entrega,
+        },
+      },
+    };
+  };
+
+  // Función para construir el request de actualización
+  const buildUpdateRequest = () => {
+    return buildCreateRequest();
+  };
+
+  // Función helper para crear DocumentInfo
+  const createDocumentInfo = (name: string, is_mandatory: boolean): DocumentInfo => {
+    return {
+      name,
+      is_mandatory,
+      status: 'Pendiente',
+      file_reference: '',
+      observation: '',
+    };
   };
 
   const handlePrevious = () => {
@@ -276,9 +412,10 @@ export default function CreateEditDemolicion() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Simular guardado
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Demolición guardada:', formData);
+      if (demolicionId) {
+        const updateData = buildUpdateRequest();
+        await update(demolicionId, updateData);
+      }
       navigate('/dashboard/demoliciones');
     } catch (error) {
       console.error('Error al guardar:', error);
@@ -298,13 +435,14 @@ export default function CreateEditDemolicion() {
             onInputChange={(field: string, value: any) => handleInputChange(field as keyof DemolicionFormData, value)}
             title="Paso 1: Vincular Administrado"
             description="Seleccione el administrado para este servicio de demolición total"
+            showProjectName={true}
           />
         );
       case 1:
         return (
           <StepDocumentacion
             formData={formData}
-            demolicionId={id || 'new'}
+            demolicionId={demolicionId || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
@@ -322,7 +460,7 @@ export default function CreateEditDemolicion() {
         return (
           <StepGestionMunicipal
             formData={formData}
-            demolicionId={id || 'new'}
+            demolicionId={demolicionId || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
@@ -336,7 +474,7 @@ export default function CreateEditDemolicion() {
               fecha_entrega_administrado: formData.fecha_entrega_final_administrado,
               cargo_entrega_administrado: formData.cargo_entrega_final_administrado,
             }}
-            projectId={id || 'new'}
+            projectId={demolicionId || 'new'}
             uploadedDocuments={uploadedDocuments}
             errors={errors}
             onInputChange={(field: string, value: any) => {
@@ -358,7 +496,7 @@ export default function CreateEditDemolicion() {
     }
   };
 
-  if (clientsLoading) {
+  if (clientsLoading || (isEdit && demolicionLoading)) {
     return (
       <div className="p-6">
         <div className="animate-pulse">
@@ -481,7 +619,7 @@ export default function CreateEditDemolicion() {
             formData={formData}
             currentStep={currentStep}
             steps={steps}
-            demolicionId={id || 'new'}
+            demolicionId={demolicionId || 'new'}
             onSave={handleSave}
             isSaving={isSaving}
             uploadedDocuments={uploadedDocuments}

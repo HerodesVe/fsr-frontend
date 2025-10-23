@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LuPlus } from 'react-icons/lu';
 
-import { useClients } from '@/hooks/useClients';
+// import { useClients } from '@/hooks/useClients';
+import { useClientsDirect as useClients } from '@/hooks/useClientsDirect'; // Hook alternativo para debugging
 import { useHeaderStore } from '@/store/headerStore';
 import { Button, Filter, Table, Pagination } from '@/components/ui';
 import type { FilterOption, TableColumn, TableAction } from '@/components/ui';
