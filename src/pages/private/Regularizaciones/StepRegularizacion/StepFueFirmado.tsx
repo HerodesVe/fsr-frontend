@@ -89,7 +89,7 @@ export default function StepFueFirmado({
               accept=".pdf"
               multiple={false}
               onUpload={onFileUpload}
-              documentKey="fueFirmado"
+              documentKey="fue.fue_firmado"
               anteproyectoId={regularizacionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key, name: doc.name, file_id: doc.file_id }))}
             />

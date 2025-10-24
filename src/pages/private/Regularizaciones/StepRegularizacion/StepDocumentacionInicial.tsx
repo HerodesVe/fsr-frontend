@@ -69,7 +69,7 @@ export default function StepDocumentacionInicial({
               accept=".pdf"
               multiple
               onUpload={onFileUpload}
-              documentKey="licenciaAnterior"
+              documentKey="documentacion_inicial.licencia_anterior"
               anteproyectoId={regularizacionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key, name: doc.name, file_id: doc.file_id }))}
             />
@@ -96,7 +96,7 @@ export default function StepDocumentacionInicial({
               accept=".pdf"
               multiple
               onUpload={onFileUpload}
-              documentKey="declaratoriaFabrica"
+              documentKey="documentacion_inicial.declaratoria_fabrica"
               anteproyectoId={regularizacionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key, name: doc.name, file_id: doc.file_id }))}
             />
@@ -123,7 +123,7 @@ export default function StepDocumentacionInicial({
               accept=".pdf,.dwg"
               multiple
               onUpload={onFileUpload}
-              documentKey="planosAntecedentes"
+              documentKey="documentacion_inicial.planos_antecedentes"
               anteproyectoId={regularizacionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key, name: doc.name, file_id: doc.file_id }))}
             />
@@ -147,7 +147,7 @@ export default function StepDocumentacionInicial({
               accept=".pdf,.doc,.docx,.jpg,.png"
               multiple
               onUpload={onFileUpload}
-              documentKey="otros"
+              documentKey="documentacion_inicial.otros_documentos"
               anteproyectoId={regularizacionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key, name: doc.name, file_id: doc.file_id }))}
             />

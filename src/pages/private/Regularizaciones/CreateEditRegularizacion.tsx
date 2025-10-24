@@ -55,7 +55,7 @@ export default function CreateEditRegularizacion() {
   const [formData, setFormData] = useState<RegularizacionFormData>({
     // Paso 1: Administrado
     selectedClient: null,
-    titulo_proceso: '',
+    nombre_proyecto: '',
     administrado: '',
     fue_nombre: '',
     fue_dni: '',
@@ -95,14 +95,59 @@ export default function CreateEditRegularizacion() {
 
   // Cargar datos de la regularización cuando se edita
   useEffect(() => {
-    if (regularizacion && isEdit) {
+    if (regularizacion && isEdit && clients && clients.length > 0) {
+      // Buscar el cliente seleccionado en la lista de clients
+      const selectedClient = clients.find(client => client.id === regularizacion.client_id) || null;
+
+      // Cargar datos del formulario desde el backend
       setFormData(prev => ({
         ...prev,
-        titulo_proceso: regularizacion.data?.titulo_proceso || '',
-        // TODO: Cargar más campos según la estructura del backend
+        selectedClient,
+        nombre_proyecto: regularizacion.data?.nombre_proyecto || regularizacion.data?.titulo_proceso || '',
+        
+        // Documentación Inicial
+        fechaCulminacion: regularizacion.data?.documentacion_inicial?.fecha_culminacion || '',
+        
+        // Datos del Predio
+        fue_ubicacion: regularizacion.data?.datos_predio?.fue_ubicacion || '',
+        fue_partida: regularizacion.data?.datos_predio?.fue_partida || '',
+        fue_modalidad: regularizacion.data?.datos_predio?.fue_modalidad || '',
+        fue_presupuesto: regularizacion.data?.datos_predio?.fue_presupuesto || '',
+        
+        // Entrega Final
+        fecha_entrega_administrado: regularizacion.data?.entrega_final?.fecha_entrega_administrado || '',
+        receptor_administrado: regularizacion.data?.entrega_final?.receptor_administrado || '',
+        observaciones_entrega: regularizacion.data?.entrega_final?.observaciones_entrega || '',
       }));
+
+      // Cargar documentos subidos desde el backend
+      const allDocs: UploadedDocument[] = [];
+      
+      // 1. Cargar desde uploaded_documents (documentos con key)
+      if (regularizacion.uploaded_documents && regularizacion.uploaded_documents.length > 0) {
+        const docs = regularizacion.uploaded_documents.map((doc: any) => ({
+          file_id: doc.file_id,
+          name: doc.name,
+          key: doc.key,
+        }));
+        allDocs.push(...docs);
+      }
+
+      // 2. Cargar documento del cargo de entrega final si existe
+      if (regularizacion.data?.entrega_final?.cargo_entrega_administrado?.file_reference) {
+        const cargoDoc = regularizacion.data.entrega_final.cargo_entrega_administrado;
+        allDocs.push({
+          file_id: cargoDoc.file_reference,
+          name: cargoDoc.name || 'Cargo Entrega Administrado',
+          key: 'entrega_final.cargo_entrega_administrado',
+        });
+      }
+
+      if (allDocs.length > 0) {
+        setUploadedDocuments(allDocs);
+      }
     }
-  }, [regularizacion, isEdit]);
+  }, [regularizacion, isEdit, clients]);
 
   useEffect(() => {
     setHeader(
@@ -122,50 +167,73 @@ export default function CreateEditRegularizacion() {
     }));
     
     // Limpiar error del campo
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
-    }
+    setErrors(prev => {
+      if (prev[field]) {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      }
+      return prev;
+    });
 
     // Ocultar mensaje de validación general si está visible
-    if (showValidationError) {
-      setShowValidationError(false);
-    }
+    setShowValidationError(false);
   };
 
-  const handleFileUpload = async (file: File, documentKey: string) => {
+  const handleFileUpload = async (file: File, documentKey?: string): Promise<UploadedDocument> => {
+    const tempId = Date.now().toString();
+    
     // Crear objeto local inmediatamente
     const uploadedDoc: UploadedDocument = {
-      key: documentKey,
+      key: documentKey || '',
       name: file.name,
-      file_id: Date.now().toString(),
+      file_id: tempId,
     };
     
     setUploadedDocuments(prev => [...prev, uploadedDoc]);
 
     // Si ya tenemos un ID de regularización, subir el archivo inmediatamente
-    if (regularizacionId) {
+    if (regularizacionId && documentKey) {
       try {
-        await uploadDocs(regularizacionId, [file], [documentKey]);
+        const response = await uploadDocs(regularizacionId, [file], [documentKey]);
+        
+        // Actualizar con file_id real del backend
+        if (response && response.uploaded_documents) {
+          const uploadedFromBackend = response.uploaded_documents.find(
+            (doc: any) => doc.key === documentKey && doc.name === file.name
+          );
+          
+          if (uploadedFromBackend) {
+            setUploadedDocuments(prev => 
+              prev.map(doc => 
+                doc.file_id === tempId 
+                  ? { ...doc, file_id: uploadedFromBackend.file_id }
+                  : doc
+              )
+            );
+          }
+        }
       } catch (error) {
         console.error('Error uploading file:', error);
+        // Remover el documento si falla la subida
+        setUploadedDocuments(prev => prev.filter(doc => doc.file_id !== tempId));
       }
     }
     
     return uploadedDoc;
   };
 
-  // Función para descargar un documento
   const handleDownloadDocument = async (documentId: string, fileName: string) => {
-    if (regularizacionId) {
-      try {
-        await downloadDoc(regularizacionId, documentId, fileName);
-      } catch (error) {
-        console.error('Error downloading document:', error);
-        alert('Error al descargar el documento');
-      }
+    if (!regularizacionId) {
+      alert('No se puede descargar el documento en este momento');
+      return;
+    }
+    
+    try {
+      await downloadDoc(regularizacionId, documentId, fileName);
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      alert('Error al descargar el documento');
     }
   };
 
@@ -177,8 +245,8 @@ export default function CreateEditRegularizacion() {
         if (!formData.selectedClient && !formData.fue_nombre) {
           newErrors.selectedClient = 'Debe seleccionar un administrado o crear uno nuevo';
         }
-        if (!formData.titulo_proceso || formData.titulo_proceso.trim() === '') {
-          newErrors.titulo_proceso = 'El título del proceso es requerido';
+        if (!formData.nombre_proyecto || formData.nombre_proyecto.trim() === '') {
+          newErrors.nombre_proyecto = 'El nombre del proyecto es requerido';
         }
         if (!formData.selectedClient) {
           if (!formData.fue_nombre) {
@@ -265,11 +333,13 @@ export default function CreateEditRegularizacion() {
         setIsSaving(false);
       }
     } else if (regularizacionId) {
-      // Si ya existe, actualizar
+      // Si ya existe, actualizar solo según el paso actual
       try {
         setIsSaving(true);
-        const updateData = buildUpdateRequest();
-        await update(regularizacionId, updateData);
+        const updateData = buildUpdateRequestForCurrentStep();
+        if (updateData) {
+          await update(regularizacionId, updateData);
+        }
       } catch (error) {
         console.error('Error updating regularizacion:', error);
       } finally {
@@ -289,18 +359,48 @@ export default function CreateEditRegularizacion() {
     }
   };
 
+  // Helper global para convertir fechas al formato ISO (YYYY-MM-DD)
+  const formatDateForBackend = (dateString: string): string | undefined => {
+    if (!dateString || dateString.trim() === '') return undefined;
+    
+    // Si ya está en formato ISO (YYYY-MM-DD), devolverlo tal cual
+    if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+      return dateString.split('T')[0];
+    }
+    
+    // Si está en formato DD/MM/YYYY, convertir a YYYY-MM-DD
+    if (/^\d{2}\/\d{2}\/\d{4}/.test(dateString)) {
+      const [day, month, year] = dateString.split('/');
+      return `${year}-${month}-${day}`;
+    }
+    
+    // Si puede ser parseado como fecha, convertir a ISO
+    if (!isNaN(Date.parse(dateString))) {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0];
+    }
+    
+    return undefined;
+  };
+
+  // Función helper para crear DocumentInfo
+  const createDocumentInfo = (name: string, is_mandatory: boolean): DocumentInfo => {
+    return {
+      name,
+      is_mandatory,
+      status: 'Pendiente',
+      file_reference: '',
+      observation: '',
+    };
+  };
+
   // Función para construir el request de creación
   const buildCreateRequest = (): CreateRegularizacionRequest => {
-    // Helper para manejar fechas: solo incluye si tiene valor, sino omite el campo
-    const getDateOrUndefined = (dateString: string) => {
-      return dateString && dateString.trim() !== '' ? dateString : undefined;
-    };
-
     const requestData: any = {
       client_id: formData.selectedClient?.id || '',
       data: {
         service_type: 'regularizacion_licencia',
-        titulo_proceso: formData.titulo_proceso,
+        nombre_proyecto: formData.nombre_proyecto,
         documentacion_inicial: {
           licencia_anterior: createDocumentInfo('Licencia Anterior', false),
           declaratoria_fabrica: createDocumentInfo('Declaratoria de Fábrica', false),
@@ -330,14 +430,14 @@ export default function CreateEditRegularizacion() {
       },
     };
 
-    // Solo agregar fecha de culminación si tiene valor
-    const fechaCulminacion = getDateOrUndefined(formData.fechaCulminacion);
+    // Solo agregar fecha de culminación si tiene valor (formato ISO)
+    const fechaCulminacion = formatDateForBackend(formData.fechaCulminacion);
     if (fechaCulminacion) {
       requestData.data.documentacion_inicial.fecha_culminacion = fechaCulminacion;
     }
 
-    // Solo agregar fecha de entrega si tiene valor
-    const fechaEntrega = getDateOrUndefined(formData.fecha_entrega_administrado);
+    // Solo agregar fecha de entrega si tiene valor (formato ISO)
+    const fechaEntrega = formatDateForBackend(formData.fecha_entrega_administrado);
     if (fechaEntrega) {
       requestData.data.entrega_final.fecha_entrega_administrado = fechaEntrega;
     }
@@ -345,20 +445,86 @@ export default function CreateEditRegularizacion() {
     return requestData;
   };
 
-  // Función para construir el request de actualización
-  const buildUpdateRequest = () => {
-    return buildCreateRequest();
+  // Función para construir el request de actualización según el paso actual
+  const buildUpdateRequestForCurrentStep = (): any | null => {
+    switch (currentStep) {
+      case 0: // Paso 1: Administrado
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            service_type: 'regularizacion_licencia',
+            nombre_proyecto: formData.nombre_proyecto,
+          }
+        };
+
+      case 1: // Paso 2: Documentación Inicial
+        // ⚠️ NO enviar estructura de documentos, los documentos se suben automáticamente con handleFileUpload
+        // Solo enviar fecha de culminación
+        const docInicialData: any = {};
+        
+        const fechaCulminacion = formatDateForBackend(formData.fechaCulminacion);
+        if (fechaCulminacion) {
+          docInicialData.fecha_culminacion = fechaCulminacion;
+        }
+
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            documentacion_inicial: docInicialData
+          }
+        };
+
+      case 2: // Paso 3: Datos del Predio
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            datos_predio: {
+              fue_ubicacion: formData.fue_ubicacion,
+              fue_partida: formData.fue_partida,
+              fue_modalidad: formData.fue_modalidad,
+              fue_presupuesto: formData.fue_presupuesto,
+            }
+          }
+        };
+
+      case 3: // Paso 4: FUE Firmado
+        // ⚠️ NO enviar estructura de documentos, solo se suben con handleFileUpload
+        // Este paso solo maneja documentos, no hay campos de formulario adicionales
+        return null;
+
+      case 4: // Paso 5: Gestión Municipal
+        // ⚠️ NO enviar estructura de documentos, solo se suben con handleFileUpload
+        // Este paso solo maneja documentos, no hay campos de formulario adicionales
+        return null;
+
+      case 5: // Paso 6: Entrega al Administrado
+        // ⚠️ NO enviar estructura de documentos, solo campos de texto/formulario
+        // Los documentos (cargo_entrega_administrado) se suben con handleFileUpload
+        const entregaData: any = {
+          receptor_administrado: formData.receptor_administrado,
+          observaciones_entrega: formData.observaciones_entrega,
+        };
+
+        const fechaEntrega = formatDateForBackend(formData.fecha_entrega_administrado);
+        if (fechaEntrega) {
+          entregaData.fecha_entrega_administrado = fechaEntrega;
+        }
+
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            entrega_final: entregaData
+          }
+        };
+
+      default:
+        return null;
+    }
   };
 
-  // Función helper para crear DocumentInfo
-  const createDocumentInfo = (name: string, is_mandatory: boolean): DocumentInfo => {
-    return {
-      name,
-      is_mandatory,
-      status: 'Pendiente',
-      file_reference: '',
-      observation: '',
-    };
+  // Función para construir el request de actualización completo (si se necesita)
+  const buildUpdateRequest = () => {
+    return buildCreateRequest();
   };
 
   const handlePrevious = () => {
@@ -455,6 +621,7 @@ export default function CreateEditRegularizacion() {
             errors={errors}
             onInputChange={(field: string, value: any) => handleInputChange(field as keyof RegularizacionFormData, value)}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
             title="Cargo"
             description="Complete la información de la entrega final de la regularización al administrado"
           />

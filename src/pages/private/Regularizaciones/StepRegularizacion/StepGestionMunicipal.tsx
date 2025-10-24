@@ -59,7 +59,7 @@ export default function StepGestionMunicipal({
               accept=".pdf,.jpg,.png"
               multiple
               onUpload={onFileUpload}
-              documentKey="cargoMunicipal"
+              documentKey="gestion_municipal.cargo_municipal"
               anteproyectoId={regularizacionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key, name: doc.name, file_id: doc.file_id }))}
             />
@@ -84,7 +84,7 @@ export default function StepGestionMunicipal({
               accept=".pdf,.jpg,.png"
               multiple
               onUpload={onFileUpload}
-              documentKey="actaObservacion"
+              documentKey="gestion_municipal.acta_observacion"
               anteproyectoId={regularizacionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key, name: doc.name, file_id: doc.file_id }))}
             />
@@ -109,7 +109,7 @@ export default function StepGestionMunicipal({
               accept=".pdf,.doc,.docx,.dwg,.jpg,.png"
               multiple
               onUpload={onFileUpload}
-              documentKey="docSubsanacion"
+              documentKey="gestion_municipal.doc_subsanacion"
               anteproyectoId={regularizacionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key, name: doc.name, file_id: doc.file_id }))}
             />
@@ -138,7 +138,7 @@ export default function StepGestionMunicipal({
               accept=".pdf"
               multiple
               onUpload={onFileUpload}
-              documentKey="resolucionFinal"
+              documentKey="gestion_municipal.resolucion_final"
               anteproyectoId={regularizacionId}
               uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key, name: doc.name, file_id: doc.file_id }))}
             />

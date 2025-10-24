@@ -44,7 +44,7 @@ export interface FormStep {
 export interface RegularizacionFormData {
   // Paso 1: Administrado
   selectedClient: any | null;
-  titulo_proceso: string;
+  nombre_proyecto: string;
   
   // Datos adicionales del administrado (si se crea nuevo)
   administrado: string;
@@ -135,7 +135,8 @@ export interface Regularizacion {
   scheduled_completion_date?: string;
   data?: {
     service_type?: string;
-    titulo_proceso?: string;
+    nombre_proyecto?: string;
+    titulo_proceso?: string; // Mantener por compatibilidad con backend legacy
     tipo_regularizacion?: string;
     descripcion?: string;
     documentacion_inicial?: any;
@@ -160,7 +161,7 @@ export interface CreateRegularizacionRequest {
   client_id: string;
   data: {
     service_type: 'regularizacion_licencia';
-    titulo_proceso: string;
+    nombre_proyecto: string;
     documentacion_inicial: {
       fecha_culminacion: string;
       licencia_anterior: DocumentInfo;
