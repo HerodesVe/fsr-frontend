@@ -65,5 +65,24 @@ export const uploadDocuments = async (id: string, uploadData: { files: File[]; k
   return response.data;
 };
 
+export const downloadDocument = async (id: string, documentId: string): Promise<Blob> => {
+  const response = await api.get(`/demoliciones/${id}/documents/${documentId}`, {
+    responseType: 'blob', // Important for file downloads
+  });
+  return response.data;
+};
+
+export const downloadDocumentWithName = async (id: string, documentId: string, fileName: string): Promise<void> => {
+  const blob = await downloadDocument(id, documentId);
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+};
+
 
 

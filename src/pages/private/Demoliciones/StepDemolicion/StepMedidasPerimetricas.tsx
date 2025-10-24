@@ -1,3 +1,4 @@
+import React from 'react';
 import { Input, Textarea } from '@/components/ui';
 import type { DemolicionFormData } from '@/types/demolicion.types';
 
@@ -7,7 +8,7 @@ interface StepMedidasPerimetricasProps {
   onInputChange: (field: keyof DemolicionFormData, value: any) => void;
 }
 
-export default function StepMedidasPerimetricas({
+const StepMedidasPerimetricas = React.memo(function StepMedidasPerimetricas({
   formData,
   errors,
   onInputChange,
@@ -141,5 +142,7 @@ export default function StepMedidasPerimetricas({
       </div>
     </div>
   );
-}
+});
+
+export default StepMedidasPerimetricas;
 

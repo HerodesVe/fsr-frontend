@@ -156,13 +156,18 @@ export interface ActasEspecialidad {
 export interface Demolicion {
   id: string;
   instance_code: string;
+  client_id: string; // ✅ ID del cliente/administrado
+  service_id: string;
+  user_id: string;
   administrado: string;
   responsable: string;
   fecha_creacion: string;
   fecha_culminacion: string;
   status: string;
+  progress_percentage?: number;
   created_at: string;
   scheduled_completion_date: string | null;
+  next_step?: string;
   data?: {
     service_type?: string;
     nombre_proyecto?: string;
@@ -175,6 +180,11 @@ export interface Demolicion {
     [key: string]: any;
   };
   steps_status: Record<string, string>;
+  uploaded_documents?: Array<{
+    key: string;
+    name: string;
+    file_id: string;
+  }>;
 }
 
 export interface UploadedDocument {
@@ -183,6 +193,7 @@ export interface UploadedDocument {
   url: string;
   size: number;
   type: string;
+  key?: string; // Document key para identificar el tipo de documento
 }
 
 export interface FormStep {

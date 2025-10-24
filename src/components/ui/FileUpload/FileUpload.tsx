@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { LuUpload, LuFile, LuX, LuTriangle, LuLoader, LuCheck } from 'react-icons/lu';
+import { LuUpload, LuFile, LuX, LuTriangle, LuLoader, LuCheck, LuDownload } from 'react-icons/lu';
 
 export interface FileUploadProps {
   label?: string;
@@ -19,6 +19,8 @@ export interface FileUploadProps {
   anteproyectoId?: string; // ID del anteproyecto
   // Props para documentos ya subidos
   uploadedFiles?: Array<{ key: string; name: string; file_id: string; }>;
+  // Props para descarga de documentos
+  onDownload?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 
@@ -38,6 +40,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   documentKey,
   anteproyectoId,
   uploadedFiles = [],
+  onDownload,
 }) => {
   const [dragActive, setDragActive] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set());
@@ -249,6 +252,18 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                       </p>
                     </div>
                   </div>
+                  
+                  {/* Botón de descarga */}
+                  {!isPending && onDownload && (
+                    <button
+                      type="button"
+                      onClick={() => onDownload(uploadedFile.file_id, uploadedFile.name)}
+                      className="ml-2 p-2 text-teal-600 hover:bg-teal-100 rounded-md transition-colors"
+                      title="Descargar documento"
+                    >
+                      <LuDownload className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               );
             })}

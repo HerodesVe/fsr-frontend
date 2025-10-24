@@ -1,3 +1,4 @@
+import React from 'react';
 import { LuTriangle } from 'react-icons/lu';
 import { FileUpload, Switch, Textarea, Input } from '@/components/ui';
 import type { DemolicionFormData, UploadedDocument } from '@/types/demolicion.types';
@@ -8,14 +9,16 @@ interface StepDocumentacionProps {
   uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof DemolicionFormData, value: any) => void;
   onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
-export default function StepDocumentacion({
+const StepDocumentacion = React.memo(function StepDocumentacion({
   formData,
   demolicionId,
   uploadedDocuments,
   onInputChange,
   onFileUpload,
+  onDownloadDocument,
 }: StepDocumentacionProps) {
   return (
     <div className="space-y-8">
@@ -49,7 +52,8 @@ export default function StepDocumentacion({
               onUpload={onFileUpload}
               documentKey="documentacion_administrado.partida_registral"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -73,7 +77,8 @@ export default function StepDocumentacion({
               onUpload={onFileUpload}
               documentKey="documentacion_administrado.fue"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -97,7 +102,8 @@ export default function StepDocumentacion({
               onUpload={onFileUpload}
               documentKey="documentacion_administrado.documentos_antecedentes"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -184,7 +190,8 @@ export default function StepDocumentacion({
               onUpload={onFileUpload}
               documentKey="documentacion_fsr.memoria_descriptiva"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -208,7 +215,8 @@ export default function StepDocumentacion({
               onUpload={onFileUpload}
               documentKey="documentacion_fsr.plano_ubicacion"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -232,7 +240,8 @@ export default function StepDocumentacion({
               onUpload={onFileUpload}
               documentKey="documentacion_fsr.plano_arquitectura"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -256,7 +265,8 @@ export default function StepDocumentacion({
               onUpload={onFileUpload}
               documentKey="documentacion_fsr.plano_cerco"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -277,7 +287,8 @@ export default function StepDocumentacion({
               onUpload={onFileUpload}
               documentKey="documentacion_fsr.plano_sostenimiento"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
         </div>
@@ -310,7 +321,8 @@ export default function StepDocumentacion({
               onUpload={onFileUpload}
               documentKey="panel_fotografico.fotografias"
               anteproyectoId={demolicionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -329,4 +341,6 @@ export default function StepDocumentacion({
       </div>
     </div>
   );
-}
+});
+
+export default StepDocumentacion;

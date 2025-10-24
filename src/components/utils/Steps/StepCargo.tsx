@@ -12,6 +12,7 @@ interface StepCargoProps {
   onFileUpload: (file: File, documentKey: string) => Promise<any>;
   title?: string;
   description?: string;
+  cargoDocumentKey?: string;
 }
 
 export default function StepCargo({
@@ -22,7 +23,8 @@ export default function StepCargo({
   onInputChange,
   onFileUpload,
   title = "Entrega al Administrado",
-  description = "Complete la información de la entrega final del proyecto al administrado"
+  description = "Complete la información de la entrega final del proyecto al administrado",
+  cargoDocumentKey = "cargo_entrega_administrado"
 }: StepCargoProps) {
   return (
     <div className="space-y-8">
@@ -96,7 +98,7 @@ export default function StepCargo({
               accept=".pdf"
               multiple={false}
               onUpload={onFileUpload}
-              documentKey="cargo_entrega_administrado"
+              documentKey={cargoDocumentKey}
               anteproyectoId={projectId}
               uploadedFiles={uploadedDocuments.map(doc => ({ 
                 key: doc.id || doc.key, 

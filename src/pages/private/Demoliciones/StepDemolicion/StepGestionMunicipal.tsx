@@ -1,3 +1,4 @@
+import React from 'react';
 import { FileUpload, DateInput } from '@/components/ui';
 import type { DemolicionFormData, UploadedDocument } from '@/types/demolicion.types';
 
@@ -7,14 +8,16 @@ interface StepGestionMunicipalProps {
   uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof DemolicionFormData, value: any) => void;
   onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
-export default function StepGestionMunicipal({
+const StepGestionMunicipal = React.memo(function StepGestionMunicipal({
   formData,
   demolicionId,
   uploadedDocuments,
   onInputChange,
   onFileUpload,
+  onDownloadDocument,
 }: StepGestionMunicipalProps) {
   return (
     <div className="space-y-6">
@@ -42,7 +45,8 @@ export default function StepGestionMunicipal({
                 onUpload={onFileUpload}
                 documentKey="gestion_municipal.cargo_ingreso_municipalidad"
                 anteproyectoId={demolicionId}
-                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
             </div>
             <div>
@@ -70,7 +74,8 @@ export default function StepGestionMunicipal({
                 onUpload={onFileUpload}
                 documentKey="gestion_municipal.respuesta_resolucion_municipal"
                 anteproyectoId={demolicionId}
-                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
             </div>
             <div>
@@ -98,7 +103,8 @@ export default function StepGestionMunicipal({
                 onUpload={onFileUpload}
                 documentKey="gestion_municipal.cargo_entrega_administrado"
                 anteproyectoId={demolicionId}
-                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
             </div>
             <div>
@@ -114,4 +120,6 @@ export default function StepGestionMunicipal({
       </div>
     </div>
   );
-}
+});
+
+export default StepGestionMunicipal;

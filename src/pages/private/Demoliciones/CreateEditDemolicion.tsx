@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LuArrowLeft, LuArrowRight, LuX, LuInfo } from 'react-icons/lu';
 import { Button } from '@/components/ui';
@@ -32,7 +32,7 @@ export default function CreateEditDemolicion() {
   const navigate = useNavigate();
   const { setHeader } = useHeaderStore();
   const { clients, isLoading: clientsLoading } = useClients();
-  const { demolicion, isLoading: demolicionLoading, createNew, update, uploadDocs } = useDemolicion(id);
+  const { demolicion, isLoading: demolicionLoading, createNew, update, uploadDocs, downloadDoc } = useDemolicion(id);
   
   const [currentStep, setCurrentStep] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
@@ -112,16 +112,32 @@ export default function CreateEditDemolicion() {
 
   // Cargar datos de la demolición cuando se edita
   useEffect(() => {
-    if (demolicion && isEdit) {
-      // Aquí cargaríamos los datos del backend al formulario
-      // Por ahora solo cargamos el nombre del proyecto
+    if (demolicion && isEdit && clients && clients.length > 0) {
+      // Buscar el cliente seleccionado en la lista de clients
+      const selectedClient = clients.find(client => client.id === demolicion.client_id) || null;
+
+      // Cargar datos del formulario desde el backend
       setFormData(prev => ({
         ...prev,
+        selectedClient, // ✅ Cargar el cliente seleccionado
         nombre_proyecto: demolicion.data?.nombre_proyecto || '',
         // TODO: Cargar más campos según la estructura del backend
       }));
+
+      // Cargar documentos subidos desde el backend
+      if (demolicion.uploaded_documents && demolicion.uploaded_documents.length > 0) {
+        const docs: UploadedDocument[] = demolicion.uploaded_documents.map((doc: any) => ({
+          id: doc.file_id,
+          name: doc.name,
+          url: '', // No necesitamos la URL porque solo descargaremos
+          size: 0,
+          type: 'application/pdf',
+          key: doc.key,
+        }));
+        setUploadedDocuments(docs);
+      }
     }
-  }, [demolicion, isEdit]);
+  }, [demolicion, isEdit, clients]);
 
   useEffect(() => {
     setHeader(
@@ -134,34 +150,37 @@ export default function CreateEditDemolicion() {
     };
   }, [setHeader, isEdit]);
 
-  const handleInputChange = (field: keyof DemolicionFormData, value: any) => {
+  const handleInputChange = useCallback((field: keyof DemolicionFormData, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
     
     // Limpiar error del campo
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
-    }
+    setErrors(prev => {
+      if (prev[field]) {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      }
+      return prev;
+    });
 
     // Ocultar mensaje de validación general si está visible
-    if (showValidationError) {
-      setShowValidationError(false);
-    }
-  };
+    setShowValidationError(false);
+  }, []);
 
-  const handleFileUpload = async (file: File, documentKey?: string) => {
-    // Crear objeto local inmediatamente
+  const handleFileUpload = useCallback(async (file: File, documentKey?: string) => {
+    const tempId = Date.now().toString();
+    
+    // Crear objeto local inmediatamente con estado "pendiente"
     const uploadedDoc: UploadedDocument = {
-      id: Date.now().toString(),
+      id: tempId,
       name: file.name,
       url: URL.createObjectURL(file),
       size: file.size,
       type: file.type,
+      key: documentKey,
     };
     
     setUploadedDocuments(prev => [...prev, uploadedDoc]);
@@ -169,14 +188,44 @@ export default function CreateEditDemolicion() {
     // Si ya tenemos un ID de demolición, subir el archivo inmediatamente
     if (demolicionId && documentKey) {
       try {
-        await uploadDocs(demolicionId, [file], [documentKey]);
+        const response = await uploadDocs(demolicionId, [file], [documentKey]);
+        
+        // Actualizar el documento con el file_id real del backend
+        if (response && response.uploaded_documents) {
+          const uploadedFromBackend = response.uploaded_documents.find(
+            (doc: any) => doc.key === documentKey && doc.name === file.name
+          );
+          
+          if (uploadedFromBackend) {
+            setUploadedDocuments(prev => 
+              prev.map(doc => 
+                doc.id === tempId 
+                  ? { ...doc, id: uploadedFromBackend.file_id }
+                  : doc
+              )
+            );
+          }
+        }
       } catch (error) {
         console.error('Error uploading file:', error);
+        // Remover el documento si falla la subida
+        setUploadedDocuments(prev => prev.filter(doc => doc.id !== tempId));
       }
     }
     
     return uploadedDoc;
-  };
+  }, [demolicionId, uploadDocs]);
+
+  const handleDownloadDocument = useCallback(async (documentId: string, fileName: string) => {
+    if (demolicionId) {
+      try {
+        await downloadDoc(demolicionId, documentId, fileName);
+      } catch (error) {
+        console.error('Error downloading document:', error);
+        alert('Error al descargar el documento');
+      }
+    }
+  }, [demolicionId, downloadDoc]);
 
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
@@ -471,6 +520,7 @@ export default function CreateEditDemolicion() {
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
       case 2:
@@ -489,6 +539,7 @@ export default function CreateEditDemolicion() {
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
       case 4:
@@ -514,6 +565,7 @@ export default function CreateEditDemolicion() {
             onFileUpload={handleFileUpload}
             title="Entrega de Demolición"
             description="Complete la información de la entrega final de la demolición al administrado"
+            cargoDocumentKey="entrega_final.cargo_entrega_final_administrado"
           />
         );
       default:

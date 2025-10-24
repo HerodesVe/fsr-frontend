@@ -5,7 +5,8 @@ import {
   createDemolicion,
   updateDemolicion,
   deleteDemolicion,
-  uploadDocuments
+  uploadDocuments,
+  downloadDocumentWithName
 } from '@/services/demoliciones.service';
 import type { Demolicion, CreateDemolicionRequest, UpdateDemolicionRequest } from '@/types/demolicion.types';
 
@@ -114,7 +115,6 @@ export const useDemolicion = (id?: string) => {
 
   const uploadDocs = async (demolicionId: string, files: File[], keys: string[]) => {
     try {
-      setIsLoading(true);
       const result = await uploadDocuments(demolicionId, { files, keys });
       setError(null);
       return result;
@@ -122,8 +122,16 @@ export const useDemolicion = (id?: string) => {
       setError(err as Error);
       console.error('Error uploading documents:', err);
       throw err;
-    } finally {
-      setIsLoading(false);
+    }
+  };
+
+  const downloadDoc = async (demolicionId: string, documentId: string, fileName: string) => {
+    try {
+      await downloadDocumentWithName(demolicionId, documentId, fileName);
+    } catch (err) {
+      setError(err as Error);
+      console.error('Error downloading document:', err);
+      throw err;
     }
   };
 
@@ -135,6 +143,7 @@ export const useDemolicion = (id?: string) => {
     update,
     remove,
     uploadDocs,
+    downloadDoc,
     refetch: id ? () => fetchDemolicion(id) : undefined,
   };
 };
