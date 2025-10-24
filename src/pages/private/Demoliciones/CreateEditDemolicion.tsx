@@ -119,9 +119,36 @@ export default function CreateEditDemolicion() {
       // Cargar datos del formulario desde el backend
       setFormData(prev => ({
         ...prev,
-        selectedClient, // ✅ Cargar el cliente seleccionado
+        selectedClient,
         nombre_proyecto: demolicion.data?.nombre_proyecto || '',
-        // TODO: Cargar más campos según la estructura del backend
+        
+        // Documentación
+        comentarios_adicionales: demolicion.data?.documentacion_administrado?.comentarios_adicionales || '',
+        es_zona_reglamentacion_especial: demolicion.data?.documentacion_administrado?.es_zona_reglamentacion_especial || false,
+        link_video: demolicion.data?.panel_fotografico?.link_video || '',
+        
+        // Medidas Perimétricas
+        frente_partida: demolicion.data?.medidas_perimetricas?.frente_partida?.toString() || '',
+        fondo_partida: demolicion.data?.medidas_perimetricas?.fondo_partida?.toString() || '',
+        derecha_partida: demolicion.data?.medidas_perimetricas?.derecha_partida?.toString() || '',
+        izquierda_partida: demolicion.data?.medidas_perimetricas?.izquierda_partida?.toString() || '',
+        area_total_partida: demolicion.data?.medidas_perimetricas?.area_total_partida?.toString() || '',
+        frente_real: demolicion.data?.medidas_perimetricas?.frente_real?.toString() || '',
+        fondo_real: demolicion.data?.medidas_perimetricas?.fondo_real?.toString() || '',
+        derecha_real: demolicion.data?.medidas_perimetricas?.derecha_real?.toString() || '',
+        izquierda_real: demolicion.data?.medidas_perimetricas?.izquierda_real?.toString() || '',
+        area_total_real: demolicion.data?.medidas_perimetricas?.area_total_real?.toString() || '',
+        observaciones_medidas: demolicion.data?.medidas_perimetricas?.observaciones_medidas || '',
+        
+        // Gestión Municipal
+        fecha_ingreso_municipalidad: demolicion.data?.gestion_municipal?.fecha_ingreso_municipalidad || '',
+        fecha_respuesta_municipal: demolicion.data?.gestion_municipal?.fecha_respuesta_municipal || '',
+        fecha_entrega_administrado: demolicion.data?.gestion_municipal?.fecha_entrega_administrado || '',
+        
+        // Entrega Final
+        fecha_entrega_final_administrado: demolicion.data?.entrega_final?.fecha_entrega_final_administrado || '',
+        receptor_administrado: demolicion.data?.entrega_final?.receptor_administrado || '',
+        observaciones_entrega: demolicion.data?.entrega_final?.observaciones_entrega || '',
       }));
 
       // Cargar documentos subidos desde el backend
@@ -416,11 +443,13 @@ export default function CreateEditDemolicion() {
         setIsSaving(false);
       }
     } else if (demolicionId) {
-      // Si ya existe, actualizar
+      // Si ya existe, actualizar solo según el paso actual
       try {
         setIsSaving(true);
-        const updateData = buildUpdateRequest();
-        await update(demolicionId, updateData);
+        const updateData = buildUpdateRequestForCurrentStep();
+        if (updateData) {
+          await update(demolicionId, updateData);
+        }
       } catch (error) {
         console.error('Error updating demolicion:', error);
       } finally {
@@ -440,13 +469,32 @@ export default function CreateEditDemolicion() {
     }
   };
 
+  // Helper global para convertir fechas al formato ISO (YYYY-MM-DD)
+  const formatDateForBackend = (dateString: string): string | undefined => {
+    if (!dateString || dateString.trim() === '') return undefined;
+    
+    // Si ya está en formato ISO (YYYY-MM-DD), devolverlo tal cual
+    if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+      return dateString.split('T')[0]; // Tomar solo la parte de fecha si tiene hora
+    }
+    
+    // Si está en formato DD/MM/YYYY, convertir a YYYY-MM-DD
+    if (/^\d{2}\/\d{2}\/\d{4}/.test(dateString)) {
+      const [day, month, year] = dateString.split('/');
+      return `${year}-${month}-${day}`;
+    }
+    
+    // Si puede ser parseado como fecha, convertir a ISO
+    if (!isNaN(Date.parse(dateString))) {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0];
+    }
+    
+    return undefined;
+  };
+
   // Función para construir el request de creación
   const buildCreateRequest = (): CreateDemolicionRequest => {
-    // Helper para manejar fechas: solo incluye si tiene valor, sino omite el campo
-    const getDateOrUndefined = (dateString: string) => {
-      return dateString && dateString.trim() !== '' ? dateString : undefined;
-    };
-
     // Construir objeto base
     const requestData: any = {
       client_id: formData.selectedClient?.id || '',
@@ -498,23 +546,23 @@ export default function CreateEditDemolicion() {
       },
     };
 
-    // Solo agregar fechas si tienen valor
-    const fechaIngresoMuni = getDateOrUndefined(formData.fecha_ingreso_municipalidad);
+    // Solo agregar fechas si tienen valor (formato ISO)
+    const fechaIngresoMuni = formatDateForBackend(formData.fecha_ingreso_municipalidad);
     if (fechaIngresoMuni) {
       requestData.data.gestion_municipal.fecha_ingreso_municipalidad = fechaIngresoMuni;
     }
 
-    const fechaRespuestaMuni = getDateOrUndefined(formData.fecha_respuesta_municipal);
+    const fechaRespuestaMuni = formatDateForBackend(formData.fecha_respuesta_municipal);
     if (fechaRespuestaMuni) {
       requestData.data.gestion_municipal.fecha_respuesta_municipal = fechaRespuestaMuni;
     }
 
-    const fechaEntregaAdmin = getDateOrUndefined(formData.fecha_entrega_administrado);
+    const fechaEntregaAdmin = formatDateForBackend(formData.fecha_entrega_administrado);
     if (fechaEntregaAdmin) {
       requestData.data.gestion_municipal.fecha_entrega_administrado = fechaEntregaAdmin;
     }
 
-    const fechaEntregaFinal = getDateOrUndefined(formData.fecha_entrega_final_administrado);
+    const fechaEntregaFinal = formatDateForBackend(formData.fecha_entrega_final_administrado);
     if (fechaEntregaFinal) {
       requestData.data.entrega_final.fecha_entrega_final_administrado = fechaEntregaFinal;
     }
@@ -522,7 +570,105 @@ export default function CreateEditDemolicion() {
     return requestData;
   };
 
-  // Función para construir el request de actualización
+  // Función para construir el request de actualización según el paso actual
+  const buildUpdateRequestForCurrentStep = (): any | null => {
+    switch (currentStep) {
+      case 0: // Paso 1: Administrado
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            service_type: 'demolicion_total',
+            nombre_proyecto: formData.nombre_proyecto,
+          }
+        };
+
+      case 1: // Paso 2: Documentación
+        // ⚠️ NO enviar estructura de documentos, solo campos de texto
+        // Los documentos se suben automáticamente con handleFileUpload
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            documentacion_administrado: {
+              es_zona_reglamentacion_especial: formData.es_zona_reglamentacion_especial,
+              comentarios_adicionales: formData.comentarios_adicionales,
+            },
+            panel_fotografico: {
+              link_video: formData.link_video,
+            }
+          }
+        };
+
+      case 2: // Paso 3: Medidas Perimétricas
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            medidas_perimetricas: {
+              frente_partida: parseFloat(formData.frente_partida) || 0,
+              fondo_partida: parseFloat(formData.fondo_partida) || 0,
+              derecha_partida: parseFloat(formData.derecha_partida) || 0,
+              izquierda_partida: parseFloat(formData.izquierda_partida) || 0,
+              area_total_partida: parseFloat(formData.area_total_partida) || 0,
+              frente_real: parseFloat(formData.frente_real) || 0,
+              fondo_real: parseFloat(formData.fondo_real) || 0,
+              derecha_real: parseFloat(formData.derecha_real) || 0,
+              izquierda_real: parseFloat(formData.izquierda_real) || 0,
+              area_total_real: parseFloat(formData.area_total_real) || 0,
+              observaciones_medidas: formData.observaciones_medidas,
+            }
+          }
+        };
+
+      case 3: // Paso 4: Gestión Municipal
+        // ⚠️ NO enviar estructura de documentos, solo fechas
+        const gestionData: any = {};
+        
+        const fechaIngreso = formatDateForBackend(formData.fecha_ingreso_municipalidad);
+        if (fechaIngreso) {
+          gestionData.fecha_ingreso_municipalidad = fechaIngreso;
+        }
+        
+        const fechaRespuesta = formatDateForBackend(formData.fecha_respuesta_municipal);
+        if (fechaRespuesta) {
+          gestionData.fecha_respuesta_municipal = fechaRespuesta;
+        }
+        
+        const fechaEntrega = formatDateForBackend(formData.fecha_entrega_administrado);
+        if (fechaEntrega) {
+          gestionData.fecha_entrega_administrado = fechaEntrega;
+        }
+
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            gestion_municipal: gestionData
+          }
+        };
+
+      case 4: // Paso 5: Entrega al Administrado
+        // ⚠️ NO enviar estructura de documentos, solo campos de texto
+        const entregaData: any = {
+          receptor_administrado: formData.receptor_administrado,
+          observaciones_entrega: formData.observaciones_entrega,
+        };
+
+        const fechaEntregaFinal = formatDateForBackend(formData.fecha_entrega_final_administrado);
+        if (fechaEntregaFinal) {
+          entregaData.fecha_entrega_final_administrado = fechaEntregaFinal;
+        }
+
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            entrega_final: entregaData
+          }
+        };
+
+      default:
+        return null;
+    }
+  };
+
+  // Función para construir el request de actualización completo (si se necesita)
   const buildUpdateRequest = () => {
     return buildCreateRequest();
   };

@@ -65,5 +65,21 @@ export const uploadDocuments = async (id: string, uploadData: { files: File[]; k
   return response.data;
 };
 
+export const downloadDocument = async (conformidadId: string, documentId: string): Promise<Blob> => {
+  const response = await api.get(`/conformidades/${conformidadId}/documents/${documentId}`, {
+    responseType: 'blob',
+  });
+  return response.data;
+};
 
-
+export const downloadDocumentWithName = async (conformidadId: string, documentId: string, fileName: string): Promise<void> => {
+  const blob = await downloadDocument(conformidadId, documentId);
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};

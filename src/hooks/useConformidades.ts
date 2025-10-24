@@ -5,9 +5,11 @@ import {
   createConformidad,
   updateConformidad,
   deleteConformidad,
-  uploadDocuments
+  uploadDocuments,
+  downloadDocumentWithName
 } from '@/services/conformidades.service';
 import type { Conformidad, CreateConformidadRequest, UpdateConformidadRequest } from '@/types/conformidad.types';
+import toast from 'react-hot-toast';
 
 export const useConformidades = () => {
   const [conformidades, setConformidades] = useState<Conformidad[]>([]);
@@ -114,7 +116,6 @@ export const useConformidad = (id?: string) => {
 
   const uploadDocs = async (conformidadId: string, files: File[], keys: string[]) => {
     try {
-      setIsLoading(true);
       const result = await uploadDocuments(conformidadId, { files, keys });
       setError(null);
       return result;
@@ -122,8 +123,19 @@ export const useConformidad = (id?: string) => {
       setError(err as Error);
       console.error('Error uploading documents:', err);
       throw err;
-    } finally {
-      setIsLoading(false);
+    }
+  };
+
+  const downloadDoc = async (conformidadId: string, documentId: string, fileName: string) => {
+    try {
+      toast.info('Descargando documento...');
+      await downloadDocumentWithName(conformidadId, documentId, fileName);
+      toast.success('Documento descargado exitosamente');
+    } catch (err) {
+      setError(err as Error);
+      console.error('Error downloading document:', err);
+      toast.error('Error al descargar el documento');
+      throw err;
     }
   };
 
@@ -135,6 +147,7 @@ export const useConformidad = (id?: string) => {
     update,
     remove,
     uploadDocs,
+    downloadDoc,
     refetch: id ? () => fetchConformidad(id) : undefined,
   };
 };

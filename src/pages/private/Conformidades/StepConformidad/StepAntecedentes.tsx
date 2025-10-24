@@ -5,15 +5,12 @@ import type { StepProps } from '@/types/conformidad.types';
 export default function StepAntecedentes({
   formData,
   errors,
+  uploadedDocuments,
+  conformidadId,
   onInputChange,
-  onFileUpload
+  onFileUpload,
+  onDownloadDocument
 }: StepProps) {
-
-  const handleFileChange = async (files: File[], fieldName: keyof typeof formData) => {
-    const uploadPromises = files.map(file => onFileUpload(file));
-    const uploadedFiles = await Promise.all(uploadPromises);
-    onInputChange(fieldName, uploadedFiles);
-  };
 
   // Solo mostrar para modalidades con variaciones o casco habitable
   if (formData.modalidad === 'sin_variaciones') {
@@ -89,9 +86,16 @@ export default function StepAntecedentes({
                 Vincular Expedientes Anteriores (Actas, Dictámenes)
               </label>
               <FileUpload
-                onChange={(files) => handleFileChange(files, 'expedientes_anteriores')}
+                placeholder="Subir Expedientes Anteriores"
+                value={formData.expedientes_anteriores || []}
+                onChange={(files) => onInputChange('expedientes_anteriores', files)}
                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                multiple={true}
+                multiple
+                onUpload={onFileUpload}
+                documentKey="antecedentes_cv.expedientes_anteriores"
+                anteproyectoId={conformidadId}
+                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
               <p className="mt-2 text-sm text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
                 Adjunte documentos de expedientes anteriores relacionados

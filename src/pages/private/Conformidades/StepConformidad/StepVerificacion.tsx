@@ -5,7 +5,7 @@ export default function StepVerificacion({
   formData,
   errors,
   onInputChange
-}: StepProps) {
+}: Omit<StepProps, 'uploadedDocuments' | 'conformidadId' | 'onFileUpload' | 'onDownloadDocument'>) {
 
   return (
     <div className="space-y-6">

@@ -4,15 +4,12 @@ import type { StepProps } from '@/types/conformidad.types';
 export default function StepDocumentosExpediente({
   formData,
   errors,
+  uploadedDocuments,
+  conformidadId,
   onInputChange,
-  onFileUpload
+  onFileUpload,
+  onDownloadDocument
 }: StepProps) {
-
-  const handleFileChange = async (files: File[], fieldName: keyof typeof formData) => {
-    const uploadPromises = files.map(file => onFileUpload(file));
-    const uploadedFiles = await Promise.all(uploadPromises);
-    onInputChange(fieldName, uploadedFiles);
-  };
 
   // Solo mostrar para modalidades con variaciones o casco habitable
   if (formData.modalidad === 'sin_variaciones') {
@@ -55,9 +52,16 @@ export default function StepDocumentosExpediente({
             FUE de Conformidad <span className="text-red-500">*</span>
           </label>
           <FileUpload
-            onChange={(files) => handleFileChange(files, 'fue_conformidad')}
+            placeholder="Subir FUE de Conformidad"
+            value={formData.fue_conformidad || []}
+            onChange={(files) => onInputChange('fue_conformidad', files)}
             accept=".pdf,.doc,.docx"
-            multiple={false}
+            multiple
+            onUpload={onFileUpload}
+            documentKey="documentos_expediente.fue_conformidad"
+            anteproyectoId={conformidadId}
+            uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+            onDownload={onDownloadDocument}
           />
           {errors?.fue_conformidad && (
             <p className="mt-2 text-sm text-red-600" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -72,9 +76,16 @@ export default function StepDocumentosExpediente({
             Planos de Conformidad <span className="text-red-500">*</span>
           </label>
           <FileUpload
-            onChange={(files) => handleFileChange(files, 'planos_conformidad')}
+            placeholder="Subir Planos de Conformidad"
+            value={formData.planos_conformidad || []}
+            onChange={(files) => onInputChange('planos_conformidad', files)}
             accept=".pdf,.dwg,.jpg,.jpeg,.png"
-            multiple={true}
+            multiple
+            onUpload={onFileUpload}
+            documentKey="documentos_expediente.planos_conformidad"
+            anteproyectoId={conformidadId}
+            uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+            onDownload={onDownloadDocument}
           />
           {errors?.planos_conformidad && (
             <p className="mt-2 text-sm text-red-600" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -89,9 +100,16 @@ export default function StepDocumentosExpediente({
             Memoria Descriptiva
           </label>
           <FileUpload
-            onChange={(files) => handleFileChange(files, 'memoria_descriptiva')}
+            placeholder="Subir Memoria Descriptiva"
+            value={formData.memoria_descriptiva || []}
+            onChange={(files) => onInputChange('memoria_descriptiva', files)}
             accept=".pdf,.doc,.docx"
-            multiple={false}
+            multiple
+            onUpload={onFileUpload}
+            documentKey="documentos_expediente.memoria_descriptiva"
+            anteproyectoId={conformidadId}
+            uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+            onDownload={onDownloadDocument}
           />
         </div>
 
@@ -101,9 +119,16 @@ export default function StepDocumentosExpediente({
             Cuaderno de Obra
           </label>
           <FileUpload
-            onChange={(files) => handleFileChange(files, 'cuaderno_obra')}
+            placeholder="Subir Cuaderno de Obra"
+            value={formData.cuaderno_obra || []}
+            onChange={(files) => onInputChange('cuaderno_obra', files)}
             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-            multiple={false}
+            multiple
+            onUpload={onFileUpload}
+            documentKey="documentos_expediente.cuaderno_obra"
+            anteproyectoId={conformidadId}
+            uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+            onDownload={onDownloadDocument}
           />
         </div>
 
@@ -113,9 +138,16 @@ export default function StepDocumentosExpediente({
             Protocolos
           </label>
           <FileUpload
-            onChange={(files) => handleFileChange(files, 'protocolos')}
+            placeholder="Subir Protocolos"
+            value={formData.protocolos || []}
+            onChange={(files) => onInputChange('protocolos', files)}
             accept=".pdf,.doc,.docx,.xls,.xlsx"
-            multiple={true}
+            multiple
+            onUpload={onFileUpload}
+            documentKey="documentos_expediente.protocolos"
+            anteproyectoId={conformidadId}
+            uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+            onDownload={onDownloadDocument}
           />
         </div>
 
@@ -125,9 +157,16 @@ export default function StepDocumentosExpediente({
             Declaraciones Juradas
           </label>
           <FileUpload
-            onChange={(files) => handleFileChange(files, 'declaraciones_juradas')}
+            placeholder="Subir Declaraciones Juradas"
+            value={formData.declaraciones_juradas || []}
+            onChange={(files) => onInputChange('declaraciones_juradas', files)}
             accept=".pdf,.doc,.docx"
-            multiple={true}
+            multiple
+            onUpload={onFileUpload}
+            documentKey="documentos_expediente.declaraciones_juradas"
+            anteproyectoId={conformidadId}
+            uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+            onDownload={onDownloadDocument}
           />
         </div>
       </div>
@@ -138,9 +177,16 @@ export default function StepDocumentosExpediente({
           Sustentos Técnicos, Legales, Fichas, Fotos y otros
         </label>
         <FileUpload
-          onChange={(files) => handleFileChange(files, 'sustentos_tecnicos')}
+          placeholder="Subir Sustentos Técnicos"
+          value={formData.sustentos_tecnicos || []}
+          onChange={(files) => onInputChange('sustentos_tecnicos', files)}
           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx,.dwg"
-          multiple={true}
+          multiple
+          onUpload={onFileUpload}
+          documentKey="documentos_expediente.sustentos_tecnicos"
+          anteproyectoId={conformidadId}
+          uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+          onDownload={onDownloadDocument}
         />
         <p className="mt-2 text-sm text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
           Cargar todos los documentos de sustento adicionales necesarios para el expediente

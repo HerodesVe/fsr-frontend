@@ -1,35 +1,17 @@
 import { Switch } from '@/components/ui';
 import { FileUpload } from '@/components/ui';
 import type { StepProps } from '@/types/conformidad.types';
-import { UploadedFilesList } from '../components';
 
 export default function StepDocumentosIniciales({
   formData,
   errors,
+  uploadedDocuments,
+  conformidadId,
   onInputChange,
-  onFileUpload
+  onFileUpload,
+  onDownloadDocument
 }: StepProps) {
 
-  const handleFileChange = async (files: File[], fieldName: keyof typeof formData) => {
-    // Obtener los archivos actuales del campo
-    const currentFiles = (formData[fieldName] as any[]) || [];
-    
-    // Subir los nuevos archivos
-    const uploadPromises = files.map(file => onFileUpload(file));
-    const uploadedFiles = await Promise.all(uploadPromises);
-    
-    // Combinar los archivos actuales con los nuevos
-    const allFiles = [...currentFiles, ...uploadedFiles];
-    
-    // Actualizar el formData con todos los archivos
-    onInputChange(fieldName, allFiles);
-  };
-
-  const handleRemoveFile = (fieldName: keyof typeof formData, fileId: string) => {
-    const currentFiles = (formData[fieldName] as any[]) || [];
-    const updatedFiles = currentFiles.filter(file => file.id !== fileId);
-    onInputChange(fieldName, updatedFiles);
-  };
 
   const renderSinVariaciones = () => (
     <div className="space-y-6">
@@ -44,13 +26,16 @@ export default function StepDocumentosIniciales({
           Licencia de Obra <span className="text-red-500">*</span>
         </label>
         <FileUpload
-          onChange={(files) => handleFileChange(files, 'licencia_obra_sv')}
+          placeholder="Subir Licencia de Obra"
+          value={formData.licencia_obra_sv || []}
+          onChange={(files) => onInputChange('licencia_obra_sv', files)}
           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-          multiple={false}
-        />
-        <UploadedFilesList
-          documents={formData.licencia_obra_sv || []}
-          onRemove={(fileId) => handleRemoveFile('licencia_obra_sv', fileId)}
+          multiple
+          onUpload={onFileUpload}
+          documentKey="documentos_iniciales_sv.licencia_obra_sv"
+          anteproyectoId={conformidadId}
+          uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+          onDownload={onDownloadDocument}
         />
         {errors?.licencia_obra_sv && (
           <p className="mt-2 text-sm text-red-600" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -64,13 +49,16 @@ export default function StepDocumentosIniciales({
           Planos Aprobados (3 juegos) <span className="text-red-500">*</span>
         </label>
         <FileUpload
-          onChange={(files) => handleFileChange(files, 'planos_aprobados_sv')}
+          placeholder="Subir Planos Aprobados"
+          value={formData.planos_aprobados_sv || []}
+          onChange={(files) => onInputChange('planos_aprobados_sv', files)}
           accept=".pdf,.dwg,.jpg,.jpeg,.png"
-          multiple={true}
-        />
-        <UploadedFilesList
-          documents={formData.planos_aprobados_sv || []}
-          onRemove={(fileId) => handleRemoveFile('planos_aprobados_sv', fileId)}
+          multiple
+          onUpload={onFileUpload}
+          documentKey="documentos_iniciales_sv.planos_aprobados_sv"
+          anteproyectoId={conformidadId}
+          uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+          onDownload={onDownloadDocument}
         />
         {errors?.planos_aprobados_sv && (
           <p className="mt-2 text-sm text-red-600" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -127,13 +115,16 @@ export default function StepDocumentosIniciales({
               Licencia de Obra <span className="text-red-500">*</span>
             </label>
             <FileUpload
-              onChange={(files) => handleFileChange(files, 'licencia_obra_cv')}
+              placeholder="Subir Licencia de Obra"
+              value={formData.licencia_obra_cv || []}
+              onChange={(files) => onInputChange('licencia_obra_cv', files)}
               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-              multiple={false}
-            />
-            <UploadedFilesList
-              documents={formData.licencia_obra_cv || []}
-              onRemove={(fileId) => handleRemoveFile('licencia_obra_cv', fileId)}
+              multiple
+              onUpload={onFileUpload}
+              documentKey="documentos_iniciales_cv.licencia_obra_cv"
+              anteproyectoId={conformidadId}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
             {errors?.licencia_obra_cv && (
               <p className="mt-2 text-sm text-red-600" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -147,13 +138,16 @@ export default function StepDocumentosIniciales({
               Planos Aprobados de Licencia <span className="text-red-500">*</span>
             </label>
             <FileUpload
-              onChange={(files) => handleFileChange(files, 'planos_aprobados_licencia_cv')}
+              placeholder="Subir Planos Aprobados de Licencia"
+              value={formData.planos_aprobados_licencia_cv || []}
+              onChange={(files) => onInputChange('planos_aprobados_licencia_cv', files)}
               accept=".pdf,.dwg,.jpg,.jpeg,.png"
-              multiple={true}
-            />
-            <UploadedFilesList
-              documents={formData.planos_aprobados_licencia_cv || []}
-              onRemove={(fileId) => handleRemoveFile('planos_aprobados_licencia_cv', fileId)}
+              multiple
+              onUpload={onFileUpload}
+              documentKey="documentos_iniciales_cv.planos_aprobados_licencia_cv"
+              anteproyectoId={conformidadId}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
             {errors?.planos_aprobados_licencia_cv && (
               <p className="mt-2 text-sm text-red-600" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -167,13 +161,16 @@ export default function StepDocumentosIniciales({
               Planos Digitales (CAD) <span className="text-red-500">*</span>
             </label>
             <FileUpload
-              onChange={(files) => handleFileChange(files, 'planos_digitales_cad_cv')}
+              placeholder="Subir Planos Digitales (CAD)"
+              value={formData.planos_digitales_cad_cv || []}
+              onChange={(files) => onInputChange('planos_digitales_cad_cv', files)}
               accept=".dwg,.dxf,.rvt"
-              multiple={true}
-            />
-            <UploadedFilesList
-              documents={formData.planos_digitales_cad_cv || []}
-              onRemove={(fileId) => handleRemoveFile('planos_digitales_cad_cv', fileId)}
+              multiple
+              onUpload={onFileUpload}
+              documentKey="documentos_iniciales_cv.planos_digitales_cad_cv"
+              anteproyectoId={conformidadId}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
             {errors?.planos_digitales_cad_cv && (
               <p className="mt-2 text-sm text-red-600" style={{ fontFamily: 'Inter, sans-serif' }}>

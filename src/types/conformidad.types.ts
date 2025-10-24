@@ -108,13 +108,18 @@ export interface ConformidadFormData {
 export interface Conformidad {
   id: string;
   instance_code: string;
+  client_id: string;
+  service_id: string;
+  user_id: string;
   administrado: string;
   responsable: string;
   fecha_creacion: string;
   fecha_culminacion: string;
   status: string;
+  progress_percentage?: number;
   created_at: string;
   scheduled_completion_date: string | null;
+  next_step?: string;
   data?: {
     service_type?: string;
     nombre_proyecto?: string;
@@ -136,6 +141,11 @@ export interface Conformidad {
     documentos_expediente: StepStatus;
     verificacion: StepStatus;
   };
+  uploaded_documents?: Array<{
+    key: string;
+    name: string;
+    file_id: string;
+  }>;
 }
 
 export interface UploadedDocument {
@@ -144,6 +154,7 @@ export interface UploadedDocument {
   url: string;
   size: number;
   type: string;
+  key?: string;
 }
 
 export interface FormStep {
@@ -167,7 +178,8 @@ export interface StepProps {
   conformidadId: string;
   uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof ConformidadFormData, value: any) => void;
-  onFileUpload: (file: File) => Promise<UploadedDocument>;
+  onFileUpload: (file: File, documentKey?: string) => Promise<UploadedDocument>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 export interface StepAdministradoProps extends Omit<StepProps, 'conformidadId' | 'uploadedDocuments' | 'onFileUpload'> {

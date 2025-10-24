@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LuArrowLeft, LuArrowRight, LuX, LuInfo } from 'react-icons/lu';
 import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
 import { useConformidad } from '@/hooks/useConformidades';
+import toast from 'react-hot-toast';
 
 import type { 
   ConformidadFormData, 
@@ -22,8 +23,8 @@ import StepVerificacion from './StepConformidad/StepVerificacion';
 import { ResumenConformidad } from './components';
 
 const stepLabels = [
-  'Administrado',
   'Modalidad',
+  'Administrado',
   'Documentos Iniciales',
   'Antecedentes',
   'Documentos Expediente',
@@ -36,7 +37,7 @@ export default function CreateEditConformidad() {
   const navigate = useNavigate();
   const { setHeader } = useHeaderStore();
   const { clients, isLoading: clientsLoading } = useClients();
-  const { conformidad, isLoading: conformidadLoading, createNew, update, uploadDocs } = useConformidad(id);
+  const { conformidad, isLoading: conformidadLoading, createNew, update, uploadDocs, downloadDoc } = useConformidad(id);
   
   const [currentStep, setCurrentStep] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
@@ -47,8 +48,8 @@ export default function CreateEditConformidad() {
   
   // Estado para manejar los pasos del formulario
   const [steps, setSteps] = useState<FormStep[]>([
-    { id: 1, title: 'Administrado', completed: false },
-    { id: 2, title: 'Modalidad', completed: false },
+    { id: 1, title: 'Modalidad', completed: false },
+    { id: 2, title: 'Administrado', completed: false },
     { id: 3, title: 'Documentos Iniciales', completed: false },
     { id: 4, title: 'Antecedentes', completed: false },
     { id: 5, title: 'Documentos Expediente', completed: false },
@@ -103,15 +104,67 @@ export default function CreateEditConformidad() {
 
   // Cargar datos de la conformidad cuando se edita
   useEffect(() => {
-    if (conformidad && isEdit) {
+    if (conformidad && isEdit && clients && clients.length > 0) {
+      // Buscar el cliente seleccionado
+      const selectedClient = clients.find(client => client.id === conformidad.client_id) || null;
+
       setFormData(prev => ({
         ...prev,
+        selectedClient,
         nombre_proyecto: conformidad.data?.nombre_proyecto || '',
-        modalidad: conformidad.data?.modalidad || '',
-        // TODO: Cargar más campos según la estructura del backend
+        modalidad: conformidad.data?.modalidad || 'sin_variaciones',
+        
+        // Sin Variaciones - Verificación
+        verificacion_campo_sv: conformidad.data?.verificacion_sv?.verificacion_campo_sv || false,
+        fecha_verificacion_sv: conformidad.data?.verificacion_sv?.fecha_verificacion_sv || '',
+        
+        // Con Variaciones - Información Inicial
+        servicios_previos_fsr: conformidad.data?.informacion_inicial_cv?.servicios_previos_fsr || false,
+        
+        // Con Variaciones - Antecedentes
+        primer_expediente: conformidad.data?.antecedentes_cv?.primer_expediente ?? true,
+        descripcion_antecedentes: conformidad.data?.antecedentes_cv?.descripcion_antecedentes || '',
+        
+        // Entrega Final
+        fecha_entrega_administrado: conformidad.data?.entrega_final?.fecha_entrega_administrado || '',
+        receptor_administrado: conformidad.data?.entrega_final?.receptor_administrado || '',
+        observaciones_entrega: conformidad.data?.entrega_final?.observaciones_entrega || '',
       }));
+
+      // Cargar documentos subidos
+      const allDocs: UploadedDocument[] = [];
+      
+      // 1. Desde uploaded_documents
+      if (conformidad.uploaded_documents && conformidad.uploaded_documents.length > 0) {
+        const docs = conformidad.uploaded_documents.map((doc: any) => ({
+          id: doc.file_id,
+          name: doc.name,
+          url: '',
+          size: 0,
+          type: 'application/pdf',
+          key: doc.key,
+        }));
+        allDocs.push(...docs);
+      }
+
+      // 2. Desde data.entrega_final
+      if (conformidad.data?.entrega_final?.cargo_entrega_administrado?.file_reference) {
+        const cargoDoc = conformidad.data.entrega_final.cargo_entrega_administrado;
+        allDocs.push({
+          id: cargoDoc.file_reference,
+          name: cargoDoc.name || 'Cargo Entrega Administrado',
+          url: '',
+          size: 0,
+          type: 'application/pdf',
+          key: 'entrega_final.cargo_entrega_administrado',
+        });
+      }
+
+      if (allDocs.length > 0) {
+        setUploadedDocuments(allDocs);
+      }
     }
-  }, [conformidad, isEdit]);
+  }, [conformidad, isEdit, clients]);
 
   useEffect(() => {
     setHeader(
@@ -124,66 +177,99 @@ export default function CreateEditConformidad() {
     };
   }, [setHeader, isEdit]);
 
-  const handleInputChange = (field: keyof ConformidadFormData, value: any) => {
+  const handleInputChange = useCallback((field: keyof ConformidadFormData, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
     
     // Limpiar error del campo
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
-    }
+    setErrors(prev => {
+      if (prev[field]) {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      }
+      return prev;
+    });
 
     // Ocultar mensaje de validación general si está visible
-    if (showValidationError) {
-      setShowValidationError(false);
-    }
-  };
+    setShowValidationError(false);
+  }, []);
 
-  const handleFileUpload = async (file: File, documentKey?: string): Promise<UploadedDocument> => {
+  const handleFileUpload = useCallback(async (file: File, documentKey?: string): Promise<UploadedDocument> => {
+    const tempId = Date.now().toString();
+    
     // Crear objeto local inmediatamente
     const uploadedDoc: UploadedDocument = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: tempId,
       name: file.name,
       url: URL.createObjectURL(file),
       size: file.size,
       type: file.type,
+      key: documentKey,
     };
     
-    // Agregar a la lista global de documentos subidos
     setUploadedDocuments(prev => [...prev, uploadedDoc]);
 
     // Si ya tenemos un ID de conformidad, subir el archivo inmediatamente
     if (conformidadId && documentKey) {
       try {
-        await uploadDocs(conformidadId, [file], [documentKey]);
+        const response = await uploadDocs(conformidadId, [file], [documentKey]);
+        
+        // Actualizar con file_id real del backend
+        if (response && response.uploaded_documents) {
+          const uploadedFromBackend = response.uploaded_documents.find(
+            (doc: any) => doc.key === documentKey && doc.name === file.name
+          );
+          
+          if (uploadedFromBackend) {
+            setUploadedDocuments(prev => 
+              prev.map(doc => 
+                doc.id === tempId 
+                  ? { ...doc, id: uploadedFromBackend.file_id }
+                  : doc
+              )
+            );
+          }
+        }
       } catch (error) {
         console.error('Error uploading file:', error);
+        setUploadedDocuments(prev => prev.filter(doc => doc.id !== tempId));
       }
     }
     
     return uploadedDoc;
-  };
+  }, [conformidadId, uploadDocs]);
+
+  const handleDownloadDocument = useCallback(async (documentId: string, fileName: string) => {
+    if (!conformidadId) {
+      toast.error('No se puede descargar el documento en este momento');
+      return;
+    }
+    
+    try {
+      await downloadDoc(conformidadId, documentId, fileName);
+    } catch (error) {
+      console.error('Error downloading document:', error);
+    }
+  }, [conformidadId, downloadDoc]);
 
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
 
     switch (step) {
-      case 0: // Administrado
+      case 0: // Modalidad
+        if (!formData.modalidad) {
+          newErrors.modalidad = 'Debe seleccionar una modalidad';
+        }
+        break;
+      case 1: // Administrado
         if (!formData.selectedClient) {
           newErrors.selectedClient = 'Debe seleccionar un administrado';
         }
         if (!formData.nombre_proyecto || formData.nombre_proyecto.trim() === '') {
           newErrors.nombre_proyecto = 'El nombre del proyecto es requerido';
-        }
-        break;
-      case 1: // Modalidad
-        if (!formData.modalidad) {
-          newErrors.modalidad = 'Debe seleccionar una modalidad';
         }
         break;
       case 2: // Documentos Iniciales
@@ -252,8 +338,8 @@ export default function CreateEditConformidad() {
     // Ocultar mensaje de error si está visible
     setShowValidationError(false);
 
-    // Si es el primer paso y no hay conformidadId, crear la conformidad
-    if (currentStep === 0 && !conformidadId) {
+    // Si es el paso de Administrado (paso 1) y no hay conformidadId, crear la conformidad
+    if (currentStep === 1 && !conformidadId) {
       try {
         setIsSaving(true);
         const requestData = buildCreateRequest();
@@ -267,11 +353,13 @@ export default function CreateEditConformidad() {
         setIsSaving(false);
       }
     } else if (conformidadId) {
-      // Si ya existe, actualizar
+      // Si ya existe, actualizar solo según el paso actual
       try {
         setIsSaving(true);
-        const updateData = buildUpdateRequest();
-        await update(conformidadId, updateData);
+        const updateData = buildUpdateRequestForCurrentStep();
+        if (updateData) {
+          await update(conformidadId, updateData);
+        }
       } catch (error) {
         console.error('Error updating conformidad:', error);
       } finally {
@@ -291,13 +379,145 @@ export default function CreateEditConformidad() {
     }
   };
 
+  // Helper global para convertir fechas al formato ISO (YYYY-MM-DD)
+  const formatDateForBackend = (dateString: string): string | undefined => {
+    if (!dateString || dateString.trim() === '') return undefined;
+    
+    // Si ya está en formato ISO (YYYY-MM-DD), devolverlo tal cual
+    if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+      return dateString.split('T')[0];
+    }
+    
+    // Si está en formato DD/MM/YYYY, convertir a YYYY-MM-DD
+    if (/^\d{2}\/\d{2}\/\d{4}/.test(dateString)) {
+      const [day, month, year] = dateString.split('/');
+      return `${year}-${month}-${day}`;
+    }
+    
+    // Si puede ser parseado como fecha, convertir a ISO
+    if (!isNaN(Date.parse(dateString))) {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0];
+    }
+    
+    return undefined;
+  };
+
+  // Función helper para crear DocumentInfo
+  const createDocumentInfo = (name: string, is_mandatory: boolean): DocumentInfo => {
+    return {
+      name,
+      is_mandatory,
+      status: 'Pendiente',
+      file_reference: '',
+      observation: '',
+    };
+  };
+
+  // Función para construir el request de actualización según el paso actual
+  const buildUpdateRequestForCurrentStep = (): any | null => {
+    switch (currentStep) {
+      case 0: // Paso 1: Modalidad
+        // ⚠️ La modalidad se establece en el estado local solamente
+        // NO se hace PATCH aquí porque el POST se hará en el siguiente paso (Administrado)
+        return null;
+
+      case 1: // Paso 2: Administrado
+        // Solo actualizar datos básicos si ya existe la conformidad
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            service_type: 'conformidad_obra',
+            nombre_proyecto: formData.nombre_proyecto,
+          }
+        };
+
+      case 2: // Paso 3: Documentos Iniciales
+        // ⚠️ NO enviar estructura de documentos, los documentos se suben automáticamente con handleFileUpload
+        // Solo enviar campos de formulario (inputs del usuario)
+        if (formData.modalidad === 'con_variaciones' || formData.modalidad === 'casco_habitable') {
+          return {
+            client_id: formData.selectedClient?.id || '',
+            data: {
+              informacion_inicial_cv: {
+                servicios_previos_fsr: formData.servicios_previos_fsr,
+              }
+            }
+          };
+        }
+        // Sin Variaciones no tiene campos adicionales en este paso (solo documentos que ya se suben automáticamente)
+        return null;
+
+      case 3: // Paso 4: Antecedentes
+        // ⚠️ NO enviar estructura de documentos, solo campos de texto/formulario
+        if (formData.modalidad === 'con_variaciones' || formData.modalidad === 'casco_habitable') {
+          return {
+            client_id: formData.selectedClient?.id || '',
+            data: {
+              antecedentes_cv: {
+                primer_expediente: formData.primer_expediente,
+                descripcion_antecedentes: formData.descripcion_antecedentes,
+              }
+            }
+          };
+        }
+        // Sin Variaciones no tiene este paso
+        return null;
+
+      case 4: // Paso 5: Documentos Expediente
+        // ⚠️ NO enviar estructura de documentos, solo se suben con handleFileUpload
+        // Este paso solo maneja documentos, no hay campos de formulario adicionales
+        return null;
+
+      case 5: // Paso 6: Verificación
+        // Solo para Sin Variaciones - enviar campos de verificación
+        if (formData.modalidad === 'sin_variaciones') {
+          const verificacionData: any = {
+            verificacion_campo_sv: formData.verificacion_campo_sv,
+          };
+          
+          const fechaVerificacion = formatDateForBackend(formData.fecha_verificacion_sv);
+          if (fechaVerificacion) {
+            verificacionData.fecha_verificacion_sv = fechaVerificacion;
+          }
+          
+          return {
+            client_id: formData.selectedClient?.id || '',
+            data: {
+              verificacion_sv: verificacionData
+            }
+          };
+        }
+        // Con Variaciones/Casco Habitable no tiene este paso de verificación
+        return null;
+
+      case 6: // Paso 7: Entrega al Administrado
+        // ⚠️ NO enviar estructura de documentos, solo campos de texto/formulario
+        // Los documentos (cargo_entrega_administrado) se suben con handleFileUpload
+        const entregaData: any = {
+          receptor_administrado: formData.receptor_administrado,
+          observaciones_entrega: formData.observaciones_entrega,
+        };
+
+        const fechaEntrega = formatDateForBackend(formData.fecha_entrega_administrado);
+        if (fechaEntrega) {
+          entregaData.fecha_entrega_administrado = fechaEntrega;
+        }
+
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            entrega_final: entregaData
+          }
+        };
+
+      default:
+        return null;
+    }
+  };
+
   // Función para construir el request de creación
   const buildCreateRequest = (): CreateConformidadRequest => {
-    // Helper para manejar fechas: solo incluye si tiene valor, sino omite el campo
-    const getDateOrUndefined = (dateString: string) => {
-      return dateString && dateString.trim() !== '' ? dateString : undefined;
-    };
-
     const baseData: any = {
       client_id: formData.selectedClient?.id || '',
       data: {
@@ -312,8 +532,8 @@ export default function CreateEditConformidad() {
       },
     };
 
-    // Solo agregar fecha de entrega si tiene valor
-    const fechaEntrega = getDateOrUndefined(formData.fecha_entrega_administrado);
+    // Solo agregar fecha de entrega si tiene valor (formato ISO)
+    const fechaEntrega = formatDateForBackend(formData.fecha_entrega_administrado);
     if (fechaEntrega) {
       baseData.data.entrega_final.fecha_entrega_administrado = fechaEntrega;
     }
@@ -328,8 +548,8 @@ export default function CreateEditConformidad() {
         verificacion_campo_sv: formData.verificacion_campo_sv,
       };
       
-      // Solo agregar fecha de verificación si tiene valor
-      const fechaVerificacion = getDateOrUndefined(formData.fecha_verificacion_sv);
+      // Solo agregar fecha de verificación si tiene valor (formato ISO)
+      const fechaVerificacion = formatDateForBackend(formData.fecha_verificacion_sv);
       if (fechaVerificacion) {
         baseData.data.verificacion_sv.fecha_verificacion_sv = fechaVerificacion;
       }
@@ -364,17 +584,6 @@ export default function CreateEditConformidad() {
   // Función para construir el request de actualización
   const buildUpdateRequest = () => {
     return buildCreateRequest();
-  };
-
-  // Función helper para crear DocumentInfo
-  const createDocumentInfo = (name: string, is_mandatory: boolean): DocumentInfo => {
-    return {
-      name,
-      is_mandatory,
-      status: 'Pendiente',
-      file_reference: '',
-      observation: '',
-    };
   };
 
   const handlePrevious = () => {
@@ -413,22 +622,22 @@ export default function CreateEditConformidad() {
     switch (currentStep) {
       case 0:
         return (
+          <StepModalidad
+            formData={formData}
+            errors={errors}
+            onInputChange={handleInputChange}
+          />
+        );
+      case 1:
+        return (
           <StepAdministrado
             formData={formData}
             clients={clients || []}
             errors={errors}
             onInputChange={(field: string, value: any) => handleInputChange(field as keyof ConformidadFormData, value)}
-            title="Paso 1: Seleccionar Administrado"
+            title="Paso 2: Seleccionar Administrado"
             description="Seleccione el administrado para este trámite de conformidad de obra"
             showProjectName={true}
-          />
-        );
-      case 1:
-        return (
-          <StepModalidad
-            formData={formData}
-            errors={errors}
-            onInputChange={handleInputChange}
           />
         );
       case 2:
@@ -440,6 +649,7 @@ export default function CreateEditConformidad() {
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
       case 3:
@@ -451,6 +661,7 @@ export default function CreateEditConformidad() {
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
       case 4:
@@ -462,6 +673,7 @@ export default function CreateEditConformidad() {
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
       case 5:
@@ -469,10 +681,7 @@ export default function CreateEditConformidad() {
           <StepVerificacion
             formData={formData}
             errors={errors}
-            conformidadId={conformidadId || 'new'}
-            uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
-            onFileUpload={handleFileUpload}
           />
         );
       case 6:
@@ -484,6 +693,7 @@ export default function CreateEditConformidad() {
             errors={errors}
             onInputChange={(field: string, value: any) => handleInputChange(field as keyof ConformidadFormData, value)}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
             title="Entrega de Conformidad de Obra"
             description="Complete la información de la entrega final de la conformidad de obra al administrado"
           />
