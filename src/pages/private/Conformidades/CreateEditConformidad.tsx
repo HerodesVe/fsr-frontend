@@ -60,7 +60,7 @@ export default function CreateEditConformidad() {
     // Información General
     selectedClient: null,
     nombre_proyecto: '',
-    modalidad: '',
+    modalidad: 'sin_variaciones', // ✅ Valor por defecto
 
     // Sin Variaciones - Documentos del Cliente
     licencia_obra_sv: [],

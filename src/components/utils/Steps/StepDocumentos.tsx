@@ -8,6 +8,7 @@ interface StepDocumentosProps {
   uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof AnteproyectoFormData, value: any) => void;
   onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 export default function StepDocumentos({
@@ -16,6 +17,7 @@ export default function StepDocumentos({
   uploadedDocuments,
   onInputChange,
   onFileUpload,
+  onDownloadDocument,
 }: StepDocumentosProps) {
   return (
     <div className="space-y-8">
@@ -50,6 +52,7 @@ export default function StepDocumentos({
               documentKey="partida_registral"
               anteproyectoId={anteproyectoId}
               uploadedFiles={uploadedDocuments}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -74,6 +77,7 @@ export default function StepDocumentos({
               documentKey="plano_arquitectura_adm"
               anteproyectoId={anteproyectoId}
               uploadedFiles={uploadedDocuments}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -98,6 +102,7 @@ export default function StepDocumentos({
               documentKey="pago_derecho_revision_factura"
               anteproyectoId={anteproyectoId}
               uploadedFiles={uploadedDocuments}
+              onDownload={onDownloadDocument}
             />
           </div>
         </div>
@@ -134,6 +139,7 @@ export default function StepDocumentos({
               documentKey="memoria_descriptiva_arquitectura"
               anteproyectoId={anteproyectoId}
               uploadedFiles={uploadedDocuments}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -158,6 +164,7 @@ export default function StepDocumentos({
               documentKey="memoria_descriptiva_seguridad"
               anteproyectoId={anteproyectoId}
               uploadedFiles={uploadedDocuments}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -182,6 +189,7 @@ export default function StepDocumentos({
               documentKey="formulario_unico_edificacion"
               anteproyectoId={anteproyectoId}
               uploadedFiles={uploadedDocuments}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -203,6 +211,7 @@ export default function StepDocumentos({
               documentKey="presupuesto"
               anteproyectoId={anteproyectoId}
               uploadedFiles={uploadedDocuments}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -227,6 +236,7 @@ export default function StepDocumentos({
               documentKey="plano_seguridad"
               anteproyectoId={anteproyectoId}
               uploadedFiles={uploadedDocuments}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -251,6 +261,7 @@ export default function StepDocumentos({
               documentKey="pago_derecho_revision_liquidacion"
               anteproyectoId={anteproyectoId}
               uploadedFiles={uploadedDocuments}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -275,6 +286,7 @@ export default function StepDocumentos({
               documentKey="plano_arquitectura_fsr"
               anteproyectoId={anteproyectoId}
               uploadedFiles={uploadedDocuments}
+              onDownload={onDownloadDocument}
             />
           </div>
         </div>

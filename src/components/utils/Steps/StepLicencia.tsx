@@ -8,6 +8,7 @@ interface StepLicenciaProps {
   uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof AnteproyectoFormData, value: any) => void;
   onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 export default function StepLicencia({
@@ -17,6 +18,7 @@ export default function StepLicencia({
   uploadedDocuments,
   onInputChange,
   onFileUpload,
+  onDownloadDocument,
 }: StepLicenciaProps) {
   const modalidadOptions = [
     { value: 'A', label: 'Modalidad A' },
@@ -81,9 +83,10 @@ export default function StepLicencia({
             accept=".pdf,.doc,.docx"
             required
             onUpload={onFileUpload}
-            documentKey="archivo_normativo"
+            documentKey="licencias_normativas.archivo_normativo"
             anteproyectoId={anteproyectoId}
             uploadedFiles={uploadedDocuments}
+            onDownload={onDownloadDocument}
           />
         </div>
       </div>

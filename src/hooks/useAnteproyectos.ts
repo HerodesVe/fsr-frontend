@@ -7,7 +7,8 @@ import {
   updateAnteproyecto, 
   deleteAnteproyecto,
   uploadSingleDocument,
-  uploadDocuments 
+  uploadDocuments,
+  downloadDocumentWithName
 } from '@/services/anteproyectos.service';
 import toast from 'react-hot-toast';
 
@@ -120,6 +121,18 @@ export const useAnteproyectos = () => {
     },
   });
 
+  // Función para descargar documentos
+  const downloadDocument = async (anteproyectoId: string, documentId: string, fileName: string) => {
+    try {
+      await downloadDocumentWithName(anteproyectoId, documentId, fileName);
+      toast.success('Documento descargado exitosamente');
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || 'Error al descargar el documento';
+      toast.error(errorMessage);
+      throw err;
+    }
+  };
+
   return {
     anteproyectos,
     isLoading,
@@ -131,6 +144,7 @@ export const useAnteproyectos = () => {
     deleteMutation,
     uploadSingleDocumentMutation,
     uploadDocumentsMutation,
+    downloadDocument,
   };
 };
 

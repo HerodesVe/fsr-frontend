@@ -10,6 +10,7 @@ interface StepCargoProps {
   errors: Record<string, string>;
   onInputChange: (field: string, value: any) => void;
   onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
   title?: string;
   description?: string;
   cargoDocumentKey?: string;
@@ -22,6 +23,7 @@ export default function StepCargo({
   errors,
   onInputChange,
   onFileUpload,
+  onDownloadDocument,
   title = "Entrega al Administrado",
   description = "Complete la información de la entrega final del proyecto al administrado",
   cargoDocumentKey = "cargo_entrega_administrado"
@@ -101,10 +103,11 @@ export default function StepCargo({
               documentKey={cargoDocumentKey}
               anteproyectoId={projectId}
               uploadedFiles={uploadedDocuments.map(doc => ({ 
-                key: doc.id || doc.key, 
+                key: doc.key || doc.id, 
                 name: doc.name, 
                 file_id: doc.id || doc.file_id 
               }))}
+              onDownload={onDownloadDocument}
             />
             {errors.cargo_entrega_administrado && (
               <p className="text-sm text-red-600 mt-2" style={{ fontFamily: 'Inter, sans-serif' }}>

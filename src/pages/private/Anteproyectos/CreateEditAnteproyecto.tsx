@@ -17,7 +17,7 @@ export default function CreateEditAnteproyecto() {
   const isEditing = !!id;
   
   const { setHeader } = useHeaderStore();
-  const { createInitialMutation, updateMutation, uploadSingleDocumentMutation } = useAnteproyectos();
+  const { createInitialMutation, updateMutation, uploadSingleDocumentMutation, downloadDocument } = useAnteproyectos();
   const { data: anteproyectoData, isLoading: isLoadingAnteproyecto } = useAnteproyectoById(id || '');
   const { clients } = useClients();
 
@@ -154,7 +154,7 @@ export default function CreateEditAnteproyecto() {
     if (archivoNormativo?.name) {
       // Incluir el documento si tiene un name, incluso si file_reference está vacío
       uploadedDocs.push({
-        key: 'archivo_normativo',
+        key: 'licencias_normativas.archivo_normativo', // ✅ Key con notación de puntos
         name: archivoNormativo.name || 'Archivo Normativo',
         file_id: archivoNormativo.file_reference || 'pending', // Usar 'pending' si no hay file_reference
       });
@@ -355,6 +355,16 @@ export default function CreateEditAnteproyecto() {
     });
   };
 
+  const handleDownloadDocument = async (documentId: string, fileName: string) => {
+    if (anteproyectoId) {
+      try {
+        await downloadDocument(anteproyectoId, documentId, fileName);
+      } catch (error) {
+        console.error('Error downloading document:', error);
+      }
+    }
+  };
+
   // Función para determinar el paso actual basado en el estado de los pasos
   const determineCurrentStep = (stepStatus: StepStatus): number => {
     const stepMapping = {
@@ -426,6 +436,7 @@ export default function CreateEditAnteproyecto() {
             uploadedDocuments={getUploadedDocuments()}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
 
@@ -449,6 +460,7 @@ export default function CreateEditAnteproyecto() {
             uploadedDocuments={getUploadedDocuments()}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
 

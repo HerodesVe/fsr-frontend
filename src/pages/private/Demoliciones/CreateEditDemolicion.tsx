@@ -125,16 +125,74 @@ export default function CreateEditDemolicion() {
       }));
 
       // Cargar documentos subidos desde el backend
+      const allDocs: UploadedDocument[] = [];
+      
+      // 1. Cargar desde uploaded_documents (documentos con key)
       if (demolicion.uploaded_documents && demolicion.uploaded_documents.length > 0) {
-        const docs: UploadedDocument[] = demolicion.uploaded_documents.map((doc: any) => ({
+        const docs = demolicion.uploaded_documents.map((doc: any) => ({
           id: doc.file_id,
           name: doc.name,
-          url: '', // No necesitamos la URL porque solo descargaremos
+          url: '', 
           size: 0,
           type: 'application/pdf',
           key: doc.key,
         }));
-        setUploadedDocuments(docs);
+        allDocs.push(...docs);
+      }
+
+      // 2. Cargar documentos desde data.entrega_final
+      if (demolicion.data?.entrega_final?.cargo_entrega_final_administrado?.file_reference) {
+        const cargoDoc = demolicion.data.entrega_final.cargo_entrega_final_administrado;
+        allDocs.push({
+          id: cargoDoc.file_reference,
+          name: cargoDoc.name || 'Cargo de Entrega Final',
+          url: '',
+          size: 0,
+          type: 'application/pdf',
+          key: 'entrega_final.cargo_entrega_final_administrado',
+        });
+      }
+
+      // 3. Cargar documentos desde data.gestion_municipal
+      if (demolicion.data?.gestion_municipal) {
+        const gestionMunicipal = demolicion.data.gestion_municipal;
+        
+        if (gestionMunicipal.cargo_ingreso_municipalidad?.file_reference) {
+          allDocs.push({
+            id: gestionMunicipal.cargo_ingreso_municipalidad.file_reference,
+            name: gestionMunicipal.cargo_ingreso_municipalidad.name || 'Cargo Ingreso Municipalidad',
+            url: '',
+            size: 0,
+            type: 'application/pdf',
+            key: 'gestion_municipal.cargo_ingreso_municipalidad',
+          });
+        }
+
+        if (gestionMunicipal.respuesta_resolucion_municipal?.file_reference) {
+          allDocs.push({
+            id: gestionMunicipal.respuesta_resolucion_municipal.file_reference,
+            name: gestionMunicipal.respuesta_resolucion_municipal.name || 'Respuesta Resolución Municipal',
+            url: '',
+            size: 0,
+            type: 'application/pdf',
+            key: 'gestion_municipal.respuesta_resolucion_municipal',
+          });
+        }
+
+        if (gestionMunicipal.cargo_entrega_administrado?.file_reference) {
+          allDocs.push({
+            id: gestionMunicipal.cargo_entrega_administrado.file_reference,
+            name: gestionMunicipal.cargo_entrega_administrado.name || 'Cargo Entrega Administrado',
+            url: '',
+            size: 0,
+            type: 'application/pdf',
+            key: 'gestion_municipal.cargo_entrega_administrado',
+          });
+        }
+      }
+
+      if (allDocs.length > 0) {
+        setUploadedDocuments(allDocs);
       }
     }
   }, [demolicion, isEdit, clients]);
@@ -240,24 +298,38 @@ export default function CreateEditDemolicion() {
         }
         break;
       case 1: // Documentación
-        // Validar documentos obligatorios del administrado
-        if (!formData.partida_registral || formData.partida_registral.length === 0) {
+        // Debug: mostrar documentos subidos
+        console.log('📄 Documentos subidos:', uploadedDocuments.map(doc => ({ name: doc.name, key: doc.key })));
+        
+        // Validar documentos obligatorios del administrado usando uploadedDocuments
+        const hasPartidaRegistral = uploadedDocuments.some(doc => doc.key === 'documentacion_administrado.partida_registral');
+        if (!hasPartidaRegistral) {
           newErrors.partida_registral = 'La partida registral es requerida';
         }
-        if (!formData.fue || formData.fue.length === 0) {
+        
+        const hasFue = uploadedDocuments.some(doc => doc.key === 'documentacion_administrado.fue');
+        if (!hasFue) {
           newErrors.fue = 'El FUE es requerido';
         }
+        
         // Validar documentos obligatorios de FSR
-        if (!formData.memoria_descriptiva || formData.memoria_descriptiva.length === 0) {
+        const hasMemoriaDescriptiva = uploadedDocuments.some(doc => doc.key === 'documentacion_fsr.memoria_descriptiva');
+        if (!hasMemoriaDescriptiva) {
           newErrors.memoria_descriptiva = 'La memoria descriptiva es requerida';
         }
-        if (!formData.plano_ubicacion || formData.plano_ubicacion.length === 0) {
+        
+        const hasPlanoUbicacion = uploadedDocuments.some(doc => doc.key === 'documentacion_fsr.plano_ubicacion');
+        if (!hasPlanoUbicacion) {
           newErrors.plano_ubicacion = 'El plano de ubicación es requerido';
         }
-        if (!formData.plano_arquitectura || formData.plano_arquitectura.length === 0) {
+        
+        const hasPlanoArquitectura = uploadedDocuments.some(doc => doc.key === 'documentacion_fsr.plano_arquitectura');
+        if (!hasPlanoArquitectura) {
           newErrors.plano_arquitectura = 'El plano de arquitectura es requerido';
         }
-        if (!formData.plano_cerco || formData.plano_cerco.length === 0) {
+        
+        const hasPlanoCerco = uploadedDocuments.some(doc => doc.key === 'documentacion_fsr.plano_cerco');
+        if (!hasPlanoCerco) {
           newErrors.plano_cerco = 'El plano de cerco es requerido';
         }
         break;
@@ -563,6 +635,7 @@ export default function CreateEditDemolicion() {
               }
             }}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
             title="Entrega de Demolición"
             description="Complete la información de la entrega final de la demolición al administrado"
             cargoDocumentKey="entrega_final.cargo_entrega_final_administrado"
@@ -622,17 +695,19 @@ export default function CreateEditDemolicion() {
             </div>
 
             {/* Mensaje de error de validación */}
-            {showValidationError && (
+            {showValidationError && Object.keys(errors).length > 0 && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <LuInfo className="w-5 h-5 text-red-600" />
-                  <div>
-                    <h4 className="text-sm font-medium text-red-800" style={{ fontFamily: 'Inter, sans-serif' }}>
+                <div className="flex items-start gap-2">
+                  <LuInfo className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <h4 className="text-sm font-medium text-red-800 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
                       Por favor, complete los campos obligatorios
                     </h4>
-                    <p className="text-sm text-red-700 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      Revise los campos marcados con error antes de continuar.
-                    </p>
+                    <ul className="list-disc list-inside text-sm text-red-700 space-y-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      {Object.entries(errors).map(([field, message]) => (
+                        <li key={field}>{message}</li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               </div>
