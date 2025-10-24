@@ -128,7 +128,7 @@ export const useConformidad = (id?: string) => {
 
   const downloadDoc = async (conformidadId: string, documentId: string, fileName: string) => {
     try {
-      toast.info('Descargando documento...');
+      toast.loading('Descargando documento...');
       await downloadDocumentWithName(conformidadId, documentId, fileName);
       toast.success('Documento descargado exitosamente');
     } catch (err) {

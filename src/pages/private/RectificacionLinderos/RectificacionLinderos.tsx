@@ -11,11 +11,15 @@ const rectificacionLinderosDummy: RectificacionLinderos[] = [
   {
     id: '1',
     instance_code: 'RL-2024-001',
+    service_id: 'rectificacion_linderos',
+    client_id: 'client-1',
+    user_id: 'user-1',
     administrado: 'Constructora Lima S.A.C.',
     responsable: 'Carlos Mendoza',
     fecha_creacion: '15/01/2024',
     fecha_culminacion: '25/01/2024',
     status: 'Completado',
+    progress_percentage: 100,
     created_at: '2024-01-15T00:00:00Z',
     scheduled_completion_date: '2024-01-25T00:00:00Z',
     data: {
@@ -35,11 +39,15 @@ const rectificacionLinderosDummy: RectificacionLinderos[] = [
   {
     id: '2',
     instance_code: 'RL-2024-002',
+    service_id: 'rectificacion_linderos',
+    client_id: 'client-2',
+    user_id: 'user-2',
     administrado: 'Inversiones Norte S.A.C.',
     responsable: 'Ana García',
     fecha_creacion: '18/01/2024',
     fecha_culminacion: '',
     status: 'Pendiente',
+    progress_percentage: 28,
     created_at: '2024-01-18T00:00:00Z',
     scheduled_completion_date: null,
     data: {
@@ -59,11 +67,15 @@ const rectificacionLinderosDummy: RectificacionLinderos[] = [
   {
     id: '3',
     instance_code: 'RL-2024-003',
+    service_id: 'rectificacion_linderos',
+    client_id: 'client-3',
+    user_id: 'user-3',
     administrado: 'Desarrollos Sur S.A.C.',
     responsable: 'Miguel Torres',
     fecha_creacion: '22/01/2024',
     fecha_culminacion: '',
     status: 'Pendiente',
+    progress_percentage: 14,
     created_at: '2024-01-22T00:00:00Z',
     scheduled_completion_date: null,
     data: {

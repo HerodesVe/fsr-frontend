@@ -41,11 +41,15 @@ export interface RectificacionLinderosFormData {
 export interface RectificacionLinderos {
   id: string;
   instance_code: string;
+  service_id: string;
+  client_id: string;
+  user_id: string;
   administrado: string;
   responsable: string;
   fecha_creacion: string;
   fecha_culminacion: string;
   status: string;
+  progress_percentage: number;
   created_at: string;
   scheduled_completion_date: string | null;
   data: {
