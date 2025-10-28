@@ -1,4 +1,8 @@
 export interface GestionAnteproyectoFormData {
+  // Administrado y Proyecto
+  client_id?: string;
+  nombre_proyecto?: string;
+  
   // Paso 1: Selección/Carga del Anteproyecto
   selectedAnteproyecto?: any;
   anteproyecto_importado_id?: string;
@@ -41,6 +45,36 @@ export interface GestionAnteproyectoFormData {
   otros_documentos?: File[];
 }
 
+// Estructura de datos del backend
+export interface GestionAnteproyectoData {
+  service_type: string;
+  nombre_proyecto?: string;
+  seleccion_anteproyecto?: {
+    selected_anteproyecto?: any;
+  };
+  presentacion_municipal?: {
+    fecha_ingreso?: string;
+    numero_expediente?: string;
+    archivo_cargo?: DocumentInfo;
+  };
+  seguimiento_respuesta?: {
+    fecha_respuesta?: string;
+    resultado_acta?: 'conforme' | 'no_conforme' | null;
+    fecha_presentacion_reconsideracion?: string;
+    archivo_respuesta?: DocumentInfo;
+    documentos_subsanacion?: DocumentInfo;
+    documento_reconsideracion?: DocumentInfo;
+    resolucion_reconsideracion?: DocumentInfo;
+  };
+  entrega_final?: {
+    carta_conformidad?: DocumentInfo;
+    acta_final?: DocumentInfo;
+    fue_aprobado?: DocumentInfo;
+    planos_aprobados?: DocumentInfo;
+    otros_documentos?: DocumentInfo;
+  };
+}
+
 export interface GestionAnteproyecto {
   id: string;
   instance_code: string;
@@ -57,7 +91,7 @@ export interface GestionAnteproyecto {
   scheduled_completion_date?: string;
   next_step: string;
   uploaded_documents: UploadedDocument[];
-  data: GestionAnteproyectoFormData;
+  data: GestionAnteproyectoData;
   steps_status: StepStatus;
 }
 
@@ -80,6 +114,18 @@ export interface UploadedDocument {
   url: string;
   size: number;
   type: string;
+  key?: string;
+  file_id?: string;
+}
+
+// Estructura de información de documentos
+export interface DocumentInfo {
+  name: string;
+  is_mandatory: boolean;
+  status: 'Pendiente' | 'Subido' | 'Rechazado';
+  file_reference: string;
+  emission_date?: string;
+  observation: string;
 }
 
 export enum GestionAnteproyectoStatus {

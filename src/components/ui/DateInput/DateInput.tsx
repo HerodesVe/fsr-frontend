@@ -31,11 +31,33 @@ export default function DateInput({
       inputValue = inputValue.replace(/[^\d/]/g, '');
       
       // Agregar / automáticamente
-      if (inputValue.length >= 2 && inputValue[2] !== '/') {
+      if (inputValue.length >= 2 && inputValue[2] !== '/' && inputValue.length > 2) {
         inputValue = inputValue.slice(0, 2) + '/' + inputValue.slice(2);
       }
-      if (inputValue.length >= 5 && inputValue[5] !== '/') {
+      if (inputValue.length >= 5 && inputValue[5] !== '/' && inputValue.length > 5) {
         inputValue = inputValue.slice(0, 5) + '/' + inputValue.slice(5);
+      }
+      
+      // Validar valores mientras se escribe (solo cuando la fecha está completa)
+      if (inputValue.length === 10) {
+        const [day, month, year] = inputValue.split('/');
+        const dayNum = parseInt(day);
+        const monthNum = parseInt(month);
+        const yearNum = parseInt(year);
+        
+        // Validaciones básicas
+        if (monthNum > 12 || monthNum < 1) {
+          // No permitir meses inválidos
+          return;
+        }
+        if (dayNum > 31 || dayNum < 1) {
+          // No permitir días inválidos
+          return;
+        }
+        if (yearNum < 1900 || yearNum > 2100) {
+          // No permitir años fuera de rango razonable
+          return;
+        }
       }
     }
     

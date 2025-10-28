@@ -80,6 +80,7 @@ export default function StepAdministrado({
                     onInputChange('selectedClient', client || null);
                   }}
                   error={errors.selectedClient}
+                  search={true}
                 />
               </div>
               {showCreateButton && (

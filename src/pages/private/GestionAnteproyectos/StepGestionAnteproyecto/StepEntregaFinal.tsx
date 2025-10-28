@@ -1,52 +1,67 @@
 import { LuCheck } from 'react-icons/lu';
 import { FileUpload } from '@/components/ui';
-import type { GestionAnteproyectoFormData } from '@/types/gestionAnteproyecto.types';
+import type { GestionAnteproyectoFormData, UploadedDocument } from '@/types/gestionAnteproyecto.types';
 
 interface StepEntregaFinalProps {
   formData: GestionAnteproyectoFormData;
   errors: Record<string, string>;
   gestionId: string;
-  uploadedDocuments: any[];
+  uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof GestionAnteproyectoFormData, value: any) => void;
-  onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onFileUpload: (file: File, documentKey: string) => Promise<UploadedDocument>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 export default function StepEntregaFinal({
   formData,
+  errors,
+  gestionId,
+  uploadedDocuments,
   onInputChange,
-  onFileUpload
+  onFileUpload,
+  onDownloadDocument
 }: StepEntregaFinalProps) {
 
   const documentosFinales = [
     {
       key: 'carta_conformidad',
+      documentKey: 'entrega_final.carta_conformidad',
       label: 'Carta de Conformidad',
       description: 'Carta que indica la conformidad del anteproyecto',
-      required: true
+      required: true,
+      multiple: false
     },
     {
       key: 'acta_final',
+      documentKey: 'entrega_final.acta_final',
       label: 'Acta Final Firmada',
       description: 'Acta de conformidad firmada por los delegados municipales',
-      required: true
+      required: true,
+      multiple: false
     },
     {
       key: 'fue_aprobado',
+      documentKey: 'entrega_final.fue_aprobado',
       label: 'FUE Aprobado y Sellado',
       description: 'Formulario Único de Edificación sellado y aprobado',
-      required: true
+      required: true,
+      multiple: false
     },
     {
       key: 'planos_aprobados',
+      documentKey: 'entrega_final.planos_aprobados',
       label: 'Planos Aprobados y Sellados',
       description: 'Planos sellados y firmados por la municipalidad',
-      required: true
+      required: true,
+      multiple: true
     },
     {
       key: 'otros_documentos',
+      documentKey: 'entrega_final.otros_documentos',
       label: 'Otros Documentos',
       description: 'Documentos adicionales si son necesarios',
-      required: false
+      required: false,
+      multiple: true
     }
   ];
 
@@ -87,23 +102,13 @@ export default function StepEntregaFinal({
                 label={documento.label}
                 required={documento.required}
                 accept=".pdf,.jpg,.jpeg,.png"
-                multiple={documento.key === 'planos_aprobados' || documento.key === 'otros_documentos'}
-                onChange={async (files: File[]) => {
-                  if (files.length > 0) {
-                    try {
-                      if (files.length === 1) {
-                        await onFileUpload(files[0], documento.key);
-                      } else {
-                        // Para múltiples archivos
-                        const uploadPromises = files.map((file: File) => onFileUpload(file, documento.key));
-                        await Promise.all(uploadPromises);
-                      }
-                      onInputChange(documento.key as keyof GestionAnteproyectoFormData, files);
-                    } catch (error) {
-                      console.error('Error uploading file:', error);
-                    }
-                  }
-                }}
+                onChange={(files) => onInputChange(documento.key as keyof GestionAnteproyectoFormData, files)}
+                onUpload={onFileUpload}
+                documentKey={documento.documentKey}
+                anteproyectoId={gestionId}
+                uploadedFiles={uploadedDocuments.filter(doc => doc.key === documento.documentKey).map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
+                error={errors[documento.key]}
               />
             </div>
           ))}

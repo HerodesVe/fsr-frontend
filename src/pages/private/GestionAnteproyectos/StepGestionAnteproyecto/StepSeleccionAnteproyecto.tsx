@@ -1,42 +1,96 @@
-import { useState } from 'react';
-import { LuSearch, LuFileText, LuUpload } from 'react-icons/lu';
+import { useState, useMemo } from 'react';
+import { LuSearch, LuFileText, LuUpload, LuCalendar, LuUser } from 'react-icons/lu';
 import { Button, Input, FileUpload } from '@/components/ui';
-import type { GestionAnteproyectoFormData } from '@/types/gestionAnteproyecto.types';
+import StepAdministrado from '@/components/utils/Steps/StepAdministrado';
+import { useClients } from '@/hooks/useClients';
+import { useAnteproyectos } from '@/hooks/useAnteproyectos';
+import type { GestionAnteproyectoFormData, UploadedDocument } from '@/types/gestionAnteproyecto.types';
 
 interface StepSeleccionAnteproyectoProps {
   formData: GestionAnteproyectoFormData;
+  errors: Record<string, string>;
   gestionId: string;
-  uploadedDocuments: any[];
+  uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof GestionAnteproyectoFormData, value: any) => void;
-  onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onFileUpload: (file: File, documentKey: string) => Promise<UploadedDocument>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 export default function StepSeleccionAnteproyecto({
   formData,
+  errors,
+  gestionId,
+  uploadedDocuments,
   onInputChange,
-  onFileUpload
+  onFileUpload,
+  onDownloadDocument
 }: StepSeleccionAnteproyectoProps) {
   const [modoSeleccion, setModoSeleccion] = useState<'buscar' | 'cargar'>('buscar');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const { clients } = useClients();
+  const { anteproyectos, isLoading: isLoadingAnteproyectos } = useAnteproyectos();
+
+  // Filtrar anteproyectos según el término de búsqueda
+  const filteredAnteproyectos = useMemo(() => {
+    if (!anteproyectos) return [];
+    
+    if (!searchTerm.trim()) return anteproyectos;
+    
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    return anteproyectos.filter((anteproyecto) => {
+      const nombreProyecto = anteproyecto.data?.nombre_proyecto?.toLowerCase() || '';
+      const instanceCode = anteproyecto.instance_code?.toLowerCase() || '';
+      
+      return nombreProyecto.includes(lowerSearchTerm) || 
+             instanceCode.includes(lowerSearchTerm);
+    });
+  }, [anteproyectos, searchTerm]);
 
   // Documentos requeridos para anteproyecto externo
   const documentosRequeridos = [
-    { key: 'partida_registral', label: 'Partida Registral SUNAR', required: true },
-    { key: 'certificado_parametro_municipal', label: 'Certificado de Parámetro Municipal', required: true },
-    { key: 'plano_ubicacion', label: 'Plano de Ubicación', required: true },
-    { key: 'plano_arquitectura', label: 'Plano de Arquitectura', required: true },
-    { key: 'plano_seguridad', label: 'Plano de Seguridad', required: true },
-    { key: 'memoria_descriptiva_arquitectura', label: 'Memoria Descriptiva de Arquitectura', required: true },
-    { key: 'memoria_descriptiva_seguridad', label: 'Memoria Descriptiva de Seguridad', required: true },
-    { key: 'formulario_unico_edificacion', label: 'Formulario Único de Edificación (FUE)', required: true },
-    { key: 'presupuesto', label: 'Presupuesto', required: true },
-    { key: 'pago_derecho_revision_cap', label: 'Pago de Derecho a Revisión CAP', required: true },
-    { key: 'factura', label: 'Factura del Pago', required: true },
-    { key: 'liquidacion', label: 'Liquidación del Pago', required: true },
+    { key: 'partida_registral', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.partida_registral', label: 'Partida Registral SUNAR', required: true },
+    { key: 'certificado_parametro_municipal', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.certificado_parametro_municipal', label: 'Certificado de Parámetro Municipal', required: true },
+    { key: 'plano_ubicacion', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.plano_ubicacion', label: 'Plano de Ubicación', required: true },
+    { key: 'plano_arquitectura', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.plano_arquitectura', label: 'Plano de Arquitectura', required: true },
+    { key: 'plano_seguridad', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.plano_seguridad', label: 'Plano de Seguridad', required: true },
+    { key: 'memoria_descriptiva_arquitectura', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.memoria_descriptiva_arquitectura', label: 'Memoria Descriptiva de Arquitectura', required: true },
+    { key: 'memoria_descriptiva_seguridad', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.memoria_descriptiva_seguridad', label: 'Memoria Descriptiva de Seguridad', required: true },
+    { key: 'formulario_unico_edificacion', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.formulario_unico_edificacion', label: 'Formulario Único de Edificación (FUE)', required: true },
+    { key: 'presupuesto', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.presupuesto', label: 'Presupuesto', required: true },
+    { key: 'pago_derecho_revision_cap', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.pago_derecho_revision_cap', label: 'Pago de Derecho a Revisión CAP', required: true },
+    { key: 'factura', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.factura', label: 'Factura del Pago', required: true },
+    { key: 'liquidacion', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.liquidacion', label: 'Liquidación del Pago', required: true },
   ];
+
+  // Convertir formData para StepAdministrado
+  const formDataForAdmin = {
+    ...formData,
+    selectedClient: clients?.find(c => c.id === formData.client_id) || null,
+  };
+
+  // Handler para cambios del StepAdministrado
+  const handleAdministradoChange = (field: string, value: any) => {
+    if (field === 'selectedClient') {
+      onInputChange('client_id', value?.id || '');
+    } else {
+      onInputChange(field as keyof GestionAnteproyectoFormData, value);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <div>
+      {/* Step de Administrado */}
+      <StepAdministrado
+        formData={formDataForAdmin}
+        clients={clients}
+        errors={errors}
+        onInputChange={handleAdministradoChange}
+        title="Paso 1: Vincular Administrado y Definir Proyecto"
+        description="Seleccione el administrado y defina el nombre del proyecto para la gestión del anteproyecto"
+        showProjectName={true}
+      />
+
+      <div className="border-t border-gray-200 pt-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
           Selección del Anteproyecto a Gestionar
         </h2>
@@ -74,47 +128,116 @@ export default function StepSeleccionAnteproyecto({
             <Input
               label="Buscar Anteproyecto"
               placeholder="Ingrese el nombre del proyecto o código del anteproyecto..."
-              value=""
-              onChange={() => {}}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              startContent={<LuSearch className="w-4 h-4 text-gray-400" />}
             />
           </div>
           
-          {/* Lista de anteproyectos disponibles (dummy) */}
+          {/* Lista de anteproyectos disponibles */}
           <div className="border rounded-lg p-4 bg-gray-50">
             <h4 className="font-medium text-gray-900 mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Anteproyectos Disponibles
+              Anteproyectos Disponibles {filteredAnteproyectos.length > 0 && `(${filteredAnteproyectos.length})`}
             </h4>
-            <div className="space-y-2">
-              {[
-                { id: '1', nombre: 'Edificio Residencial San Isidro', codigo: 'ANT-2024-001', cliente: 'Constructora Lima S.A.C.' },
-                { id: '2', nombre: 'Centro Comercial Miraflores', codigo: 'ANT-2024-002', cliente: 'Inversiones Norte S.A.C.' },
-                { id: '3', nombre: 'Oficinas Corporativas La Molina', codigo: 'ANT-2024-003', cliente: 'Desarrollos Sur S.A.C.' },
-              ].map((anteproyecto) => (
-                <div
-                  key={anteproyecto.id}
-                  className="flex items-center justify-between p-3 bg-white border rounded-lg hover:border-teal-300 cursor-pointer"
-                  onClick={() => onInputChange('selectedAnteproyecto', anteproyecto)}
-                >
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <LuFileText className="w-4 h-4 text-gray-500" />
-                      <span className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-                        {anteproyecto.nombre}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 ml-6" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      {anteproyecto.codigo} - {anteproyecto.cliente}
-                    </p>
+            
+            {isLoadingAnteproyectos ? (
+              <div className="space-y-2">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="animate-pulse bg-white border rounded-lg p-3">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="bordered"
-                  >
-                    Seleccionar
-                  </Button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : filteredAnteproyectos.length === 0 ? (
+              <div className="text-center py-8">
+                <LuFileText className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                <p className="text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  {searchTerm ? 'No se encontraron anteproyectos que coincidan con la búsqueda' : 'No hay anteproyectos disponibles'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {filteredAnteproyectos.map((anteproyecto) => {
+                  const isSelected = formData.selectedAnteproyecto?.id === anteproyecto.id;
+                  const clientName = clients?.find(c => c.id === anteproyecto.client_id)?.names || 'Cliente no especificado';
+                  
+                  return (
+                    <div
+                      key={anteproyecto.id}
+                      className={`p-3 bg-white border rounded-lg transition-all ${
+                        isSelected 
+                          ? 'border-teal-500 bg-teal-50' 
+                          : 'hover:border-teal-300 cursor-pointer'
+                      }`}
+                      onClick={() => !isSelected && onInputChange('selectedAnteproyecto', {
+                        id: anteproyecto.id,
+                        nombre: anteproyecto.data?.nombre_proyecto,
+                        codigo: anteproyecto.instance_code
+                      })}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <LuFileText className={`w-4 h-4 ${isSelected ? 'text-teal-600' : 'text-gray-500'}`} />
+                            <span className={`font-medium ${isSelected ? 'text-teal-900' : 'text-gray-900'}`} style={{ fontFamily: 'Inter, sans-serif' }}>
+                              {anteproyecto.data?.nombre_proyecto || 'Proyecto sin nombre'}
+                            </span>
+                          </div>
+                          <div className="flex flex-col gap-1 ml-6">
+                            <p className="text-sm text-gray-600 flex items-center gap-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                              <span className="font-medium">Código:</span> {anteproyecto.instance_code}
+                            </p>
+                            <p className="text-sm text-gray-600 flex items-center gap-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                              <LuUser className="w-3 h-3" />
+                              {clientName}
+                            </p>
+                            {anteproyecto.created_at && (
+                              <p className="text-sm text-gray-600 flex items-center gap-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                                <LuCalendar className="w-3 h-3" />
+                                {new Date(anteproyecto.created_at).toLocaleDateString('es-ES')}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                anteproyecto.status === 'completado' 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-yellow-100 text-yellow-800'
+                              }`}>
+                                {anteproyecto.status === 'completado' ? 'Completado' : 'En proceso'}
+                              </span>
+                              {anteproyecto.progress_percentage !== undefined && (
+                                <span className="text-xs text-gray-500">
+                                  {anteproyecto.progress_percentage}% completado
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant={isSelected ? 'solid' : 'bordered'}
+                          style={isSelected ? { backgroundColor: 'var(--primary-color)' } : {}}
+                          className={isSelected ? 'text-white' : ''}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isSelected) {
+                              onInputChange('selectedAnteproyecto', {
+                                id: anteproyecto.id,
+                                nombre: anteproyecto.data?.nombre_proyecto,
+                                codigo: anteproyecto.instance_code
+                              });
+                            }
+                          }}
+                        >
+                          {isSelected ? 'Seleccionado' : 'Seleccionar'}
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       ) : (
@@ -135,17 +258,13 @@ export default function StepSeleccionAnteproyecto({
                   label={documento.label}
                   required={documento.required}
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  multiple={false}
-                  onChange={async (files: File[]) => {
-                    if (files.length > 0) {
-                      try {
-                        await onFileUpload(files[0], documento.key);
-                        onInputChange(documento.key as keyof GestionAnteproyectoFormData, files);
-                      } catch (error) {
-                        console.error('Error uploading file:', error);
-                      }
-                    }
-                  }}
+                  onChange={(files) => onInputChange(documento.key as keyof GestionAnteproyectoFormData, files)}
+                  onUpload={onFileUpload}
+                  documentKey={documento.documentKey}
+                  anteproyectoId={gestionId}
+                  uploadedFiles={uploadedDocuments.filter(doc => doc.key === documento.documentKey).map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                  onDownload={onDownloadDocument}
+                  error={errors[documento.key]}
                 />
               </div>
             ))}

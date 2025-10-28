@@ -1,22 +1,26 @@
 import { useState } from 'react';
 import { LuInfo, LuCheck, LuX } from 'react-icons/lu';
 import { DateInput, FileUpload, Button } from '@/components/ui';
-import type { GestionAnteproyectoFormData } from '@/types/gestionAnteproyecto.types';
+import type { GestionAnteproyectoFormData, UploadedDocument } from '@/types/gestionAnteproyecto.types';
 
 interface StepSeguimientoRespuestaProps {
   formData: GestionAnteproyectoFormData;
   errors: Record<string, string>;
   gestionId: string;
-  uploadedDocuments: any[];
+  uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof GestionAnteproyectoFormData, value: any) => void;
-  onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onFileUpload: (file: File, documentKey: string) => Promise<UploadedDocument>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 export default function StepSeguimientoRespuesta({
   formData,
   errors,
+  gestionId,
+  uploadedDocuments,
   onInputChange,
-  onFileUpload
+  onFileUpload,
+  onDownloadDocument
 }: StepSeguimientoRespuestaProps) {
   const [mostrarReconsideracion, setMostrarReconsideracion] = useState(false);
 
@@ -62,17 +66,12 @@ export default function StepSeguimientoRespuesta({
             label="Archivo del Acta/Respuesta"
             required
             accept=".pdf,.jpg,.jpeg,.png"
-            multiple={false}
-            onChange={async (files: File[]) => {
-              if (files.length > 0) {
-                try {
-                  await onFileUpload(files[0], 'archivo_respuesta');
-                  onInputChange('archivo_respuesta', files);
-                } catch (error) {
-                  console.error('Error uploading file:', error);
-                }
-              }
-            }}
+            onChange={(files) => onInputChange('archivo_respuesta', files)}
+            onUpload={onFileUpload}
+            documentKey="seguimiento_respuesta.archivo_respuesta"
+            anteproyectoId={gestionId}
+            uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'seguimiento_respuesta.archivo_respuesta').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+            onDownload={onDownloadDocument}
             error={errors.archivo_respuesta}
           />
         </div>
@@ -125,19 +124,12 @@ export default function StepSeguimientoRespuesta({
           <FileUpload
             label="Documentos de Subsanación"
             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-            multiple={true}
-            onChange={async (files: File[]) => {
-              if (files.length > 0) {
-                try {
-                  // Subir múltiples archivos
-                  const uploadPromises = files.map((file: File) => onFileUpload(file, 'documentos_subsanacion'));
-                  await Promise.all(uploadPromises);
-                  onInputChange('documentos_subsanacion', files);
-                } catch (error) {
-                  console.error('Error uploading files:', error);
-                }
-              }
-            }}
+            onChange={(files) => onInputChange('documentos_subsanacion', files)}
+            onUpload={onFileUpload}
+            documentKey="seguimiento_respuesta.documentos_subsanacion"
+            anteproyectoId={gestionId}
+            uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'seguimiento_respuesta.documentos_subsanacion').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+            onDownload={onDownloadDocument}
           />
 
           {/* Proceso de Reconsideración */}
@@ -171,17 +163,12 @@ export default function StepSeguimientoRespuesta({
                   <FileUpload
                     label="Documento de Reconsideración"
                     accept=".pdf,.doc,.docx"
-                    multiple={false}
-                    onChange={async (files: File[]) => {
-                      if (files.length > 0) {
-                        try {
-                          await onFileUpload(files[0], 'documento_reconsideracion');
-                          onInputChange('documento_reconsideracion', files);
-                        } catch (error) {
-                          console.error('Error uploading file:', error);
-                        }
-                      }
-                    }}
+                    onChange={(files) => onInputChange('documento_reconsideracion', files)}
+                    onUpload={onFileUpload}
+                    documentKey="seguimiento_respuesta.documento_reconsideracion"
+                    anteproyectoId={gestionId}
+                    uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'seguimiento_respuesta.documento_reconsideracion').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                    onDownload={onDownloadDocument}
                   />
                 </div>
 
@@ -189,17 +176,12 @@ export default function StepSeguimientoRespuesta({
                   <FileUpload
                     label="Resolución de Reconsideración"
                     accept=".pdf,.jpg,.jpeg,.png"
-                    multiple={false}
-                    onChange={async (files: File[]) => {
-                      if (files.length > 0) {
-                        try {
-                          await onFileUpload(files[0], 'resolucion_reconsideracion');
-                          onInputChange('resolucion_reconsideracion', files);
-                        } catch (error) {
-                          console.error('Error uploading file:', error);
-                        }
-                      }
-                    }}
+                    onChange={(files) => onInputChange('resolucion_reconsideracion', files)}
+                    onUpload={onFileUpload}
+                    documentKey="seguimiento_respuesta.resolucion_reconsideracion"
+                    anteproyectoId={gestionId}
+                    uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'seguimiento_respuesta.resolucion_reconsideracion').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                    onDownload={onDownloadDocument}
                   />
                 </div>
               </div>

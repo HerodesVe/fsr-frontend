@@ -4,69 +4,12 @@ import { LuPlus } from 'react-icons/lu';
 import { useHeaderStore } from '@/store/headerStore';
 import { Button, Filter } from '@/components/ui';
 import { ProyectoCard } from '@/components/utils/ProyectoCard';
-import { GestionAnteproyecto, GestionAnteproyectoStatus } from '@/types/gestionAnteproyecto.types';
-
-// Data dummy para desarrollo
-const gestionAnteproyectosDummy: GestionAnteproyecto[] = [
-  {
-    id: '1',
-    instance_code: 'GA-2024-001',
-    service_id: 'serv-001',
-    client_id: 'client-001',
-    user_id: 'user-001',
-    administrado: 'Constructora Lima S.A.C.',
-    responsable: 'Carlos Mendoza',
-    fecha_creacion: '15/01/2024',
-    fecha_culminacion: '20/01/2024',
-    status: 'Completado',
-    progress_percentage: 100,
-    created_at: '2024-01-15T00:00:00Z',
-    scheduled_completion_date: '2024-01-20T00:00:00Z',
-    next_step: 'completado',
-    uploaded_documents: [],
-    data: {
-      selectedAnteproyecto: { nombre_proyecto: 'Edificio Residencial San Isidro' },
-    },
-    steps_status: {
-      seleccion_anteproyecto: 'Completada',
-      presentacion_municipal: 'Completada',
-      seguimiento_respuesta: 'Completada',
-      entrega_final: 'Completada'
-    }
-  },
-  {
-    id: '2',
-    instance_code: 'GA-2024-002',
-    service_id: 'serv-002',
-    client_id: 'client-002',
-    user_id: 'user-002',
-    administrado: 'Inversiones Norte S.A.C.',
-    responsable: 'Ana García',
-    fecha_creacion: '18/01/2024',
-    fecha_culminacion: '',
-    status: 'Pendiente',
-    progress_percentage: 50,
-    created_at: '2024-01-18T00:00:00Z',
-    scheduled_completion_date: undefined,
-    next_step: 'seguimiento_respuesta',
-    uploaded_documents: [],
-    data: {
-      selectedAnteproyecto: { nombre_proyecto: 'Centro Comercial Miraflores' },
-    },
-    steps_status: {
-      seleccion_anteproyecto: 'Completada',
-      presentacion_municipal: 'Completada',
-      seguimiento_respuesta: 'En progreso',
-      entrega_final: 'Pendiente'
-    }
-  }
-];
+import { GestionAnteproyectoStatus } from '@/types/gestionAnteproyecto.types';
+import { useGestionAnteproyectos } from '@/hooks/useGestionAnteproyectos';
 
 export default function GestionAnteproyectos() {
   const navigate = useNavigate();
-  const [gestionAnteproyectos] = useState<GestionAnteproyecto[]>(gestionAnteproyectosDummy);
-  const [isLoading] = useState(false);
-  const [error] = useState<Error | null>(null);
+  const { gestionAnteproyectos, isLoading, error } = useGestionAnteproyectos();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<GestionAnteproyectoStatus>(GestionAnteproyectoStatus.TODOS);
   const { setHeader } = useHeaderStore();
@@ -96,7 +39,7 @@ export default function GestionAnteproyectos() {
       
       // Filtro por texto de búsqueda
       const matchesSearch = searchTerm === '' || 
-        (gestion.data?.selectedAnteproyecto?.nombre_proyecto?.toLowerCase().includes(searchLower)) ||
+        (gestion.data?.nombre_proyecto?.toLowerCase().includes(searchLower)) ||
         (gestion.instance_code?.toLowerCase().includes(searchLower)) ||
         (gestion.administrado?.toLowerCase().includes(searchLower)) ||
         (gestion.responsable?.toLowerCase().includes(searchLower));

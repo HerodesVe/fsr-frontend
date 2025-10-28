@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { LuArrowLeft, LuArrowRight, LuX } from 'react-icons/lu';
+import { LuArrowLeft, LuArrowRight, LuX, LuInfo } from 'react-icons/lu';
 import { useHeaderStore } from '@/store/headerStore';
 import { Button } from '@/components/ui';
+import { useGestionAnteproyecto } from '@/hooks/useGestionAnteproyectos';
+import toast from 'react-hot-toast';
 import { 
   StepSeleccionAnteproyecto,
   StepPresentacionMunicipal,
@@ -10,7 +12,14 @@ import {
   StepEntregaFinal
 } from './StepGestionAnteproyecto';
 import { ResumenGestionAnteproyecto } from './components/ResumenGestionAnteproyecto';
-import type { GestionAnteproyectoFormData, FormStep } from '@/types/gestionAnteproyecto.types';
+import type { GestionAnteproyectoFormData, FormStep, UploadedDocument, DocumentInfo } from '@/types/gestionAnteproyecto.types';
+
+const stepLabels = [
+  'Selección Anteproyecto',
+  'Presentación Municipal',
+  'Seguimiento',
+  'Entrega Final'
+];
 
 export default function CreateEditGestionAnteproyecto() {
   const navigate = useNavigate();
@@ -18,12 +27,18 @@ export default function CreateEditGestionAnteproyecto() {
   const isEditing = !!id;
   
   const { setHeader } = useHeaderStore();
+  const { gestionAnteproyecto, isLoading: gestionLoading, createNew, update, uploadDocs, downloadDoc } = useGestionAnteproyecto(id);
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [gestionId] = useState<string>(id || '');
+  const [gestionId, setGestionId] = useState<string | null>(id || null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showValidationError, setShowValidationError] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
 
   const [formData, setFormData] = useState<GestionAnteproyectoFormData>({
+    client_id: '',
+    nombre_proyecto: '',
     selectedAnteproyecto: null,
     fecha_ingreso: '',
     numero_expediente: '',
@@ -38,6 +53,41 @@ export default function CreateEditGestionAnteproyecto() {
     { id: 4, title: 'Entrega Final', completed: false },
   ]);
 
+  // Cargar datos cuando se edita
+  useEffect(() => {
+    if (gestionAnteproyecto && isEditing) {
+      setFormData(prev => ({
+        ...prev,
+        client_id: gestionAnteproyecto.client_id || '',
+        nombre_proyecto: gestionAnteproyecto.data?.nombre_proyecto || '',
+        selectedAnteproyecto: gestionAnteproyecto.data?.seleccion_anteproyecto?.selected_anteproyecto || null,
+        fecha_ingreso: gestionAnteproyecto.data?.presentacion_municipal?.fecha_ingreso || '',
+        numero_expediente: gestionAnteproyecto.data?.presentacion_municipal?.numero_expediente || '',
+        fecha_respuesta: gestionAnteproyecto.data?.seguimiento_respuesta?.fecha_respuesta || '',
+        resultado_acta: gestionAnteproyecto.data?.seguimiento_respuesta?.resultado_acta || null,
+        fecha_presentacion_reconsideracion: gestionAnteproyecto.data?.seguimiento_respuesta?.fecha_presentacion_reconsideracion || '',
+      }));
+
+      // Cargar documentos
+      const allDocs: UploadedDocument[] = [];
+      if (gestionAnteproyecto.uploaded_documents && gestionAnteproyecto.uploaded_documents.length > 0) {
+        const docs = gestionAnteproyecto.uploaded_documents.map((doc: any) => ({
+          id: doc.file_id || doc.id,
+          name: doc.name,
+          url: '',
+          size: 0,
+          type: 'application/pdf',
+          key: doc.key,
+        }));
+        allDocs.push(...docs);
+      }
+
+      if (allDocs.length > 0) {
+        setUploadedDocuments(allDocs);
+      }
+    }
+  }, [gestionAnteproyecto, isEditing]);
+
   useEffect(() => {
     setHeader(
       isEditing ? 'Editar Gestión de Anteproyecto' : 'Nueva Gestión de Anteproyecto',
@@ -48,14 +98,263 @@ export default function CreateEditGestionAnteproyecto() {
     };
   }, [setHeader, isEditing]);
 
-  const handleInputChange = (field: keyof GestionAnteproyectoFormData, value: any) => {
+  const handleInputChange = useCallback((field: keyof GestionAnteproyectoFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Marcar que hay cambios en el paso actual
     
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+    setShowValidationError(false);
+  }, [errors]);
+
+  const handleFileUpload = useCallback(async (file: File, documentKey?: string): Promise<UploadedDocument> => {
+    const tempId = Date.now().toString();
+    
+    const uploadedDoc: UploadedDocument = {
+      id: tempId,
+      name: file.name,
+      url: URL.createObjectURL(file),
+      size: file.size,
+      type: file.type,
+      key: documentKey,
+    };
+    
+    setUploadedDocuments(prev => [...prev, uploadedDoc]);
+
+    if (gestionId && documentKey) {
+      try {
+        const response = await uploadDocs({ gestionId, files: [file], documentKeys: [documentKey] });
+        
+        if (response && response.uploaded_documents) {
+          const uploadedFromBackend = response.uploaded_documents.find(
+            (doc: any) => doc.key === documentKey && doc.name === file.name
+          );
+          
+          if (uploadedFromBackend) {
+            setUploadedDocuments(prev => 
+              prev.map(doc => 
+                doc.id === tempId 
+                  ? { ...doc, id: uploadedFromBackend.file_id || uploadedFromBackend.id }
+                  : doc
+              )
+            );
+          }
+        }
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        setUploadedDocuments(prev => prev.filter(doc => doc.id !== tempId));
+      }
+    }
+    
+    return uploadedDoc;
+  }, [gestionId, uploadDocs]);
+
+  const handleDownloadDocument = useCallback(async (documentId: string, fileName: string) => {
+    if (!gestionId) {
+      toast.error('No se puede descargar el documento en este momento');
+      return;
+    }
+    
+    try {
+      await downloadDoc(gestionId, documentId, fileName);
+    } catch (error) {
+      console.error('Error downloading document:', error);
+    }
+  }, [gestionId, downloadDoc]);
+
+  const formatDateForBackend = (dateString: string): string | undefined => {
+    if (!dateString || dateString.trim() === '') return undefined;
+    
+    console.log('🔍 formatDateForBackend - Input:', dateString);
+    
+    // Formato ISO: YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss
+    if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+      const result = dateString.split('T')[0];
+      console.log('✅ ISO format detected:', result);
+      return result;
+    }
+    
+    // Formato DD/MM/YYYY (usado por DateInput)
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+      const [day, month, year] = dateString.split('/');
+      const dayNum = parseInt(day);
+      const monthNum = parseInt(month);
+      
+      // Validar que día y mes sean válidos
+      if (monthNum < 1 || monthNum > 12) {
+        console.error('❌ Invalid month:', monthNum);
+        return undefined;
+      }
+      if (dayNum < 1 || dayNum > 31) {
+        console.error('❌ Invalid day:', dayNum);
+        return undefined;
+      }
+      
+      const result = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      console.log('✅ DD/MM/YYYY format detected:', result);
+      return result;
+    }
+    
+    // Formato D/M/YYYY o DD/M/YYYY o D/MM/YYYY (fechas con números sin ceros a la izquierda)
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString)) {
+      const [part1, part2, year] = dateString.split('/');
+      const num1 = parseInt(part1);
+      const num2 = parseInt(part2);
+      
+      // Asumimos siempre formato DD/MM/YYYY (día/mes/año)
+      // ya que es el formato estándar en español
+      const day = num1;
+      const month = num2;
+      
+      // Validar que día y mes sean válidos
+      if (month < 1 || month > 12) {
+        console.error('❌ Invalid month:', month);
+        return undefined;
+      }
+      if (day < 1 || day > 31) {
+        console.error('❌ Invalid day:', day);
+        return undefined;
+      }
+      
+      const result = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+      console.log('✅ D/M/YYYY format detected:', result);
+      return result;
+    }
+    
+    console.error('❌ Could not parse date:', dateString);
+    return undefined;
+  };
+
+  const createDocumentInfo = (name: string, is_mandatory: boolean): DocumentInfo => {
+    return {
+      name,
+      is_mandatory,
+      status: 'Pendiente',
+      file_reference: '',
+      observation: '',
+    };
+  };
+
+  // PATCH por paso - Solo lo editado
+  const buildUpdateRequestForCurrentStep = (): any | null => {
+    switch (currentStep) {
+      case 0: // Paso 1: Selección Anteproyecto
+        // Solo se envía el nombre del proyecto y anteproyecto seleccionado
+        return {
+          client_id: formData.client_id,
+          data: {
+            nombre_proyecto: formData.nombre_proyecto,
+            seleccion_anteproyecto: {
+              selected_anteproyecto: formData.selectedAnteproyecto ? {
+                id: formData.selectedAnteproyecto.id,
+                nombre: formData.selectedAnteproyecto.nombre,
+                codigo: formData.selectedAnteproyecto.codigo
+              } : null
+            }
+          }
+        };
+
+      case 1: // Paso 2: Presentación Municipal
+        const presentacionData: any = {
+          numero_expediente: formData.numero_expediente,
+        };
+        
+        const fechaIngreso = formatDateForBackend(formData.fecha_ingreso || '');
+        if (fechaIngreso) presentacionData.fecha_ingreso = fechaIngreso;
+
+        return {
+          data: {
+            presentacion_municipal: presentacionData
+          }
+        };
+
+      case 2: // Paso 3: Seguimiento y Respuesta
+        const seguimientoData: any = {
+          resultado_acta: formData.resultado_acta,
+        };
+        
+        const fechaRespuesta = formatDateForBackend(formData.fecha_respuesta || '');
+        if (fechaRespuesta) seguimientoData.fecha_respuesta = fechaRespuesta;
+
+        const fechaReconsideracion = formatDateForBackend(formData.fecha_presentacion_reconsideracion || '');
+        if (fechaReconsideracion) seguimientoData.fecha_presentacion_reconsideracion = fechaReconsideracion;
+
+        return {
+          data: {
+            seguimiento_respuesta: seguimientoData
+          }
+        };
+
+      case 3: // Paso 4: Entrega Final
+        // Los documentos se manejan mediante handleFileUpload
+        // No hay campos de texto adicionales en este paso
+        return null;
+
+      default:
+        return null;
+    }
+  };
+
+  // Construir request de creación completo
+  const buildCreateRequest = (): any => {
+    const baseData: any = {
+      client_id: formData.client_id,
+      data: {
+        service_type: 'gestion_anteproyecto',
+        nombre_proyecto: formData.nombre_proyecto,
+        seleccion_anteproyecto: {
+          selected_anteproyecto: formData.selectedAnteproyecto ? {
+            id: formData.selectedAnteproyecto.id,
+            nombre: formData.selectedAnteproyecto.nombre,
+            codigo: formData.selectedAnteproyecto.codigo
+          } : null,
+          anteproyecto_externo_docs: {
+            partida_registral: createDocumentInfo('Partida Registral SUNAR', true),
+            certificado_parametro_municipal: createDocumentInfo('Certificado de Parámetro Municipal', true),
+            plano_ubicacion: createDocumentInfo('Plano de Ubicación', true),
+            plano_arquitectura: createDocumentInfo('Plano de Arquitectura', true),
+            plano_seguridad: createDocumentInfo('Plano de Seguridad', true),
+            memoria_descriptiva_arquitectura: createDocumentInfo('Memoria Descriptiva de Arquitectura', true),
+            memoria_descriptiva_seguridad: createDocumentInfo('Memoria Descriptiva de Seguridad', true),
+            formulario_unico_edificacion: createDocumentInfo('Formulario Único de Edificación (FUE)', true),
+            presupuesto: createDocumentInfo('Presupuesto', true),
+            pago_derecho_revision_cap: createDocumentInfo('Pago de Derecho a Revisión CAP', true),
+            factura: createDocumentInfo('Factura del Pago', true),
+            liquidacion: createDocumentInfo('Liquidación del Pago', true),
+          }
+        },
+        presentacion_municipal: {
+          numero_expediente: formData.numero_expediente,
+          archivo_cargo: createDocumentInfo('Archivo del Cargo', true),
+        },
+        seguimiento_respuesta: {
+          resultado_acta: formData.resultado_acta || 'conforme',
+          archivo_respuesta: createDocumentInfo('Archivo de Respuesta', true),
+          documentos_subsanacion: createDocumentInfo('Documentos de Subsanación', false),
+          documento_reconsideracion: createDocumentInfo('Documento de Reconsideración', false),
+          resolucion_reconsideracion: createDocumentInfo('Resolución de Reconsideración', false),
+        },
+        entrega_final: {
+          carta_conformidad: createDocumentInfo('Carta de Conformidad', true),
+          acta_final: createDocumentInfo('Acta Final', true),
+          fue_aprobado: createDocumentInfo('FUE Aprobado', true),
+          planos_aprobados: createDocumentInfo('Planos Aprobados', true),
+          otros_documentos: createDocumentInfo('Otros Documentos', false),
+        },
+      },
+    };
+
+    // Agregar fechas si existen
+    const fechaIngreso = formatDateForBackend(formData.fecha_ingreso || '');
+    if (fechaIngreso) baseData.data.presentacion_municipal.fecha_ingreso = fechaIngreso;
+
+    const fechaRespuesta = formatDateForBackend(formData.fecha_respuesta || '');
+    if (fechaRespuesta) baseData.data.seguimiento_respuesta.fecha_respuesta = fechaRespuesta;
+
+    const fechaReconsideracion = formatDateForBackend(formData.fecha_presentacion_reconsideracion || '');
+    if (fechaReconsideracion) baseData.data.seguimiento_respuesta.fecha_presentacion_reconsideracion = fechaReconsideracion;
+
+    return baseData;
   };
 
   const validateCurrentStep = (): boolean => {
@@ -63,28 +362,49 @@ export default function CreateEditGestionAnteproyecto() {
 
     switch (currentStep) {
       case 0: // Selección Anteproyecto
-        if (!formData.selectedAnteproyecto) {
-          newErrors.selectedAnteproyecto = 'Debe seleccionar un anteproyecto o cargar documentos externos';
+        if (!formData.client_id) newErrors.client_id = 'Debe seleccionar un administrado';
+        if (!formData.nombre_proyecto) newErrors.nombre_proyecto = 'El nombre del proyecto es requerido';
+        
+        // Validar que se haya seleccionado un anteproyecto O se hayan cargado documentos externos
+        const hasSelectedAnteproyecto = formData.selectedAnteproyecto && formData.selectedAnteproyecto.id;
+        const hasExternalDocs = uploadedDocuments.some(doc => 
+          doc.key?.startsWith('seleccion_anteproyecto.anteproyecto_externo_docs.')
+        );
+        
+        if (!hasSelectedAnteproyecto && !hasExternalDocs) {
+          newErrors.selectedAnteproyecto = 'Debe seleccionar un anteproyecto existente o cargar los documentos de un anteproyecto externo';
         }
         break;
       
       case 1: // Presentación Municipal
         if (!formData.fecha_ingreso) newErrors.fecha_ingreso = 'Fecha de ingreso es requerida';
         if (!formData.numero_expediente) newErrors.numero_expediente = 'Número de expediente es requerido';
-        if (!formData.archivo_cargo) newErrors.archivo_cargo = 'Archivo del cargo es requerido';
+        if (!uploadedDocuments.some(doc => doc.key === 'presentacion_municipal.archivo_cargo')) {
+          newErrors.archivo_cargo = 'Archivo del cargo es requerido';
+        }
         break;
       
       case 2: // Seguimiento
         if (!formData.fecha_respuesta) newErrors.fecha_respuesta = 'Fecha de respuesta es requerida';
-        if (!formData.archivo_respuesta) newErrors.archivo_respuesta = 'Archivo de respuesta es requerido';
+        if (!uploadedDocuments.some(doc => doc.key === 'seguimiento_respuesta.archivo_respuesta')) {
+          newErrors.archivo_respuesta = 'Archivo de respuesta es requerido';
+        }
         if (!formData.resultado_acta) newErrors.resultado_acta = 'Debe seleccionar el resultado del acta';
         break;
       
       case 3: // Entrega Final
-        if (!formData.carta_conformidad) newErrors.carta_conformidad = 'Carta de conformidad es requerida';
-        if (!formData.acta_final) newErrors.acta_final = 'Acta final es requerida';
-        if (!formData.fue_aprobado) newErrors.fue_aprobado = 'FUE aprobado es requerido';
-        if (!formData.planos_aprobados) newErrors.planos_aprobados = 'Planos aprobados son requeridos';
+        if (!uploadedDocuments.some(doc => doc.key === 'entrega_final.carta_conformidad')) {
+          newErrors.carta_conformidad = 'Carta de conformidad es requerida';
+        }
+        if (!uploadedDocuments.some(doc => doc.key === 'entrega_final.acta_final')) {
+          newErrors.acta_final = 'Acta final es requerida';
+        }
+        if (!uploadedDocuments.some(doc => doc.key === 'entrega_final.fue_aprobado')) {
+          newErrors.fue_aprobado = 'FUE aprobado es requerido';
+        }
+        if (!uploadedDocuments.some(doc => doc.key === 'entrega_final.planos_aprobados')) {
+          newErrors.planos_aprobados = 'Planos aprobados son requeridos';
+        }
         break;
     }
 
@@ -93,24 +413,49 @@ export default function CreateEditGestionAnteproyecto() {
   };
 
   const handleNext = async () => {
-    if (!validateCurrentStep()) return;
-
-    try {
-      // Simular guardado de datos
-      console.log('Guardando paso:', currentStep, formData);
-
-      // Marcar paso como completado
-      setSteps(prev => prev.map(step => 
-        step.id === currentStep + 1 ? { ...step, completed: true } : step
-      ));
-
-      // Limpiar flag de cambios para el paso actual
-
-      setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
-    } catch (error) {
-      console.error('Error guardando:', error);
+    if (!validateCurrentStep()) {
+      setShowValidationError(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => setShowValidationError(false), 5000);
       return;
     }
+
+    setShowValidationError(false);
+
+    // Si es el primer paso y no hay gestionId, crear
+    if (currentStep === 0 && !gestionId) {
+      try {
+        setIsSaving(true);
+        const requestData = buildCreateRequest();
+        const newGestion = await createNew(requestData);
+        setGestionId(newGestion.id);
+      } catch (error) {
+        console.error('Error creating gestion:', error);
+        setShowValidationError(true);
+        return;
+      } finally {
+        setIsSaving(false);
+      }
+    } else if (gestionId) {
+      try {
+        setIsSaving(true);
+        const updateData = buildUpdateRequestForCurrentStep();
+        if (updateData) {
+          await update({ id: gestionId, data: updateData });
+        }
+      } catch (error) {
+        console.error('Error updating gestion:', error);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+
+    // Marcar paso como completado
+    setSteps(prev => prev.map(step => 
+      step.id === currentStep + 1 ? { ...step, completed: true } : step
+    ));
+
+    setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
   };
 
   const handlePrevious = () => {
@@ -118,37 +463,30 @@ export default function CreateEditGestionAnteproyecto() {
   };
 
   const handleStepClick = (stepIndex: number) => {
-    // Permitir navegación hacia atrás a cualquier paso
     if (stepIndex <= currentStep) {
       setCurrentStep(stepIndex);
-    }
-    // Permitir navegación hacia adelante solo a pasos completados o al siguiente paso inmediato
-    else if (steps[stepIndex].completed || stepIndex === currentStep + 1) {
+    } else if (steps[stepIndex].completed || stepIndex === currentStep + 1) {
       setCurrentStep(stepIndex);
     }
-  };
-
-  const handleFileUpload = async (file: File, _documentKey: string): Promise<any> => {
-    // Simular upload
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          id: Date.now().toString(),
-          name: file.name,
-          url: URL.createObjectURL(file),
-          size: file.size,
-          type: file.type,
-        });
-      }, 1000);
-    });
   };
 
   const handleCancel = () => {
     navigate('/dashboard/gestion-anteproyectos');
   };
 
-  const handleSaveGestion = () => {
-    console.log('Guardando gestión completa...');
+  const handleSaveGestion = async () => {
+    setIsSaving(true);
+    try {
+      if (gestionId) {
+        const updateData = buildCreateRequest();
+        await update({ id: gestionId, data: updateData });
+      }
+      navigate('/dashboard/gestion-anteproyectos');
+    } catch (error) {
+      console.error('Error al guardar:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const renderStepContent = () => {
@@ -157,10 +495,12 @@ export default function CreateEditGestionAnteproyecto() {
         return (
           <StepSeleccionAnteproyecto
             formData={formData}
-            gestionId={gestionId}
-            uploadedDocuments={[]}
+            errors={errors}
+            gestionId={gestionId || 'new'}
+            uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
 
@@ -169,10 +509,11 @@ export default function CreateEditGestionAnteproyecto() {
           <StepPresentacionMunicipal
             formData={formData}
             errors={errors}
-            gestionId={gestionId}
-            uploadedDocuments={[]}
+            gestionId={gestionId || 'new'}
+            uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
 
@@ -181,10 +522,11 @@ export default function CreateEditGestionAnteproyecto() {
           <StepSeguimientoRespuesta
             formData={formData}
             errors={errors}
-            gestionId={gestionId}
-            uploadedDocuments={[]}
+            gestionId={gestionId || 'new'}
+            uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
 
@@ -193,10 +535,11 @@ export default function CreateEditGestionAnteproyecto() {
           <StepEntregaFinal
             formData={formData}
             errors={errors}
-            gestionId={gestionId}
-            uploadedDocuments={[]}
+            gestionId={gestionId || 'new'}
+            uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
 
@@ -206,9 +549,25 @@ export default function CreateEditGestionAnteproyecto() {
   };
 
   const getStepTitle = (index: number): string => {
-    const titles = ['Selección', 'Presentación', 'Seguimiento', 'Entrega Final'];
-    return titles[index] || '';
+    return stepLabels[index] || '';
   };
+
+  if (gestionLoading && isEditing) {
+    return (
+      <div className="p-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <div className="h-96 bg-gray-200 rounded"></div>
+            </div>
+            <div className="h-96 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -239,6 +598,22 @@ export default function CreateEditGestionAnteproyecto() {
               ))}
             </div>
           </div>
+
+          {showValidationError && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center gap-2">
+                <LuInfo className="w-5 h-5 text-red-600" />
+                <div>
+                  <h4 className="text-sm font-medium text-red-800" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    Por favor, complete los campos obligatorios
+                  </h4>
+                  <p className="text-sm text-red-700 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    Revise los campos marcados con error antes de continuar.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
             {renderStepContent()}
@@ -273,8 +648,9 @@ export default function CreateEditGestionAnteproyecto() {
                   style={{ backgroundColor: 'var(--primary-color)' }}
                   className="text-white hover:opacity-90"
                   endContent={<LuArrowRight className="w-4 h-4" />}
+                  disabled={isSaving}
                 >
-                  Siguiente: {getStepTitle(currentStep + 1)}
+                  {isSaving ? 'Guardando...' : `Siguiente: ${getStepTitle(currentStep + 1)}`}
                 </Button>
               ) : (
                 <Button
@@ -295,10 +671,10 @@ export default function CreateEditGestionAnteproyecto() {
             formData={formData}
             currentStep={currentStep}
             steps={steps}
-            gestionId={gestionId}
+            gestionId={gestionId || 'new'}
             onSave={handleSaveGestion}
-            isSaving={false}
-            uploadedDocuments={[]}
+            isSaving={isSaving}
+            uploadedDocuments={uploadedDocuments}
           />
         </div>
       </div>

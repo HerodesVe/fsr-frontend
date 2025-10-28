@@ -180,13 +180,6 @@ export default function StepPredio({
             onChange={(e) => onInputChange('longitud', parseFloat(e.target.value) || 0)}
             numbersOnly
           />
-
-          <Input
-            label="Código postal"
-            placeholder="Interior"
-            value=""
-            onChange={() => {}}
-          />
         </div>
       </div>
 

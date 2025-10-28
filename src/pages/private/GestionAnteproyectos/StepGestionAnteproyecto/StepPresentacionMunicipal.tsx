@@ -1,20 +1,24 @@
 import { DateInput, Input, FileUpload } from '@/components/ui';
-import type { GestionAnteproyectoFormData } from '@/types/gestionAnteproyecto.types';
+import type { GestionAnteproyectoFormData, UploadedDocument } from '@/types/gestionAnteproyecto.types';
 
 interface StepPresentacionMunicipalProps {
   formData: GestionAnteproyectoFormData;
   errors: Record<string, string>;
   gestionId: string;
-  uploadedDocuments: any[];
+  uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof GestionAnteproyectoFormData, value: any) => void;
-  onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onFileUpload: (file: File, documentKey: string) => Promise<UploadedDocument>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 export default function StepPresentacionMunicipal({
   formData,
   errors,
+  gestionId,
+  uploadedDocuments,
   onInputChange,
-  onFileUpload
+  onFileUpload,
+  onDownloadDocument
 }: StepPresentacionMunicipalProps) {
 
   return (
@@ -42,7 +46,7 @@ export default function StepPresentacionMunicipal({
           placeholder="Ej: EXP-2025-123456"
           required
           value={formData.numero_expediente || ''}
-          onChange={(value) => onInputChange('numero_expediente', value)}
+          onChange={(e) => onInputChange('numero_expediente', e.target.value)}
           error={errors.numero_expediente}
           description="Número asignado por la municipalidad al expediente"
         />
@@ -53,17 +57,12 @@ export default function StepPresentacionMunicipal({
           label="Archivo del Cargo Sellado"
           required
           accept=".pdf,.jpg,.jpeg,.png"
-          multiple={false}
-          onChange={async (files: File[]) => {
-            if (files.length > 0) {
-              try {
-                await onFileUpload(files[0], 'archivo_cargo');
-                onInputChange('archivo_cargo', files);
-              } catch (error) {
-                console.error('Error uploading file:', error);
-              }
-            }
-          }}
+          onChange={(files) => onInputChange('archivo_cargo', files)}
+          onUpload={onFileUpload}
+          documentKey="presentacion_municipal.archivo_cargo"
+          anteproyectoId={gestionId}
+          uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'presentacion_municipal.archivo_cargo').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+          onDownload={onDownloadDocument}
           error={errors.archivo_cargo}
         />
       </div>
