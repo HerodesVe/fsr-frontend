@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LuArrowLeft, LuArrowRight, LuX, LuInfo } from 'react-icons/lu';
 import { Button } from '@/components/ui';
 import { useHeaderStore } from '@/store/headerStore';
 import { useClients } from '@/hooks/useClients';
+import { useAmpliacion } from '@/hooks/useAmpliaciones';
+import toast from 'react-hot-toast';
 import { ResumenAmpliacion } from './components';
 import { StepCargo } from '@/components/utils/Steps';
 import StepProyectoPersonalizado from './StepAmpliacion/StepProyectoPersonalizado';
@@ -11,7 +13,7 @@ import StepLicencias from './StepAmpliacion/StepLicencias';
 import StepAntecedentes from './StepAmpliacion/StepAntecedentes';
 import StepDocumentacion from './StepAmpliacion/StepDocumentacion';
 import StepTramiteMunicipal from './StepAmpliacion/StepTramiteMunicipal';
-import type { AmpliacionFormData, FormStep, UploadedDocument } from '@/types/ampliacion.types';
+import type { AmpliacionFormData, FormStep, UploadedDocument, DocumentInfo } from '@/types/ampliacion.types';
 
 const stepLabels = [
   'Información del Proyecto',
@@ -27,14 +29,15 @@ export default function CreateEditAmpliacion() {
   const navigate = useNavigate();
   const { setHeader } = useHeaderStore();
   const { clients, isLoading: clientsLoading } = useClients();
+  const { ampliacion, isLoading: ampliacionLoading, createNew, update, uploadDocs, downloadDoc } = useAmpliacion(id);
   
   const [currentStep, setCurrentStep] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showValidationError, setShowValidationError] = useState(false);
+  const [ampliacionId, setAmpliacionId] = useState<string | null>(id || null);
   
-  // Estado para manejar los pasos del formulario
   const [steps, setSteps] = useState<FormStep[]>([
     { id: 1, title: 'Información del Proyecto', completed: false },
     { id: 2, title: 'Licencias y Normativas', completed: false },
@@ -45,17 +48,12 @@ export default function CreateEditAmpliacion() {
   ]);
   
   const [formData, setFormData] = useState<AmpliacionFormData>({
-    // Paso 1: Información del Proyecto
     nombre_proyecto: '',
     selectedClient: null,
-
-    // Paso 2: Licencias
     tipo_licencia_edificacion: '',
     modalidad: 'B',
     link_normativas: '',
     archivo_normativo: [],
-
-    // Paso 3: Antecedentes
     gestionado_por_fsr: false,
     proyecto_fsr_id: '',
     certificado_parametros: [],
@@ -64,52 +62,30 @@ export default function CreateEditAmpliacion() {
     declaratoria_fabrica: [],
     planos_fabrica: [],
     partida_registral: [],
-
-    // Paso 4: Documentación Técnica
     fue: [],
-    
-    // Arquitectura
     arquitectura_intervencion: [],
     arquitectura_resultante: [],
     arquitectura_memoria: [],
-    
-    // Estructuras
     estructuras_intervencion: [],
     estructuras_resultante: [],
-    
-    // Sanitarias
     sanitarias_intervencion: [],
     sanitarias_resultante: [],
     sanitarias_sedapal: [],
-    
-    // Eléctricas
     electricas_resultante: [],
     electricas_luz_del_sur: [],
-    
-    // Mecánicas
     mecanicas_ficha_tecnica: [],
-    
-    // Gas
     gas_resultante: [],
     gas_calidda: [],
-    
-    // Casos Especiales
     es_condominio: false,
     tiene_junta: 'no',
     autorizacion_condominio: [],
     observaciones_condominio: '',
-
-    // Paso 5: Trámite Municipal
     fecha_ingreso_municipalidad: '',
     cargo_ingreso: [],
     fecha_comision: '',
     dictamen_comision: 'conforme',
     acta_comision: [],
-    
-    // Seguimiento
     seguimiento: [],
-
-    // Paso 6: Entrega al Administrado
     fecha_entrega_administrado: '',
     receptor_administrado: '',
     cargo_entrega_administrado: [],
@@ -118,57 +94,315 @@ export default function CreateEditAmpliacion() {
 
   const isEdit = Boolean(id);
 
+  // Cargar datos cuando se edita
+  useEffect(() => {
+    if (ampliacion && isEdit && clients && clients.length > 0) {
+      const selectedClient = clients.find(client => client.id === ampliacion.client_id) || null;
+
+      setFormData(prev => ({
+        ...prev,
+        selectedClient,
+        nombre_proyecto: ampliacion.data?.nombre_proyecto || '',
+        tipo_licencia_edificacion: ampliacion.data?.licencias?.tipo_licencia_edificacion || '',
+        modalidad: ampliacion.data?.licencias?.modalidad || 'B',
+        link_normativas: ampliacion.data?.licencias?.link_normativas || '',
+        gestionado_por_fsr: ampliacion.data?.antecedentes?.gestionado_por_fsr || false,
+        proyecto_fsr_id: ampliacion.data?.antecedentes?.proyecto_fsr_id || '',
+        es_condominio: ampliacion.data?.documentacion_tecnica?.es_condominio || false,
+        tiene_junta: ampliacion.data?.documentacion_tecnica?.tiene_junta || 'no',
+        observaciones_condominio: ampliacion.data?.documentacion_tecnica?.observaciones_condominio || '',
+        fecha_ingreso_municipalidad: ampliacion.data?.tramite_municipal?.fecha_ingreso_municipalidad || '',
+        fecha_comision: ampliacion.data?.tramite_municipal?.fecha_comision || '',
+        dictamen_comision: ampliacion.data?.tramite_municipal?.dictamen_comision || 'conforme',
+        seguimiento: ampliacion.data?.tramite_municipal?.seguimiento || [],
+        fecha_entrega_administrado: ampliacion.data?.entrega_final?.fecha_entrega_administrado || '',
+        receptor_administrado: ampliacion.data?.entrega_final?.receptor_administrado || '',
+        observaciones_entrega: ampliacion.data?.entrega_final?.observaciones_entrega || '',
+      }));
+
+      // Cargar documentos
+      const allDocs: UploadedDocument[] = [];
+      if (ampliacion.uploaded_documents && ampliacion.uploaded_documents.length > 0) {
+        const docs = ampliacion.uploaded_documents.map((doc: any) => ({
+          id: doc.file_id,
+          name: doc.name,
+          url: '',
+          size: 0,
+          type: 'application/pdf',
+          key: doc.key,
+        }));
+        allDocs.push(...docs);
+      }
+
+      if (allDocs.length > 0) {
+        setUploadedDocuments(allDocs);
+      }
+    }
+  }, [ampliacion, isEdit, clients]);
+
   useEffect(() => {
     setHeader(
       isEdit ? 'Editar Ampliación/Remodelación/Demolición' : 'Nueva Ampliación/Remodelación/Demolición',
       'Gestiona todos tus trámites y servicios en un solo lugar'
     );
-    
-    return () => {
-      setHeader('Dashboard');
-    };
+    return () => setHeader('Dashboard');
   }, [setHeader, isEdit]);
 
-  const handleInputChange = (field: keyof AmpliacionFormData, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleInputChange = useCallback((field: keyof AmpliacionFormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setErrors(prev => {
+      if (prev[field]) {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      }
+      return prev;
+    });
+    setShowValidationError(false);
+  }, []);
+
+  const handleFileUpload = useCallback(async (file: File, documentKey?: string): Promise<UploadedDocument> => {
+    const tempId = Date.now().toString();
     
-    // Limpiar error del campo
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
-    }
-
-    // Ocultar mensaje de validación general si está visible
-    if (showValidationError) {
-      setShowValidationError(false);
-    }
-  };
-
-  const handleFileUpload = async (file: File, documentKey: string) => {
-    // Simular upload
     const uploadedDoc: UploadedDocument = {
-      key: documentKey,
+      id: tempId,
       name: file.name,
-      file_id: Date.now().toString(),
       url: URL.createObjectURL(file),
       size: file.size,
       type: file.type,
+      key: documentKey,
     };
     
     setUploadedDocuments(prev => [...prev, uploadedDoc]);
+
+    if (ampliacionId && documentKey) {
+      try {
+        const response = await uploadDocs(ampliacionId, [file], [documentKey]);
+        
+        if (response && response.uploaded_documents) {
+          const uploadedFromBackend = response.uploaded_documents.find(
+            (doc: any) => doc.key === documentKey && doc.name === file.name
+          );
+          
+          if (uploadedFromBackend) {
+            setUploadedDocuments(prev => 
+              prev.map(doc => 
+                doc.id === tempId 
+                  ? { ...doc, id: uploadedFromBackend.file_id }
+                  : doc
+              )
+            );
+          }
+        }
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        setUploadedDocuments(prev => prev.filter(doc => doc.id !== tempId));
+      }
+    }
+    
     return uploadedDoc;
+  }, [ampliacionId, uploadDocs]);
+
+  const handleDownloadDocument = useCallback(async (documentId: string, fileName: string) => {
+    if (!ampliacionId) {
+      toast.error('No se puede descargar el documento en este momento');
+      return;
+    }
+    
+    try {
+      await downloadDoc(ampliacionId, documentId, fileName);
+    } catch (error) {
+      console.error('Error downloading document:', error);
+    }
+  }, [ampliacionId, downloadDoc]);
+
+  const formatDateForBackend = (dateString: string): string | undefined => {
+    if (!dateString || dateString.trim() === '') return undefined;
+    if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+      return dateString.split('T')[0];
+    }
+    if (/^\d{2}\/\d{2}\/\d{4}/.test(dateString)) {
+      const [day, month, year] = dateString.split('/');
+      return `${year}-${month}-${day}`;
+    }
+    if (!isNaN(Date.parse(dateString))) {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0];
+    }
+    return undefined;
+  };
+
+  const createDocumentInfo = (name: string, is_mandatory: boolean): DocumentInfo => {
+    return {
+      name,
+      is_mandatory,
+      status: 'Pendiente',
+      file_reference: '',
+      observation: '',
+    };
+  };
+
+  // PATCH por paso - Solo lo editado
+  const buildUpdateRequestForCurrentStep = (): any | null => {
+    switch (currentStep) {
+      case 0: // Paso 1: Información del Proyecto
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            nombre_proyecto: formData.nombre_proyecto,
+          }
+        };
+
+      case 1: // Paso 2: Licencias
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            licencias: {
+              tipo_licencia_edificacion: formData.tipo_licencia_edificacion,
+              modalidad: formData.modalidad,
+              link_normativas: formData.link_normativas,
+            }
+          }
+        };
+
+      case 2: // Paso 3: Antecedentes
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            antecedentes: {
+              gestionado_por_fsr: formData.gestionado_por_fsr,
+              proyecto_fsr_id: formData.proyecto_fsr_id,
+            }
+          }
+        };
+
+      case 3: // Paso 4: Documentación Técnica
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            documentacion_tecnica: {
+              es_condominio: formData.es_condominio,
+              tiene_junta: formData.tiene_junta,
+              observaciones_condominio: formData.observaciones_condominio,
+            }
+          }
+        };
+
+      case 4: // Paso 5: Trámite Municipal
+        const tramiteData: any = {
+          dictamen_comision: formData.dictamen_comision,
+          seguimiento: formData.seguimiento,
+        };
+        
+        const fechaIngreso = formatDateForBackend(formData.fecha_ingreso_municipalidad);
+        if (fechaIngreso) tramiteData.fecha_ingreso_municipalidad = fechaIngreso;
+        
+        const fechaComision = formatDateForBackend(formData.fecha_comision);
+        if (fechaComision) tramiteData.fecha_comision = fechaComision;
+
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            tramite_municipal: tramiteData
+          }
+        };
+
+      case 5: // Paso 6: Entrega al Administrado
+        const entregaData: any = {
+          receptor_administrado: formData.receptor_administrado,
+          observaciones_entrega: formData.observaciones_entrega,
+        };
+        
+        const fechaEntrega = formatDateForBackend(formData.fecha_entrega_administrado);
+        if (fechaEntrega) entregaData.fecha_entrega_administrado = fechaEntrega;
+
+        return {
+          client_id: formData.selectedClient?.id || '',
+          data: {
+            entrega_final: entregaData
+          }
+        };
+
+      default:
+        return null;
+    }
+  };
+
+  // Construir request de creación completo
+  const buildCreateRequest = (): any => {
+    const baseData: any = {
+      client_id: formData.selectedClient?.id || '',
+      data: {
+        service_type: 'ampliacion_remodelacion',
+        nombre_proyecto: formData.nombre_proyecto,
+        licencias: {
+          tipo_licencia_edificacion: formData.tipo_licencia_edificacion,
+          modalidad: formData.modalidad,
+          link_normativas: formData.link_normativas,
+          archivo_normativo: createDocumentInfo('Archivo Normativo', false),
+        },
+        antecedentes: {
+          gestionado_por_fsr: formData.gestionado_por_fsr,
+          proyecto_fsr_id: formData.proyecto_fsr_id,
+          certificado_parametros: createDocumentInfo('Certificado de Parámetros', true),
+          licencia_obra: createDocumentInfo('Licencia de Obra', true),
+          conformidad_obra: createDocumentInfo('Conformidad de Obra', false),
+          declaratoria_fabrica: createDocumentInfo('Declaratoria de Fábrica', false),
+          planos_fabrica: createDocumentInfo('Planos de Fábrica', false),
+          partida_registral: createDocumentInfo('Partida Registral', true),
+        },
+        documentacion_tecnica: {
+          fue: createDocumentInfo('FUE', true),
+          arquitectura_intervencion: createDocumentInfo('Planos Intervención Arquitectura', true),
+          arquitectura_resultante: createDocumentInfo('Planos Resultante Arquitectura', true),
+          arquitectura_memoria: createDocumentInfo('Memoria Descriptiva', true),
+          estructuras_intervencion: createDocumentInfo('Planos Intervención Estructuras', false),
+          estructuras_resultante: createDocumentInfo('Planos Resultante Estructuras', false),
+          sanitarias_intervencion: createDocumentInfo('Planos Intervención Sanitarias', false),
+          sanitarias_resultante: createDocumentInfo('Planos Resultante Sanitarias', false),
+          sanitarias_sedapal: createDocumentInfo('Factibilidad Sedapal', false),
+          electricas_resultante: createDocumentInfo('Planos Resultante Eléctricas', false),
+          electricas_luz_del_sur: createDocumentInfo('Factibilidad Luz del Sur', false),
+          mecanicas_ficha_tecnica: createDocumentInfo('Ficha Técnica Mecánicas', false),
+          gas_resultante: createDocumentInfo('Planos Resultante Gas', false),
+          gas_calidda: createDocumentInfo('Factibilidad Cálidda', false),
+          es_condominio: formData.es_condominio,
+          tiene_junta: formData.tiene_junta,
+          autorizacion_condominio: createDocumentInfo('Autorización Condominio', false),
+          observaciones_condominio: formData.observaciones_condominio,
+        },
+        tramite_municipal: {
+          cargo_ingreso: createDocumentInfo('Cargo de Ingreso', false),
+          dictamen_comision: formData.dictamen_comision,
+          acta_comision: createDocumentInfo('Acta de Comisión', false),
+          seguimiento: formData.seguimiento,
+        },
+        entrega_final: {
+          receptor_administrado: formData.receptor_administrado,
+          cargo_entrega_administrado: createDocumentInfo('Cargo de Entrega', false),
+          observaciones_entrega: formData.observaciones_entrega,
+        },
+      },
+    };
+
+    // Agregar fechas si existen
+    const fechaIngreso = formatDateForBackend(formData.fecha_ingreso_municipalidad);
+    if (fechaIngreso) baseData.data.tramite_municipal.fecha_ingreso_municipalidad = fechaIngreso;
+
+    const fechaComision = formatDateForBackend(formData.fecha_comision);
+    if (fechaComision) baseData.data.tramite_municipal.fecha_comision = fechaComision;
+
+    const fechaEntrega = formatDateForBackend(formData.fecha_entrega_administrado);
+    if (fechaEntrega) baseData.data.entrega_final.fecha_entrega_administrado = fechaEntrega;
+
+    return baseData;
   };
 
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
 
     switch (step) {
-      case 0: // Información del Proyecto
+      case 0:
         if (!formData.nombre_proyecto.trim()) {
           newErrors.nombre_proyecto = 'El nombre del proyecto es requerido';
         }
@@ -177,7 +411,7 @@ export default function CreateEditAmpliacion() {
         }
         break;
         
-      case 1: // Licencias y Normativas
+      case 1:
         if (!formData.tipo_licencia_edificacion?.trim()) {
           newErrors.tipo_licencia_edificacion = 'El tipo de licencia es requerido';
         }
@@ -186,45 +420,24 @@ export default function CreateEditAmpliacion() {
         }
         break;
         
-      case 2: // Antecedentes
-        if (!formData.certificado_parametros || formData.certificado_parametros.length === 0) {
-          newErrors.certificado_parametros = 'El certificado de parámetros urbanísticos es requerido';
-        }
-        if (formData.gestionado_por_fsr && !formData.proyecto_fsr_id) {
-          newErrors.proyecto_fsr_id = 'Debe seleccionar un proyecto FSR';
-        }
+      case 2:
+        // Validaciones opcionales
         break;
         
-      case 3: // Documentación Técnica
-        if (!formData.fue || formData.fue.length === 0) {
-          newErrors.fue = 'El FUE es requerido';
-        }
-        if (!formData.arquitectura_intervencion || formData.arquitectura_intervencion.length === 0) {
-          newErrors.arquitectura_intervencion = 'Los planos de intervención de arquitectura son requeridos';
-        }
-        if (!formData.arquitectura_resultante || formData.arquitectura_resultante.length === 0) {
-          newErrors.arquitectura_resultante = 'Los planos resultantes de arquitectura son requeridos';
-        }
-        if (!formData.arquitectura_memoria || formData.arquitectura_memoria.length === 0) {
-          newErrors.arquitectura_memoria = 'La memoria descriptiva es requerida';
-        }
-        if (formData.es_condominio && (!formData.autorizacion_condominio || formData.autorizacion_condominio.length === 0)) {
-          newErrors.autorizacion_condominio = 'La autorización de condominio es requerida';
-        }
+      case 3:
+        // Validaciones de documentos
         break;
         
-      case 4: // Trámite Municipal
-        // Validaciones opcionales para trámite municipal
+      case 4:
+        // Validaciones opcionales
         break;
-      case 5: // Entrega al Administrado
+
+      case 5:
         if (!formData.fecha_entrega_administrado) {
           newErrors.fecha_entrega_administrado = 'La fecha de entrega es requerida';
         }
         if (!formData.receptor_administrado) {
           newErrors.receptor_administrado = 'El nombre del receptor es requerido';
-        }
-        if (!formData.cargo_entrega_administrado || formData.cargo_entrega_administrado.length === 0) {
-          newErrors.cargo_entrega_administrado = 'El cargo de entrega es requerido';
         }
         break;
     }
@@ -233,21 +446,44 @@ export default function CreateEditAmpliacion() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validateStep(currentStep)) {
-      // Mostrar mensaje de error de validación
       setShowValidationError(true);
-      // Scroll hacia arriba para mostrar los errores
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      // Ocultar el mensaje después de 5 segundos
       setTimeout(() => setShowValidationError(false), 5000);
       return;
     }
 
-    // Ocultar mensaje de error si está visible
     setShowValidationError(false);
 
-    // Marcar paso como completado y avanzar
+    // Si es el primer paso y no hay ampliacionId, crear
+    if (currentStep === 0 && !ampliacionId) {
+      try {
+        setIsSaving(true);
+        const requestData = buildCreateRequest();
+        const newAmpliacion = await createNew(requestData);
+        setAmpliacionId(newAmpliacion.id);
+      } catch (error) {
+        console.error('Error creating ampliacion:', error);
+        setShowValidationError(true);
+        return;
+      } finally {
+        setIsSaving(false);
+      }
+    } else if (ampliacionId) {
+      try {
+        setIsSaving(true);
+        const updateData = buildUpdateRequestForCurrentStep();
+        if (updateData) {
+          await update(ampliacionId, updateData);
+        }
+      } catch (error) {
+        console.error('Error updating ampliacion:', error);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+
     setSteps(prevSteps => 
       prevSteps.map((step, index) => 
         index === currentStep ? { ...step, completed: true } : step
@@ -266,12 +502,9 @@ export default function CreateEditAmpliacion() {
   };
 
   const handleStepClick = (stepIndex: number) => {
-    // Permitir navegación hacia atrás a cualquier paso
     if (stepIndex <= currentStep) {
       setCurrentStep(stepIndex);
-    }
-    // Permitir navegación hacia adelante solo a pasos completados o al siguiente paso inmediato
-    else if (steps[stepIndex].completed || stepIndex === currentStep + 1) {
+    } else if (steps[stepIndex].completed || stepIndex === currentStep + 1) {
       setCurrentStep(stepIndex);
     }
   };
@@ -279,9 +512,10 @@ export default function CreateEditAmpliacion() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Simular guardado
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Ampliación guardada:', formData);
+      if (ampliacionId) {
+        const updateData = buildCreateRequest();
+        await update(ampliacionId, updateData);
+      }
       navigate('/dashboard/ampliaciones');
     } catch (error) {
       console.error('Error al guardar:', error);
@@ -296,7 +530,7 @@ export default function CreateEditAmpliacion() {
         return (
           <StepProyectoPersonalizado
             formData={formData}
-            clients={clients}
+            clients={clients || []}
             errors={errors}
             onInputChange={handleInputChange}
           />
@@ -306,10 +540,11 @@ export default function CreateEditAmpliacion() {
           <StepLicencias
             formData={formData}
             errors={errors}
-            ampliacionId={id || 'new'}
+            ampliacionId={ampliacionId || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
       case 2:
@@ -317,10 +552,11 @@ export default function CreateEditAmpliacion() {
           <StepAntecedentes
             formData={formData}
             errors={errors}
-            ampliacionId={id || 'new'}
+            ampliacionId={ampliacionId || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
       case 3:
@@ -328,10 +564,11 @@ export default function CreateEditAmpliacion() {
           <StepDocumentacion
             formData={formData}
             errors={errors}
-            ampliacionId={id || 'new'}
+            ampliacionId={ampliacionId || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
       case 4:
@@ -339,23 +576,26 @@ export default function CreateEditAmpliacion() {
           <StepTramiteMunicipal
             formData={formData}
             errors={errors}
-            ampliacionId={id || 'new'}
+            ampliacionId={ampliacionId || 'new'}
             uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
           />
         );
       case 5:
         return (
           <StepCargo
             formData={formData}
-            projectId={id || 'new'}
+            projectId={ampliacionId || 'new'}
             uploadedDocuments={uploadedDocuments}
             errors={errors}
             onInputChange={(field: string, value: any) => handleInputChange(field as keyof AmpliacionFormData, value)}
             onFileUpload={handleFileUpload}
+            onDownloadDocument={handleDownloadDocument}
             title="Cargo"
             description="Complete la información de la entrega final de la ampliación al administrado"
+            cargoDocumentKey="entrega_final.cargo_entrega_administrado"
           />
         );
       default:
@@ -363,7 +603,7 @@ export default function CreateEditAmpliacion() {
     }
   };
 
-  if (clientsLoading) {
+  if (clientsLoading || (isEdit && ampliacionLoading)) {
     return (
       <div className="p-6">
         <div className="animate-pulse">
@@ -383,10 +623,8 @@ export default function CreateEditAmpliacion() {
   return (
     <div className="p-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Contenido principal */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg border border-gray-200 p-6">
-            {/* Indicadores de pasos */}
             <div className="mb-6">
               <div className="flex items-center gap-2">
                 {steps.map((step, index) => (
@@ -411,7 +649,6 @@ export default function CreateEditAmpliacion() {
               </div>
             </div>
 
-            {/* Mensaje de error de validación */}
             {showValidationError && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex items-center gap-2">
@@ -428,12 +665,10 @@ export default function CreateEditAmpliacion() {
               </div>
             )}
 
-            {/* Contenido del paso */}
             <div className="mb-6">
               {renderStepContent()}
             </div>
 
-            {/* Navegación entre pasos */}
             <div className="flex items-center justify-between pt-6 border-t border-gray-200">
               <div className="flex items-center gap-4">
                 {currentStep > 0 && (
@@ -480,13 +715,12 @@ export default function CreateEditAmpliacion() {
           </div>
         </div>
 
-        {/* Resumen */}
         <div className="lg:col-span-1">
           <ResumenAmpliacion
             formData={formData}
             currentStep={currentStep}
             steps={steps}
-            ampliacionId={id || 'new'}
+            ampliacionId={ampliacionId || 'new'}
             onSave={handleSave}
             isSaving={isSaving}
             uploadedDocuments={uploadedDocuments}

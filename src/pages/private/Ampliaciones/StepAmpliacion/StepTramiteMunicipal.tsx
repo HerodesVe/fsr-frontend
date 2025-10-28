@@ -2,21 +2,24 @@ import { LuPlus, LuTrash2 } from 'react-icons/lu';
 import { DateInput, Select, FileUpload, Input, Button } from '@/components/ui';
 import type { AmpliacionFormData, UploadedDocument, SeguimientoItem } from '@/types/ampliacion.types';
 
-interface StepTramiteMunicipalProps {
+export interface StepTramiteMunicipalProps {
   formData: AmpliacionFormData;
   errors: Record<string, string>;
   ampliacionId: string;
   uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof AmpliacionFormData, value: any) => void;
   onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 export default function StepTramiteMunicipal({
   formData,
   errors,
   ampliacionId,
+  uploadedDocuments,
   onInputChange,
   onFileUpload,
+  onDownloadDocument,
 }: StepTramiteMunicipalProps) {
   const addNewSeguimiento = () => {
     const newEntry: SeguimientoItem = {
@@ -68,9 +71,10 @@ export default function StepTramiteMunicipal({
               onChange={(files) => onInputChange('cargo_ingreso', files)}
               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
               onUpload={onFileUpload}
-              documentKey="cargo_ingreso"
+              documentKey="tramite_municipal.cargo_ingreso"
               anteproyectoId={ampliacionId}
-              uploadedFiles={formData.cargo_ingreso}
+              uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'tramite_municipal.cargo_ingreso').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
               error={errors.cargo_ingreso}
             />
           </div>
@@ -104,9 +108,10 @@ export default function StepTramiteMunicipal({
               onChange={(files) => onInputChange('acta_comision', files)}
               accept=".pdf,.doc,.docx"
               onUpload={onFileUpload}
-              documentKey="acta_comision"
+              documentKey="tramite_municipal.acta_comision"
               anteproyectoId={ampliacionId}
-              uploadedFiles={formData.acta_comision}
+              uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'tramite_municipal.acta_comision').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
               error={errors.acta_comision}
             />
           </div>

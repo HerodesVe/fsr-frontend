@@ -78,13 +78,23 @@ export interface SeguimientoItem {
   comentario: string;
 }
 
-export interface UploadedDocument {
-  key: string;
+export interface DocumentInfo {
   name: string;
-  file_id: string;
-  url?: string;
-  size?: number;
-  type?: string;
+  is_mandatory: boolean;
+  status: 'Pendiente' | 'Aprobado' | 'Rechazado' | 'Subido';
+  file_reference: string;
+  emission_date?: string;
+  observation?: string;
+}
+
+export interface UploadedDocument {
+  id: string;
+  name: string;
+  url: string;
+  size: number;
+  type: string;
+  key?: string;
+  file_id?: string; // Alias para compatibilidad con FileUpload
 }
 
 export interface FormStep {
@@ -96,15 +106,27 @@ export interface FormStep {
 export interface Ampliacion {
   id: string;
   instance_code: string;
+  client_id: string;
+  service_id: string;
+  user_id: string;
   administrado: string;
   responsable: string;
   fecha_creacion: string;
   fecha_culminacion: string;
   status: string;
+  progress_percentage?: number;
   created_at: string;
   scheduled_completion_date: string | null;
-  data: {
-    nombre_proyecto: string;
+  next_step?: string;
+  data?: {
+    service_type?: string;
+    nombre_proyecto?: string;
+    licencias?: any;
+    antecedentes?: any;
+    documentacion_tecnica?: any;
+    tramite_municipal?: any;
+    entrega_final?: any;
+    [key: string]: any;
   };
   steps_status: {
     proyecto: string;
@@ -113,6 +135,11 @@ export interface Ampliacion {
     documentacion: string;
     tramite_municipal: string;
   };
+  uploaded_documents?: Array<{
+    key: string;
+    name: string;
+    file_id: string;
+  }>;
 }
 
 export enum AmpliacionStatus {

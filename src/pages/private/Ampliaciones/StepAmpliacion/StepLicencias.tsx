@@ -8,14 +8,17 @@ interface StepLicenciasProps {
   uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof AmpliacionFormData, value: any) => void;
   onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 export default function StepLicencias({
   formData,
   errors,
   ampliacionId,
+  uploadedDocuments,
   onInputChange,
   onFileUpload,
+  onDownloadDocument,
 }: StepLicenciasProps) {
   const modalidadOptions = [
     { value: 'A', label: 'Modalidad A: Aprobación automática con firma de profesionales' },
@@ -75,13 +78,14 @@ export default function StepLicencias({
 
           <FileUpload
             label="Archivo Normativo"
-            placeholder="Seleccione archivo"
+            placeholder="Subir Archivo Normativo"
             onChange={(files) => onInputChange('archivo_normativo', files)}
             accept=".pdf,.doc,.docx"
             onUpload={onFileUpload}
-            documentKey="archivo_normativo"
+            documentKey="licencias.archivo_normativo"
             anteproyectoId={ampliacionId}
-            uploadedFiles={formData.archivo_normativo || []}
+            uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'licencias.archivo_normativo').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+            onDownload={onDownloadDocument}
           />
         </div>
       </div>

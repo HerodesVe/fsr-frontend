@@ -8,6 +8,7 @@ interface StepAntecedentesProps {
   uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof AmpliacionFormData, value: any) => void;
   onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 // Mock data para proyectos FSR
@@ -21,8 +22,10 @@ export default function StepAntecedentes({
   formData,
   errors,
   ampliacionId,
+  uploadedDocuments,
   onInputChange,
   onFileUpload,
+  onDownloadDocument,
 }: StepAntecedentesProps) {
   const proyectoOptions = mockProyectosFSR.map(proyecto => ({
     value: proyecto.id,
@@ -79,53 +82,58 @@ export default function StepAntecedentes({
                 onChange={(files) => onInputChange('licencia_obra', files)}
                 accept=".pdf,.doc,.docx"
                 onUpload={onFileUpload}
-                documentKey="licencia_obra"
+                documentKey="antecedentes.licencia_obra"
                 anteproyectoId={ampliacionId}
-                uploadedFiles={formData.licencia_obra}
+                uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'antecedentes.licencia_obra').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
 
               <FileUpload
                 label="Conformidad de Obra (si aplica)"
                 placeholder="Seleccione archivo"
-                uploadedFiles={formData.conformidad_obra}
                 onChange={(files) => onInputChange('conformidad_obra', files)}
                 accept=".pdf,.doc,.docx"
                 onUpload={onFileUpload}
-                documentKey="conformidad_obra"
+                documentKey="antecedentes.conformidad_obra"
                 anteproyectoId={ampliacionId}
+                uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'antecedentes.conformidad_obra').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
 
               <FileUpload
                 label="Declaratoria de Fábrica (si aplica)"
                 placeholder="Seleccione archivo"
-                uploadedFiles={formData.declaratoria_fabrica}
                 onChange={(files) => onInputChange('declaratoria_fabrica', files)}
                 accept=".pdf,.doc,.docx"
                 onUpload={onFileUpload}
-                documentKey="declaratoria_fabrica"
+                documentKey="antecedentes.declaratoria_fabrica"
                 anteproyectoId={ampliacionId}
+                uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'antecedentes.declaratoria_fabrica').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
 
               <FileUpload
                 label="Planos de Fábrica (si aplica)"
                 placeholder="Seleccione archivo"
-                uploadedFiles={formData.planos_fabrica}
                 onChange={(files) => onInputChange('planos_fabrica', files)}
                 accept=".pdf,.dwg,.dxf"
                 onUpload={onFileUpload}
-                documentKey="planos_fabrica"
+                documentKey="antecedentes.planos_fabrica"
                 anteproyectoId={ampliacionId}
+                uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'antecedentes.planos_fabrica').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
 
               <FileUpload
                 label="Partida Registral (si no hay planos)"
                 placeholder="Seleccione archivo"
-                uploadedFiles={formData.partida_registral}
                 onChange={(files) => onInputChange('partida_registral', files)}
                 accept=".pdf,.doc,.docx"
                 onUpload={onFileUpload}
-                documentKey="partida_registral"
+                documentKey="antecedentes.partida_registral"
                 anteproyectoId={ampliacionId}
+                uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'antecedentes.partida_registral').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
             </div>
           )}
@@ -139,9 +147,10 @@ export default function StepAntecedentes({
                 accept=".pdf,.doc,.docx"
                 required
                 onUpload={onFileUpload}
-                documentKey="certificado_parametros"
+                documentKey="antecedentes.certificado_parametros"
                 anteproyectoId={ampliacionId}
-                uploadedFiles={formData.certificado_parametros}
+                uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'antecedentes.certificado_parametros').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
                 error={errors.certificado_parametros}
               />
           </div>

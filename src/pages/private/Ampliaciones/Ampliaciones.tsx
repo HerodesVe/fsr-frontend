@@ -2,82 +2,14 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LuPlus } from 'react-icons/lu';
 import { useHeaderStore } from '@/store/headerStore';
+import { useAmpliaciones } from '@/hooks/useAmpliaciones';
 import { Button, Filter } from '@/components/ui';
 import { ProyectoCard } from '@/components/utils/ProyectoCard';
-import { Ampliacion, AmpliacionStatus } from '@/types/ampliacion.types';
-
-// Data dummy para desarrollo
-const ampliacionesDummy: Ampliacion[] = [
-  {
-    id: '1',
-    instance_code: 'AMP-2024-001',
-    administrado: 'Constructora Lima S.A.C.',
-    responsable: 'Carlos Mendoza',
-    fecha_creacion: '15/01/2024',
-    fecha_culminacion: '20/01/2024',
-    status: 'Completado',
-    created_at: '2024-01-15T00:00:00Z',
-    scheduled_completion_date: '2024-01-20T00:00:00Z',
-    data: {
-      nombre_proyecto: 'Ampliación Edificio Comercial'
-    },
-    steps_status: {
-      proyecto: 'Completada',
-      licencias: 'Completada',
-      antecedentes: 'Completada',
-      documentacion: 'Completada',
-      tramite_municipal: 'Completada'
-    }
-  },
-  {
-    id: '2',
-    instance_code: 'AMP-2024-002',
-    administrado: 'Inversiones Norte S.A.C.',
-    responsable: 'Ana García',
-    fecha_creacion: '18/01/2024',
-    fecha_culminacion: '',
-    status: 'Pendiente',
-    created_at: '2024-01-18T00:00:00Z',
-    scheduled_completion_date: null,
-    data: {
-      nombre_proyecto: 'Remodelación Vivienda Unifamiliar'
-    },
-    steps_status: {
-      proyecto: 'Completada',
-      licencias: 'Completada',
-      antecedentes: 'En progreso',
-      documentacion: 'Pendiente',
-      tramite_municipal: 'Pendiente'
-    }
-  },
-  {
-    id: '3',
-    instance_code: 'AMP-2024-003',
-    administrado: 'Desarrollos Sur S.A.C.',
-    responsable: 'Miguel Torres',
-    fecha_creacion: '22/01/2024',
-    fecha_culminacion: '',
-    status: 'Pendiente',
-    created_at: '2024-01-22T00:00:00Z',
-    scheduled_completion_date: null,
-    data: {
-      nombre_proyecto: 'Demolición Parcial y Ampliación'
-    },
-    steps_status: {
-      proyecto: 'Completada',
-      licencias: 'En progreso',
-      antecedentes: 'Pendiente',
-      documentacion: 'Pendiente',
-      tramite_municipal: 'Pendiente'
-    }
-  }
-];
+import { AmpliacionStatus } from '@/types/ampliacion.types';
 
 export default function Ampliaciones() {
   const navigate = useNavigate();
-  const [ampliaciones] = useState<Ampliacion[]>(ampliacionesDummy);
-  const [isLoading] = useState(false);
-  const [error] = useState<Error | null>(null);
+  const { ampliaciones, isLoading, error } = useAmpliaciones();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<AmpliacionStatus>(AmpliacionStatus.TODOS);
   const { setHeader } = useHeaderStore();
