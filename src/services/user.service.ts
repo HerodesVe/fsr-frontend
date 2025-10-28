@@ -7,7 +7,6 @@ export interface CreateUserData {
   first_name: string;
   last_name: string;
   dni: string;
-  worker_code: number;
   role: 'OPERATOR' | 'ADMIN' | 'SUPERVISOR';
 }
 

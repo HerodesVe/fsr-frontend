@@ -41,7 +41,6 @@ export const useAuthStore = create<AuthState>()(
             first_name: 'Usuario',
             last_name: '',
             dni: '',
-            worker_code: 0,
             status: UserStatus.ACTIVE,
           };
 

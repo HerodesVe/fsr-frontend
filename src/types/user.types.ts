@@ -14,7 +14,6 @@ export enum UserRole {
     last_name: string;
     email: string;
     dni: string;
-    worker_code: number;
     role: UserRole;
     status: UserStatus;
   }

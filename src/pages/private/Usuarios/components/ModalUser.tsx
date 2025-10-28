@@ -60,10 +60,8 @@ const validationSchema = Yup.object({
   last_name: Yup.string()
     .required('El apellido es requerido'),
   dni: Yup.string()
-    .required('El DNI es requerido'),
-  worker_code: Yup.number()
-    .required('El código de trabajador es requerido')
-    .positive('Debe ser un número positivo'),
+    .required('El DNI es requerido')
+    .length(8, 'El DNI debe tener exactamente 8 caracteres'),
   role: Yup.string()
     .oneOf(['OPERATOR', 'ADMIN', 'SUPERVISOR'], 'Rol inválido')
     .required('El rol es requerido'),
@@ -91,7 +89,6 @@ export const ModalUser: React.FC<ModalUserProps> = ({
       first_name: user?.first_name || '',
       last_name: user?.last_name || '',
       dni: user?.dni || '',
-      worker_code: user?.worker_code || 1,
       role: user?.role || 'OPERATOR',
       is_active: user?.status === 'ACTIVE' || true,
     },
@@ -107,7 +104,6 @@ export const ModalUser: React.FC<ModalUserProps> = ({
             first_name: values.first_name,
             last_name: values.last_name,
             dni: values.dni,
-            worker_code: values.worker_code,
             role: values.role as 'OPERATOR' | 'ADMIN' | 'SUPERVISOR',
           };
           await createUser(userData);
@@ -118,7 +114,6 @@ export const ModalUser: React.FC<ModalUserProps> = ({
             first_name: values.first_name,
             last_name: values.last_name,
             dni: values.dni,
-            worker_code: values.worker_code,
             role: values.role as 'OPERATOR' | 'ADMIN' | 'SUPERVISOR',
             ...(values.password && { password: values.password }),
           };
@@ -174,7 +169,6 @@ export const ModalUser: React.FC<ModalUserProps> = ({
       first_name: true,
       last_name: true,
       dni: true,
-      worker_code: true,
       role: true,
     });
 
@@ -190,7 +184,6 @@ export const ModalUser: React.FC<ModalUserProps> = ({
           first_name: 'Nombres',
           last_name: 'Apellidos',
           dni: 'DNI',
-          worker_code: 'Código de Trabajador',
           role: 'Rol',
         };
         return `• ${fieldNames[field] || field}: ${message}`;
@@ -333,43 +326,28 @@ export const ModalUser: React.FC<ModalUserProps> = ({
               numbersOnly={true}
               maxLength={8}
             />
-          </div>
-          
-          <div>
+          </div>   
+
+           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Código de Trabajador <span className="text-red-500">*</span>
+              Rol <span className="text-red-500">*</span>
             </label>
-            <Input
-              name="worker_code"
-              type="number"
-              placeholder="Ingresa el código"
-              value={String(formik.values.worker_code)}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.worker_code && formik.errors.worker_code ? formik.errors.worker_code : undefined}
-              numbersOnly={true}
-              maxLength={10}
+            <Select
+              name="role"
+              placeholder="Selecciona un rol"
+              options={roleOptions}
+              selectedKeys={formik.values.role ? [formik.values.role] : []}
+              onSelectionChange={(keys) => {
+                const selectedKey = Array.from(keys)[0] as string;
+                formik.setFieldValue('role', selectedKey);
+              }}
+              error={formik.touched.role && formik.errors.role ? formik.errors.role : undefined}
             />
-          </div>
+          </div>      
         </div>
 
         {/* Rol */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Rol <span className="text-red-500">*</span>
-          </label>
-          <Select
-            name="role"
-            placeholder="Selecciona un rol"
-            options={roleOptions}
-            selectedKeys={formik.values.role ? [formik.values.role] : []}
-            onSelectionChange={(keys) => {
-              const selectedKey = Array.from(keys)[0] as string;
-              formik.setFieldValue('role', selectedKey);
-            }}
-            error={formik.touched.role && formik.errors.role ? formik.errors.role : undefined}
-          />
-        </div>
+       
 
         {/* Status */}
         <div>
