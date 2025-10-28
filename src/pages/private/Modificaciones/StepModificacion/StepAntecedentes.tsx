@@ -8,6 +8,7 @@ interface StepAntecedentesProps {
   uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof ModificacionFormData, value: any) => void;
   onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 export default function StepAntecedentes({
@@ -16,6 +17,7 @@ export default function StepAntecedentes({
   uploadedDocuments,
   onInputChange,
   onFileUpload,
+  onDownloadDocument,
 }: StepAntecedentesProps) {
   return (
     <div className="space-y-8">
@@ -65,15 +67,15 @@ export default function StepAntecedentes({
                 </div>
               </div>
               <FileUpload
-                placeholder="Seleccione archivo"
+                placeholder="Subir Licencia de Obra Anterior"
                 value={[]}
                 onChange={(files) => onInputChange('licencia_obra_anterior', files)}
                 accept=".pdf"
-                multiple
                 onUpload={onFileUpload}
-                documentKey="licencia_obra_anterior"
+                documentKey="antecedentes_modificacion.licencia_obra_anterior"
                 anteproyectoId={modificacionId}
-                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
             </div>
 
@@ -89,15 +91,15 @@ export default function StepAntecedentes({
                 </div>
               </div>
               <FileUpload
-                placeholder="Seleccione archivo"
+                placeholder="Subir Planos Aprobados Anteriores"
                 value={[]}
                 onChange={(files) => onInputChange('planos_aprobados_anteriores', files)}
                 accept=".pdf,.dwg"
-                multiple
                 onUpload={onFileUpload}
-                documentKey="planos_aprobados_anteriores"
+                documentKey="antecedentes_modificacion.planos_aprobados_anteriores"
                 anteproyectoId={modificacionId}
-                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
             </div>
 
@@ -113,15 +115,15 @@ export default function StepAntecedentes({
                 </div>
               </div>
               <FileUpload
-                placeholder="Seleccione archivo"
+                placeholder="Subir Formulario Único Anterior"
                 value={[]}
                 onChange={(files) => onInputChange('formulario_unico_anterior', files)}
                 accept=".pdf"
-                multiple
                 onUpload={onFileUpload}
-                documentKey="formulario_unico_anterior"
+                documentKey="antecedentes_modificacion.formulario_unico_anterior"
                 anteproyectoId={modificacionId}
-                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
             </div>
           </div>

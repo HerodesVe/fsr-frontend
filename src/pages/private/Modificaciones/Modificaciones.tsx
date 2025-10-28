@@ -2,82 +2,14 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LuPlus } from 'react-icons/lu';
 import { useHeaderStore } from '@/store/headerStore';
+import { useModificaciones } from '@/hooks/useModificaciones';
 import { Button, Filter } from '@/components/ui';
 import { ProyectoCard } from '@/components/utils/ProyectoCard';
-import { Modificacion, ModificacionStatus } from '@/types/modificacion.types';
-
-// Data dummy para desarrollo
-const modificacionesDummy: Modificacion[] = [
-  {
-    id: '1',
-    instance_code: 'MOD-2024-001',
-    administrado: 'Constructora Lima S.A.C.',
-    responsable: 'Carlos Mendoza',
-    fecha_creacion: '15/01/2024',
-    fecha_culminacion: '20/01/2024',
-    status: 'Completado',
-    created_at: '2024-01-15T00:00:00Z',
-    scheduled_completion_date: '2024-01-20T00:00:00Z',
-    data: {
-      nombre_proyecto: 'Modificación Edificio Central - Ampliación 2 pisos'
-    },
-    steps_status: {
-      administrado: 'Completada',
-      licencia: 'Completada',
-      antecedentes: 'Completada',
-      elaboracion: 'Completada',
-      gestion: 'Completada'
-    }
-  },
-  {
-    id: '2',
-    instance_code: 'MOD-2024-002',
-    administrado: 'Inversiones Norte S.A.C.',
-    responsable: 'Ana García',
-    fecha_creacion: '18/01/2024',
-    fecha_culminacion: '',
-    status: 'Pendiente',
-    created_at: '2024-01-18T00:00:00Z',
-    scheduled_completion_date: null,
-    data: {
-      nombre_proyecto: 'Modificación Residencial San Isidro - Cambio de uso'
-    },
-    steps_status: {
-      administrado: 'Completada',
-      licencia: 'Completada',
-      antecedentes: 'En progreso',
-      elaboracion: 'Pendiente',
-      gestion: 'Pendiente'
-    }
-  },
-  {
-    id: '3',
-    instance_code: 'MOD-2024-003',
-    administrado: 'Desarrollos Sur S.A.C.',
-    responsable: 'Miguel Torres',
-    fecha_creacion: '22/01/2024',
-    fecha_culminacion: '',
-    status: 'Pendiente',
-    created_at: '2024-01-22T00:00:00Z',
-    scheduled_completion_date: null,
-    data: {
-      nombre_proyecto: 'Modificación Comercial Miraflores - Remodelación fachada'
-    },
-    steps_status: {
-      administrado: 'Completada',
-      licencia: 'Pendiente',
-      antecedentes: 'Pendiente',
-      elaboracion: 'Pendiente',
-      gestion: 'Pendiente'
-    }
-  }
-];
+import { ModificacionStatus } from '@/types/modificacion.types';
 
 export default function Modificaciones() {
   const navigate = useNavigate();
-  const [modificaciones] = useState<Modificacion[]>(modificacionesDummy);
-  const [isLoading] = useState(false);
-  const [error] = useState<Error | null>(null);
+  const { modificaciones, isLoading, error } = useModificaciones();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<ModificacionStatus>(ModificacionStatus.TODOS);
   const { setHeader } = useHeaderStore();

@@ -9,6 +9,7 @@ interface StepGestionProps {
   errors: Record<string, string>;
   onInputChange: (field: keyof ModificacionFormData, value: any) => void;
   onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 export default function StepGestion({
@@ -18,6 +19,7 @@ export default function StepGestion({
   errors,
   onInputChange,
   onFileUpload,
+  onDownloadDocument,
 }: StepGestionProps) {
   return (
     <div className="space-y-8">
@@ -59,15 +61,16 @@ export default function StepGestion({
                 </div>
               </div>
               <FileUpload
-                placeholder="Seleccione archivo"
+                placeholder="Subir Cargo de Ingreso"
                 value={[]}
                 onChange={(files) => onInputChange('cargo_ingreso_expediente', files[0] || null)}
                 accept=".pdf"
                 multiple={false}
                 onUpload={onFileUpload}
-                documentKey="cargo_ingreso_expediente"
+                documentKey="gestion_modificacion.cargo_ingreso_expediente"
                 anteproyectoId={modificacionId}
-                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
             </div>
           </div>
@@ -90,15 +93,16 @@ export default function StepGestion({
                 </div>
               </div>
               <FileUpload
-                placeholder="Seleccione archivo"
+                placeholder="Subir Acta de Observaciones"
                 value={[]}
                 onChange={(files) => onInputChange('acta_observaciones', files[0] || null)}
                 accept=".pdf"
                 multiple={false}
                 onUpload={onFileUpload}
-                documentKey="acta_observaciones"
+                documentKey="gestion_modificacion.acta_observaciones"
                 anteproyectoId={modificacionId}
-                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
             </div>
 
@@ -114,15 +118,16 @@ export default function StepGestion({
                 </div>
               </div>
               <FileUpload
-                placeholder="Seleccione archivo"
+                placeholder="Subir Acta de Conformidad"
                 value={[]}
                 onChange={(files) => onInputChange('acta_conformidad', files[0] || null)}
                 accept=".pdf"
                 multiple={false}
                 onUpload={onFileUpload}
-                documentKey="acta_conformidad"
+                documentKey="gestion_modificacion.acta_conformidad"
                 anteproyectoId={modificacionId}
-                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
             </div>
 
@@ -138,15 +143,16 @@ export default function StepGestion({
                 </div>
               </div>
               <FileUpload
-                placeholder="Seleccione archivo"
+                placeholder="Subir Acta de Reconsideración"
                 value={[]}
                 onChange={(files) => onInputChange('acta_reconsideracion', files[0] || null)}
                 accept=".pdf"
                 multiple={false}
                 onUpload={onFileUpload}
-                documentKey="acta_reconsideracion"
+                documentKey="gestion_modificacion.acta_reconsideracion"
                 anteproyectoId={modificacionId}
-                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+                uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
               />
             </div>
           </div>
@@ -182,15 +188,16 @@ export default function StepGestion({
               </div>
             </div>
             <FileUpload
-              placeholder="Seleccione archivo"
+              placeholder="Subir Anexo de Subsanación"
               value={[]}
               onChange={(files) => onInputChange('anexo_subsanacion', files[0] || null)}
               accept=".pdf"
               multiple={false}
               onUpload={onFileUpload}
-              documentKey="anexo_subsanacion"
+              documentKey="gestion_modificacion.anexo_subsanacion"
               anteproyectoId={modificacionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -206,15 +213,16 @@ export default function StepGestion({
               </div>
             </div>
             <FileUpload
-              placeholder="Seleccione archivo"
+              placeholder="Subir Planos Corregidos"
               value={[]}
               onChange={(files) => onInputChange('planos_corregidos', files[0] || null)}
               accept=".pdf,.dwg"
               multiple={false}
               onUpload={onFileUpload}
-              documentKey="planos_corregidos"
+              documentKey="gestion_modificacion.planos_corregidos"
               anteproyectoId={modificacionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
         </div>
@@ -249,15 +257,16 @@ export default function StepGestion({
               </div>
             </div>
             <FileUpload
-              placeholder="Seleccione archivo"
+              placeholder="Subir Licencia de Modificación"
               value={[]}
               onChange={(files) => onInputChange('licencia_modificacion_emitida', files[0] || null)}
               accept=".pdf"
               multiple={false}
               onUpload={onFileUpload}
-              documentKey="licencia_modificacion_emitida"
+              documentKey="gestion_modificacion.licencia_modificacion_emitida"
               anteproyectoId={modificacionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -273,15 +282,16 @@ export default function StepGestion({
               </div>
             </div>
             <FileUpload
-              placeholder="Seleccione archivo"
+              placeholder="Subir Cargo de Entrega"
               value={[]}
               onChange={(files) => onInputChange('cargo_entrega_administrado', files[0] || null)}
               accept=".pdf"
               multiple={false}
               onUpload={onFileUpload}
-              documentKey="cargo_entrega_administrado"
+              documentKey="gestion_modificacion.cargo_entrega_administrado"
               anteproyectoId={modificacionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
         </div>

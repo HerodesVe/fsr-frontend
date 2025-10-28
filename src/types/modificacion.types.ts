@@ -3,6 +3,7 @@ import type { ClientOut } from './client.types';
 export interface ModificacionFormData {
   // Paso 1: Administrado
   selectedClient: ClientOut | null;
+  nombre_proyecto: string;
 
   // Paso 2: Licencia
   tipo_licencia_edificacion: string;
@@ -39,12 +40,22 @@ export interface ModificacionFormData {
   cargo_entrega_administrado: UploadedDocument | null;
 }
 
+export interface DocumentInfo {
+  name: string;
+  is_mandatory: boolean;
+  status: 'Pendiente' | 'Aprobado' | 'Rechazado' | 'Subido';
+  file_reference: string;
+  emission_date?: string;
+  observation?: string;
+}
+
 export interface UploadedDocument {
   id: string;
   name: string;
   url: string;
   size: number;
   type: string;
+  key?: string;
 }
 
 export interface FormStep {
@@ -56,15 +67,29 @@ export interface FormStep {
 export interface Modificacion {
   id: string;
   instance_code: string;
+  client_id: string;
+  service_id: string;
+  user_id: string;
   administrado: string;
   responsable: string;
   fecha_creacion: string;
   fecha_culminacion: string;
   status: string;
+  progress_percentage?: number;
   created_at: string;
   scheduled_completion_date: string | null;
-  data: {
-    nombre_proyecto: string;
+  next_step?: string;
+  data?: {
+    service_type?: string;
+    nombre_proyecto?: string;
+    licencia_modificacion?: {
+      tipo_licencia_edificacion?: string;
+      tipo_modalidad?: string;
+    };
+    antecedentes_modificacion?: any;
+    elaboracion_modificacion?: any;
+    gestion_modificacion?: any;
+    [key: string]: any;
   };
   steps_status: {
     administrado: string;
@@ -73,6 +98,11 @@ export interface Modificacion {
     elaboracion: string;
     gestion: string;
   };
+  uploaded_documents?: Array<{
+    key: string;
+    name: string;
+    file_id: string;
+  }>;
 }
 
 export enum ModificacionStatus {

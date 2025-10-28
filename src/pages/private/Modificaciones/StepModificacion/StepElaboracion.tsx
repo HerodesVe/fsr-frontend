@@ -8,6 +8,7 @@ interface StepElaboracionProps {
   uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof ModificacionFormData, value: any) => void;
   onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 export default function StepElaboracion({
@@ -15,6 +16,7 @@ export default function StepElaboracion({
   uploadedDocuments,
   onInputChange,
   onFileUpload,
+  onDownloadDocument,
 }: StepElaboracionProps) {
   return (
     <div className="space-y-6">
@@ -39,15 +41,15 @@ export default function StepElaboracion({
               </div>
             </div>
             <FileUpload
-              placeholder="Seleccione archivo"
+              placeholder="Subir Planos de Arquitectura"
               value={[]}
               onChange={(files) => onInputChange('planos_arquitectura', files)}
               accept=".pdf,.dwg"
-              multiple
               onUpload={onFileUpload}
-              documentKey="planos_arquitectura"
+              documentKey="elaboracion_modificacion.planos_arquitectura"
               anteproyectoId={modificacionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -63,15 +65,15 @@ export default function StepElaboracion({
               </div>
             </div>
             <FileUpload
-              placeholder="Seleccione archivo"
+              placeholder="Subir Planos de Estructuras"
               value={[]}
               onChange={(files) => onInputChange('planos_estructuras', files)}
               accept=".pdf,.dwg"
-              multiple
               onUpload={onFileUpload}
-              documentKey="planos_estructuras"
+              documentKey="elaboracion_modificacion.planos_estructuras"
               anteproyectoId={modificacionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -87,15 +89,15 @@ export default function StepElaboracion({
               </div>
             </div>
             <FileUpload
-              placeholder="Seleccione archivo"
+              placeholder="Subir Planos de Inst. Sanitarias"
               value={[]}
               onChange={(files) => onInputChange('planos_sanitarias', files)}
               accept=".pdf,.dwg"
-              multiple
               onUpload={onFileUpload}
-              documentKey="planos_sanitarias"
+              documentKey="elaboracion_modificacion.planos_sanitarias"
               anteproyectoId={modificacionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -111,15 +113,15 @@ export default function StepElaboracion({
               </div>
             </div>
             <FileUpload
-              placeholder="Seleccione archivo"
+              placeholder="Subir Planos de Inst. Eléctricas"
               value={[]}
               onChange={(files) => onInputChange('planos_electricas', files)}
               accept=".pdf,.dwg"
-              multiple
               onUpload={onFileUpload}
-              documentKey="planos_electricas"
+              documentKey="elaboracion_modificacion.planos_electricas"
               anteproyectoId={modificacionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -135,15 +137,15 @@ export default function StepElaboracion({
               </div>
             </div>
             <FileUpload
-              placeholder="Seleccione archivo"
+              placeholder="Subir Memoria Descriptiva"
               value={[]}
               onChange={(files) => onInputChange('memoria_descriptiva', files)}
               accept=".pdf,.doc,.docx"
-              multiple
               onUpload={onFileUpload}
-              documentKey="memoria_descriptiva"
+              documentKey="elaboracion_modificacion.memoria_descriptiva"
               anteproyectoId={modificacionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
 
@@ -159,15 +161,15 @@ export default function StepElaboracion({
               </div>
             </div>
             <FileUpload
-              placeholder="Seleccione archivo"
+              placeholder="Subir Documentación Adicional"
               value={[]}
               onChange={(files) => onInputChange('documentacion_adicional', files)}
               accept=".pdf,.doc,.docx"
-              multiple
               onUpload={onFileUpload}
-              documentKey="documentacion_adicional"
+              documentKey="elaboracion_modificacion.documentacion_adicional"
               anteproyectoId={modificacionId}
-              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.id, name: doc.name, file_id: doc.id }))}
+              uploadedFiles={uploadedDocuments.map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
             />
           </div>
         </div>
