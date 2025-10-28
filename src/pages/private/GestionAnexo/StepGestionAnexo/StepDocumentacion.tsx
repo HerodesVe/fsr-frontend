@@ -3,21 +3,23 @@ import type { GestionAnexoFormData, UploadedDocument } from '@/types/gestionAnex
 
 interface StepDocumentacionProps {
   formData: GestionAnexoFormData;
+  errors: Record<string, string>;
   gestionId: string;
   uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof GestionAnexoFormData, value: any) => void;
-  onFileUpload: (file: File) => Promise<UploadedDocument>;
+  onFileUpload: (file: File, documentKey: string) => Promise<UploadedDocument>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 export default function StepDocumentacion({
   formData,
+  errors,
+  gestionId,
+  uploadedDocuments,
   onInputChange,
+  onFileUpload,
+  onDownloadDocument,
 }: StepDocumentacionProps) {
-
-  const handleFileChange = async (field: keyof GestionAnexoFormData, files: File[]) => {
-    onInputChange(field, files);
-  };
-
   return (
     <div className="space-y-8">
       <div>
@@ -32,88 +34,100 @@ export default function StepDocumentacion({
           {/* Documentos principales en vertical */}
           <div className="space-y-6">
             {/* Anexo H (Formato) */}
-            <div>
-              <FileUpload
-                label="Anexo H (Formato)"
-                accept=".pdf,.doc,.docx"
-                multiple={false}
-                value={formData.anexo_h_formato || []}
-                onChange={(files) => handleFileChange('anexo_h_formato', files)}
-                required
-              />
-            </div>
+            <FileUpload
+              label="Anexo H (Formato)"
+              accept=".pdf,.doc,.docx"
+              onChange={(files) => onInputChange('anexo_h_formato', files)}
+              required
+              onUpload={onFileUpload}
+              documentKey="documentacion_anexo.anexo_h_formato"
+              anteproyectoId={gestionId}
+              uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'documentacion_anexo.anexo_h_formato').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
+              error={errors.anexo_h_formato}
+            />
 
             {/* Contrato Supervisor o Convenio de Visitas */}
-            <div>
-              <FileUpload
-                label="Contrato Supervisor o Convenio de Visitas"
-                accept=".pdf,.doc,.docx"
-                multiple={false}
-                value={formData.contrato_supervisor || []}
-                onChange={(files) => handleFileChange('contrato_supervisor', files)}
-                required
-              />
-            </div>
+            <FileUpload
+              label="Contrato Supervisor o Convenio de Visitas"
+              accept=".pdf,.doc,.docx"
+              onChange={(files) => onInputChange('contrato_supervisor', files)}
+              required
+              onUpload={onFileUpload}
+              documentKey="documentacion_anexo.contrato_supervisor"
+              anteproyectoId={gestionId}
+              uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'documentacion_anexo.contrato_supervisor').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
+              error={errors.contrato_supervisor}
+            />
 
             {/* Póliza CAR */}
-            <div>
-              <FileUpload
-                label="Póliza CAR"
-                accept=".pdf,.doc,.docx"
-                multiple={false}
-                value={formData.poliza_car || []}
-                onChange={(files) => handleFileChange('poliza_car', files)}
-                required
-              />
-            </div>
+            <FileUpload
+              label="Póliza CAR"
+              accept=".pdf,.doc,.docx"
+              onChange={(files) => onInputChange('poliza_car', files)}
+              required
+              onUpload={onFileUpload}
+              documentKey="documentacion_anexo.poliza_car"
+              anteproyectoId={gestionId}
+              uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'documentacion_anexo.poliza_car').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
+              error={errors.poliza_car}
+            />
 
             {/* Resolución de Licencia de Obra */}
-            <div>
-              <FileUpload
-                label="Resolución de Licencia de Obra"
-                accept=".pdf,.doc,.docx"
-                multiple={false}
-                value={formData.resolucion_licencia_obra || []}
-                onChange={(files) => handleFileChange('resolucion_licencia_obra', files)}
-                required
-              />
-            </div>
+            <FileUpload
+              label="Resolución de Licencia de Obra"
+              accept=".pdf,.doc,.docx"
+              onChange={(files) => onInputChange('resolucion_licencia_obra', files)}
+              required
+              onUpload={onFileUpload}
+              documentKey="documentacion_anexo.resolucion_licencia_obra"
+              anteproyectoId={gestionId}
+              uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'documentacion_anexo.resolucion_licencia_obra').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
+              error={errors.resolucion_licencia_obra}
+            />
 
             {/* Cronograma de Visitas */}
-            <div>
-              <FileUpload
-                label="Cronograma de Visitas"
-                accept=".pdf,.doc,.docx,.xls,.xlsx"
-                multiple={false}
-                value={formData.cronograma_visitas || []}
-                onChange={(files) => handleFileChange('cronograma_visitas', files)}
-                required
-              />
-            </div>
+            <FileUpload
+              label="Cronograma de Visitas"
+              accept=".pdf,.doc,.docx,.xls,.xlsx"
+              onChange={(files) => onInputChange('cronograma_visitas', files)}
+              required
+              onUpload={onFileUpload}
+              documentKey="documentacion_anexo.cronograma_visitas"
+              anteproyectoId={gestionId}
+              uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'documentacion_anexo.cronograma_visitas').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
+              error={errors.cronograma_visitas}
+            />
 
             {/* Cronograma de Obra */}
-            <div>
-              <FileUpload
-                label="Cronograma de Obra"
-                accept=".pdf,.doc,.docx,.xls,.xlsx"
-                multiple={false}
-                value={formData.cronograma_obra || []}
-                onChange={(files) => handleFileChange('cronograma_obra', files)}
-                required
-              />
-            </div>
+            <FileUpload
+              label="Cronograma de Obra"
+              accept=".pdf,.doc,.docx,.xls,.xlsx"
+              onChange={(files) => onInputChange('cronograma_obra', files)}
+              required
+              onUpload={onFileUpload}
+              documentKey="documentacion_anexo.cronograma_obra"
+              anteproyectoId={gestionId}
+              uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'documentacion_anexo.cronograma_obra').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
+              error={errors.cronograma_obra}
+            />
 
             {/* Otros Documentos (Opcional) */}
-            <div>
-              <FileUpload
-                label="Otros Documentos (Opcional)"
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                multiple={true}
-                value={formData.otros_documentos || []}
-                onChange={(files) => handleFileChange('otros_documentos', files)}
-                required={false}
-              />
-            </div>
+            <FileUpload
+              label="Otros Documentos (Opcional)"
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              onChange={(files) => onInputChange('otros_documentos', files)}
+              onUpload={onFileUpload}
+              documentKey="documentacion_anexo.otros_documentos"
+              anteproyectoId={gestionId}
+              uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'documentacion_anexo.otros_documentos').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+              onDownload={onDownloadDocument}
+            />
           </div>
 
           {/* Fecha de Inicio de Ejecución de Obra */}
@@ -125,6 +139,7 @@ export default function StepDocumentacion({
                 onChange={(value) => onInputChange('fecha_inicio_ejecucion', value)}
                 placeholder="dd/mm/aaaa"
                 required
+                error={errors.fecha_inicio_ejecucion}
               />
             </div>
           </div>
@@ -135,7 +150,7 @@ export default function StepDocumentacion({
               label="Comentarios"
               placeholder="Añadir observaciones sobre el proceso..."
               value={formData.comentarios_documentacion || ''}
-              onChange={(value) => onInputChange('comentarios_documentacion', value)}
+              onChange={(e) => onInputChange('comentarios_documentacion', e.target.value)}
               rows={4}
             />
           </div>

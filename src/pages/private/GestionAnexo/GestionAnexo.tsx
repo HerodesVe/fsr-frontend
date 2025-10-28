@@ -4,77 +4,12 @@ import { LuPlus } from 'react-icons/lu';
 import { useHeaderStore } from '@/store/headerStore';
 import { Button, Filter } from '@/components/ui';
 import { ProyectoCard } from '@/components/utils/ProyectoCard';
-import { GestionAnexoItem, GestionAnexoStatus } from '@/types/gestionAnexo.types';
-
-// Data dummy para desarrollo
-const gestionAnexoDummy: GestionAnexoItem[] = [
-  {
-    id: '1',
-    instance_code: 'GA-2024-001',
-    administrado: 'Constructora Lima S.A.C.',
-    responsable: 'Carlos Mendoza',
-    fecha_creacion: '15/01/2024',
-    fecha_culminacion: '25/01/2024',
-    status: 'Completado',
-    created_at: '2024-01-15T00:00:00Z',
-    scheduled_completion_date: '2024-01-25T00:00:00Z',
-    data: {
-      nombre_proyecto: 'Anexo H - Edificio Central'
-    },
-    steps_status: {
-      administrado: 'Completada',
-      documentacion: 'Completada',
-      presentacion: 'Completada',
-      cierre: 'Completada'
-    }
-  },
-  {
-    id: '2',
-    instance_code: 'GA-2024-002',
-    administrado: 'Inversiones Norte S.A.C.',
-    responsable: 'Ana García',
-    fecha_creacion: '18/01/2024',
-    fecha_culminacion: '',
-    status: 'Pendiente',
-    created_at: '2024-01-18T00:00:00Z',
-    scheduled_completion_date: null,
-    data: {
-      nombre_proyecto: 'Anexo H - Residencial San Isidro'
-    },
-    steps_status: {
-      administrado: 'Completada',
-      documentacion: 'En progreso',
-      presentacion: 'Pendiente',
-      cierre: 'Pendiente'
-    }
-  },
-  {
-    id: '3',
-    instance_code: 'GA-2024-003',
-    administrado: 'Desarrollos Sur S.A.C.',
-    responsable: 'Miguel Torres',
-    fecha_creacion: '22/01/2024',
-    fecha_culminacion: '',
-    status: 'Pendiente',
-    created_at: '2024-01-22T00:00:00Z',
-    scheduled_completion_date: null,
-    data: {
-      nombre_proyecto: 'Anexo H - Comercial Miraflores'
-    },
-    steps_status: {
-      administrado: 'Completada',
-      documentacion: 'Pendiente',
-      presentacion: 'Pendiente',
-      cierre: 'Pendiente'
-    }
-  }
-];
+import { GestionAnexoStatus } from '@/types/gestionAnexo.types';
+import { useGestionAnexos } from '@/hooks/useGestionAnexos';
 
 export default function GestionAnexo() {
   const navigate = useNavigate();
-  const [gestionesAnexo] = useState<GestionAnexoItem[]>(gestionAnexoDummy);
-  const [isLoading] = useState(false);
-  const [error] = useState<Error | null>(null);
+  const { gestionAnexos, isLoading, error } = useGestionAnexos();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<GestionAnexoStatus>(GestionAnexoStatus.TODOS);
   const { setHeader } = useHeaderStore();
@@ -97,9 +32,9 @@ export default function GestionAnexo() {
   ];
 
   const filteredGestiones = useMemo(() => {
-    if (!gestionesAnexo) return [];
+    if (!gestionAnexos) return [];
 
-    return gestionesAnexo.filter((gestion) => {
+    return gestionAnexos.filter((gestion: any) => {
       const searchLower = searchTerm.toLowerCase();
       
       // Filtro por texto de búsqueda
@@ -137,10 +72,10 @@ export default function GestionAnexo() {
 
       return matchesSearch && matchesStatus;
     });
-  }, [gestionesAnexo, searchTerm, selectedStatus]);
+  }, [gestionAnexos, searchTerm, selectedStatus]);
 
-  const handleGestionClick = (item: any) => {
-    navigate(`/dashboard/gestion-anexo/edit/${item.id}`);
+  const handleGestionClick = (gestion: any) => {
+    navigate(`/dashboard/gestion-anexo/edit/${gestion.id}`);
   };
 
   const handleNewGestion = () => {

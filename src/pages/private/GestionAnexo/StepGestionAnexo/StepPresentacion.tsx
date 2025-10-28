@@ -3,21 +3,23 @@ import type { GestionAnexoFormData, UploadedDocument } from '@/types/gestionAnex
 
 interface StepPresentacionProps {
   formData: GestionAnexoFormData;
+  errors: Record<string, string>;
   gestionId: string;
   uploadedDocuments: UploadedDocument[];
   onInputChange: (field: keyof GestionAnexoFormData, value: any) => void;
-  onFileUpload: (file: File) => Promise<UploadedDocument>;
+  onFileUpload: (file: File, documentKey: string) => Promise<UploadedDocument>;
+  onDownloadDocument?: (documentId: string, fileName: string) => Promise<void>;
 }
 
 export default function StepPresentacion({
   formData,
+  errors,
+  gestionId,
+  uploadedDocuments,
   onInputChange,
+  onFileUpload,
+  onDownloadDocument,
 }: StepPresentacionProps) {
-
-  const handleFileChange = async (field: keyof GestionAnexoFormData, files: File[]) => {
-    onInputChange(field, files);
-  };
-
   return (
     <div className="space-y-8">
       <div>
@@ -35,10 +37,14 @@ export default function StepPresentacion({
               <FileUpload
                 label="Hoja de Trámite (Cargo)"
                 accept=".pdf,.jpg,.jpeg,.png"
-                multiple={false}
-                value={formData.hoja_tramite_cargo || []}
-                onChange={(files) => handleFileChange('hoja_tramite_cargo', files)}
+                onChange={(files) => onInputChange('hoja_tramite_cargo', files)}
                 required
+                onUpload={onFileUpload}
+                documentKey="presentacion_municipal.hoja_tramite_cargo"
+                anteproyectoId={gestionId}
+                uploadedFiles={uploadedDocuments.filter(doc => doc.key === 'presentacion_municipal.hoja_tramite_cargo').map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
+                onDownload={onDownloadDocument}
+                error={errors.hoja_tramite_cargo}
               />
             </div>
 
@@ -50,6 +56,7 @@ export default function StepPresentacion({
                 onChange={(value) => onInputChange('fecha_ingreso_municipalidad', value)}
                 placeholder="dd/mm/aaaa"
                 required
+                error={errors.fecha_ingreso_municipalidad}
               />
             </div>
           </div>
