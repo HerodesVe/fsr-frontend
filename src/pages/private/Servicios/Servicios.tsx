@@ -141,7 +141,7 @@ export default function Servicios() {
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Anteproyectos
+                  Elaboracion de Anteproyectos
                 </h3>
                 <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
                   Elaboración de expediente técnico

@@ -44,19 +44,15 @@ export const ResumenExpediente: React.FC<ResumenExpedienteProps> = ({
       completed: isDocumentCompleted('partida_registral', formData.partida_registral) 
     },
     { 
-      name: 'Certificado de parámetros (MUNICIPALIDAD)', 
-      completed: false // Este documento no está en el sistema aún
+      name: 'Certificado de Parámetros Urbanísticos', 
+      completed: isDocumentCompleted('certificado_parametros_urbanisticos', formData.certificado_parametros_urbanisticos) 
     },
     { 
-      name: 'Plano de Ubicación', 
-      completed: false // Este documento no está en el sistema aún
+      name: 'Croquis o Plano de Ubicación', 
+      completed: isDocumentCompleted('croquis_plano_ubicacion', formData.croquis_plano_ubicacion) 
     },
     { 
-      name: 'Plano de Arquitectura', 
-      completed: isDocumentCompleted('plano_arquitectura_adm', formData.plano_arquitectura_adm) 
-    },
-    { 
-      name: 'Plano de Seguridad', 
+      name: 'Planos de Seguridad', 
       completed: isDocumentCompleted('plano_seguridad', formData.plano_seguridad) 
     },
     { 
@@ -70,14 +66,6 @@ export const ResumenExpediente: React.FC<ResumenExpedienteProps> = ({
     { 
       name: 'FUE (Formulario Único de Edificación)', 
       completed: isDocumentCompleted('formulario_unico_edificacion', formData.formulario_unico_edificacion) 
-    },
-    { 
-      name: 'Pago derecho de revisión (CAP) - Factura', 
-      completed: isDocumentCompleted('pago_derecho_revision_factura', formData.pago_derecho_revision_factura) 
-    },
-    { 
-      name: 'Pago derecho de revisión (CAP) - Liquidación', 
-      completed: isDocumentCompleted('pago_derecho_revision_liquidacion', formData.pago_derecho_revision_liquidacion) 
     },
   ];
 

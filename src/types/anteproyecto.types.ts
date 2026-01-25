@@ -136,7 +136,7 @@ export interface AnteproyectoFormData {
   // Paso 1: Administrado
   selectedClient: any; // Será del tipo ClientOut cuando se seleccione
 
-  // Paso 2: Licencias
+  // Paso 2: Tipo de Obra
   tipo_licencia_edificacion: string;
   tipo_modalidad: string;
   link_normativas: string;
@@ -172,13 +172,20 @@ export interface AnteproyectoFormData {
   descripcion_proyecto: string;
 
   // Paso 4: Documentos - Archivos
+  // Documentos Proporcionados por el Administrado
   partida_registral?: File[];
-  plano_arquitectura_adm?: File[];
-  pago_derecho_revision_factura?: File[];
+  certificado_parametros_urbanisticos?: File[];
+  croquis_plano_ubicacion?: File[];
+  cabida_arquitectonica?: File[];
+  vigencia_poder?: File[];
+  otros_documentos_administrado?: File[];
+  
+  // Documentos Elaborados por FSR
   memoria_descriptiva_arquitectura?: File[];
   memoria_descriptiva_seguridad?: File[];
   formulario_unico_edificacion?: File[];
   presupuesto?: File[];
   plano_seguridad?: File[];
-  pago_derecho_revision_liquidacion?: File[];
+  plano_arquitectura_fsr?: File[];
+  otros_documentos_fsr?: File[];
 }

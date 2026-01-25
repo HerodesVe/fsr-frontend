@@ -59,14 +59,14 @@ export default function CreateEditAnteproyecto() {
 
   const [steps, setSteps] = useState<FormStep[]>([
     { id: 1, title: 'Administrado', completed: false },
-    { id: 2, title: 'Licencias/Normativas', completed: false },
+    { id: 2, title: 'Tipo de Obra', completed: false },
     { id: 3, title: 'Predio', completed: false },
     { id: 4, title: 'Documentos', completed: false },
   ]);
 
   useEffect(() => {
     setHeader(
-      isEditing ? 'Editar Anteproyecto' : 'Nuevo Anteproyecto',
+      isEditing ? 'Editar Anteproyecto' : 'Elaboracion Anteproyecto',
       'Gestiona todos tus trámites y servicios en un solo lugar'
     );
     return () => {
@@ -139,14 +139,18 @@ export default function CreateEditAnteproyecto() {
     // Lista de todas las posibles claves de documentos en el objeto data
     const documentKeys = [
       'partida_registral',
-      'plano_arquitectura_adm',
-      'pago_derecho_revision_factura',
+      'certificado_parametros_urbanisticos',
+      'croquis_plano_ubicacion',
+      'cabida_arquitectonica',
+      'vigencia_poder',
+      'otros_documentos_administrado',
       'memoria_descriptiva_arquitectura',
       'memoria_descriptiva_seguridad',
       'formulario_unico_edificacion',
       'presupuesto',
       'plano_seguridad',
-      'pago_derecho_revision_liquidacion',
+      'plano_arquitectura_fsr',
+      'otros_documentos_fsr',
     ];
 
     // También incluir archivo_normativo de licencias_normativas
@@ -213,6 +217,7 @@ export default function CreateEditAnteproyecto() {
         if (!formData.departmentId) newErrors.departmentId = 'Departamento es requerido';
         if (!formData.provinceId) newErrors.provinceId = 'Provincia es requerida';
         if (!formData.districtId) newErrors.districtId = 'Distrito es requerido';
+        if (!formData.urbanization) newErrors.urbanization = 'Urbanización es requerida';
         if (!formData.street) newErrors.street = 'Calle es requerida';
         if (!formData.area_total_m2) newErrors.area_total_m2 = 'Área total es requerida';
         if (!formData.tipo_edificacion) newErrors.tipo_edificacion = 'Tipo de edificación es requerido';
@@ -389,7 +394,7 @@ export default function CreateEditAnteproyecto() {
   const determineCompletedSteps = (stepStatus: StepStatus): FormStep[] => {
     const baseSteps = [
       { id: 1, title: 'Administrado', completed: false },
-      { id: 2, title: 'Licencias/Normativas', completed: false },
+      { id: 2, title: 'Tipo de Obra', completed: false },
       { id: 3, title: 'Predio', completed: false },
       { id: 4, title: 'Documentos', completed: false },
     ];
@@ -523,7 +528,7 @@ export default function CreateEditAnteproyecto() {
                   onClick={handlePrevious}
                   startContent={<LuArrowLeft className="w-4 h-4" />}
                 >
-                  Anterior: {currentStep === 1 ? 'Administrado' : currentStep === 2 ? 'Licencia' : 'Predio'}
+                  Anterior: {currentStep === 1 ? 'Administrado' : currentStep === 2 ? 'Tipo de Obra' : 'Predio'}
                 </Button>
               )}
             </div>
@@ -546,7 +551,7 @@ export default function CreateEditAnteproyecto() {
                   disabled={createInitialMutation.isPending || updateMutation.isPending}
                 >
                   {(createInitialMutation.isPending || updateMutation.isPending) ? 'Guardando...' : 
-                   `Siguiente: ${currentStep === 0 ? 'Licencia' : currentStep === 1 ? 'Predio' : 'Documentos'}`}
+                   `Siguiente: ${currentStep === 0 ? 'Tipo de Obra' : currentStep === 1 ? 'Predio' : 'Documentos'}`}
                 </Button>
               ) : (
                 <Button

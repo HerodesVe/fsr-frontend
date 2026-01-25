@@ -70,7 +70,7 @@ export default function StepPredio({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Select
             label="Departamento"
-            placeholder="Lima"
+            placeholder="Seleccionar departamento"
             options={departmentOptions}
             selectedKeys={formData.departmentId ? [formData.departmentId] : []}
             onSelectionChange={(keys) => {
@@ -80,11 +80,12 @@ export default function StepPredio({
               onInputChange('districtId', '');
             }}
             error={errors.departmentId}
+            required
           />
 
           <Select
             label="Provincia"
-            placeholder="Lima"
+            placeholder="Seleccionar provincia"
             options={provinceOptions}
             selectedKeys={formData.provinceId ? [formData.provinceId] : []}
             onSelectionChange={(keys) => {
@@ -94,11 +95,12 @@ export default function StepPredio({
             }}
             error={errors.provinceId}
             disabled={!formData.departmentId}
+            required
           />
 
           <Select
             label="Distrito"
-            placeholder="Miraflores"
+            placeholder="Seleccionar distrito"
             options={districtOptions}
             selectedKeys={formData.districtId ? [formData.districtId] : []}
             onSelectionChange={(keys) => {
@@ -107,6 +109,7 @@ export default function StepPredio({
             }}
             error={errors.districtId}
             disabled={!formData.provinceId}
+            required
           />
         </div>
 
@@ -116,6 +119,8 @@ export default function StepPredio({
             value={formData.urbanization}
             onChange={(e) => onInputChange('urbanization', e.target.value)}
             label='Urbanización / A.H. / Otro'
+            error={errors.urbanization}
+            required
           />
       
           <Input
@@ -147,6 +152,7 @@ export default function StepPredio({
             value={formData.street}
             onChange={(e) => onInputChange('street', e.target.value)}
             error={errors.street}
+            required
           />
 
           <Input

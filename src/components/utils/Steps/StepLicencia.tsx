@@ -24,29 +24,45 @@ export default function StepLicencia({
     { value: 'A', label: 'Modalidad A' },
     { value: 'B', label: 'Modalidad B' },
     { value: 'C', label: 'Modalidad C' },
+    { value: 'D', label: 'Modalidad D' },
+  ];
+
+  const tipoObraOptions = [
+    { value: 'ampliacion', label: 'Ampliación' },
+    { value: 'remodelacion', label: 'Remodelación' },
+    { value: 'demolicion_total', label: 'Demolición Total' },
+    { value: 'demolicion_parcial', label: 'Demolición Parcial' },
+    { value: 'cercado', label: 'Cercado' },
+    { value: 'acondicionamiento', label: 'Acondicionamiento' },
+    { value: 'refaccion', label: 'Refacción' },
+    { value: 'puesta_valor_historico_monumental', label: 'Puesta en Valor Histórico Monumental' },
   ];
 
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
-          Tipo de Licencia
+          Tipo de Obra
         </h3>
         <p className="text-sm text-gray-600 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
           Seleccione un anteproyecto aprobado para importar sus datos e ingresar la información manualmente
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input
-            label="Tipo de Licencia de Edificación"
-            placeholder="Ingrese tipo de licencia de edificación"
-            value={formData.tipo_licencia_edificacion}
-            onChange={(e) => onInputChange('tipo_licencia_edificacion', e.target.value)}
+          <Select
+            label="Tipo de Obra"
+            placeholder="Seleccionar tipo de obra"
+            options={tipoObraOptions}
+            selectedKeys={formData.tipo_licencia_edificacion ? [formData.tipo_licencia_edificacion] : []}
+            onSelectionChange={(keys) => {
+              const value = Array.from(keys)[0] as string;
+              onInputChange('tipo_licencia_edificacion', value || '');
+            }}
             error={errors.tipo_licencia_edificacion}
           />
 
           <Select
-            label="Tipo de Modalidad"
+            label="Modalidad de Aprobación"
             placeholder="Seleccionar opción"
             options={modalidadOptions}
             selectedKeys={formData.tipo_modalidad ? [formData.tipo_modalidad] : []}
@@ -61,7 +77,7 @@ export default function StepLicencia({
 
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
-          Normativas
+          Normativa aplicable para anteproyecto
         </h3>
         <p className="text-sm text-gray-600 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
           Adjunta los documentos necesarios para las normativas del proyecto
@@ -69,14 +85,14 @@ export default function StepLicencia({
         
         <div className="space-y-6">
           <Input
-            label="Link"
+            label="Link de normativa aplicable para anteproyecto"
             placeholder="Pegar el link"
             value={formData.link_normativas}
             onChange={(e) => onInputChange('link_normativas', e.target.value)}
           />
 
           <FileUpload
-            label="Normativa"
+            label="Normativa aplicable para anteproyecto"
             placeholder="Seleccione archivo"
             value={formData.archivo_normativo ? [formData.archivo_normativo] : []}
             onChange={(files) => onInputChange('archivo_normativo', files[0])}
