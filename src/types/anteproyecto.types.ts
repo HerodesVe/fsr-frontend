@@ -183,6 +183,8 @@ export interface AnteproyectoFormData {
   partida_registral?: File[];
   certificado_parametros_urbanisticos?: File[];
   croquis_plano_ubicacion?: File[];
+  plano_arquitectura_adm?: File[];
+  pago_derecho_revision_factura?: File[];
   cabida_arquitectonica?: File[];
   vigencia_poder?: File[];
   otros_documentos_administrado?: File[];
@@ -193,6 +195,7 @@ export interface AnteproyectoFormData {
   formulario_unico_edificacion?: File[];
   presupuesto?: File[];
   plano_seguridad?: File[];
+  pago_derecho_revision_liquidacion?: File[];
   plano_arquitectura_fsr?: File[];
   otros_documentos_fsr?: File[];
 }

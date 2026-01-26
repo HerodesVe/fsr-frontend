@@ -278,8 +278,8 @@ export default function StepDocumentos({
             </div>
             <FileUpload
               placeholder="Seleccione archivo"
-              value={[]}
-              onChange={() => {}}
+              value={formData.plano_arquitectura_fsr || []}
+              onChange={(files) => onInputChange('plano_arquitectura_fsr', files)}
               accept=".pdf,.dwg"
               multiple
               onUpload={onFileUpload}

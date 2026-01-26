@@ -19,4 +19,5 @@ export type { FilterOption } from './Filter';
 export type { TableColumn, TableAction } from './Table';
 export type { SelectOption } from './Select';
 export type { FileUploadProps } from './FileUpload';
+export type { DateInputProps } from './DateInput/DateInput';
 export type { CustomTextareaProps } from './Textarea';

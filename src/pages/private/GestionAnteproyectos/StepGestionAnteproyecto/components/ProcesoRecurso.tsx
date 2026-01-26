@@ -92,8 +92,7 @@ export default function ProcesoRecurso({
     }
   };
 
-  // Determinar si se requiere subsanación basado en el resultado
-  const requiereSubsanacion = data.resultado === 'infundado' || data.resultado === 'fundado_en_parte';
+
 
   return (
     <div className={`border rounded-lg ${disabled ? 'opacity-60' : ''} ${

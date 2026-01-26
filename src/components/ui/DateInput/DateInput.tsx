@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { LuCalendar } from 'react-icons/lu';
 
-interface DateInputProps {
+export interface DateInputProps {
   label?: string;
   placeholder?: string;
   value: string;
   onChange: (value: string) => void;
   error?: string;
   required?: boolean;
+  disabled?: boolean;
   className?: string;
 }
 
@@ -18,11 +19,14 @@ export default function DateInput({
   onChange,
   error,
   required = false,
+  disabled = false,
   className = "",
 }: DateInputProps) {
   const [isFocused, setIsFocused] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
+    
     let inputValue = e.target.value;
     
     // Formatear automáticamente como dd/mm/yyyy
@@ -90,17 +94,20 @@ export default function DateInput({
           onBlur={handleBlur}
           placeholder={placeholder}
           maxLength={10}
+          disabled={disabled}
           className={`
             w-full px-3 py-2 pr-10 border rounded-lg text-sm
             transition-colors duration-200
-            ${error 
-              ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
-              : isFocused 
-                ? 'border-teal-500 focus:border-teal-500 focus:ring-teal-500' 
-                : 'border-gray-300 focus:border-teal-500 focus:ring-teal-500'
+            ${disabled 
+              ? 'bg-gray-100 cursor-not-allowed opacity-60' 
+              : error 
+                ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
+                : isFocused 
+                  ? 'border-teal-500 focus:border-teal-500 focus:ring-teal-500' 
+                  : 'border-gray-300 focus:border-teal-500 focus:ring-teal-500'
             }
             focus:outline-none focus:ring-2 focus:ring-opacity-20
-            ${error ? 'bg-red-50' : 'bg-white'}
+            ${error && !disabled ? 'bg-red-50' : disabled ? 'bg-gray-100' : 'bg-white'}
           `}
           style={{ fontFamily: 'Inter, sans-serif' }}
         />
