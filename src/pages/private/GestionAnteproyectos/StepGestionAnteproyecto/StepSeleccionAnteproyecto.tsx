@@ -48,18 +48,19 @@ export default function StepSeleccionAnteproyecto({
 
   // Documentos requeridos para anteproyecto externo
   const documentosRequeridos = [
-    { key: 'partida_registral', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.partida_registral', label: 'Partida Registral SUNAR', required: true },
+    { key: 'partida_registral', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.partida_registral', label: 'Partida Registral SUNARP', required: true },
     { key: 'certificado_parametro_municipal', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.certificado_parametro_municipal', label: 'Certificado de Parámetro Municipal', required: true },
-    { key: 'plano_ubicacion', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.plano_ubicacion', label: 'Plano de Ubicación', required: true },
-    { key: 'plano_arquitectura', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.plano_arquitectura', label: 'Plano de Arquitectura', required: true },
-    { key: 'plano_seguridad', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.plano_seguridad', label: 'Plano de Seguridad', required: true },
+    { key: 'plano_ubicacion', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.plano_ubicacion', label: 'Planos de Ubicación', required: true },
+    { key: 'plano_arquitectura', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.plano_arquitectura', label: 'Planos de Arquitectura', required: true },
+    { key: 'plano_seguridad', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.plano_seguridad', label: 'Planos de Seguridad', required: true },
     { key: 'memoria_descriptiva_arquitectura', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.memoria_descriptiva_arquitectura', label: 'Memoria Descriptiva de Arquitectura', required: true },
     { key: 'memoria_descriptiva_seguridad', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.memoria_descriptiva_seguridad', label: 'Memoria Descriptiva de Seguridad', required: true },
     { key: 'formulario_unico_edificacion', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.formulario_unico_edificacion', label: 'Formulario Único de Edificación (FUE)', required: true },
-    { key: 'presupuesto', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.presupuesto', label: 'Presupuesto', required: true },
-    { key: 'pago_derecho_revision_cap', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.pago_derecho_revision_cap', label: 'Pago de Derecho a Revisión CAP', required: true },
-    { key: 'factura', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.factura', label: 'Factura del Pago', required: true },
-    { key: 'liquidacion', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.liquidacion', label: 'Liquidación del Pago', required: true },
+    { key: 'presupuesto', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.presupuesto', label: 'Presupuesto de Obra (Añadir la palabra Obra)', required: true },
+    { key: 'pago_derecho_revision_cap', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.pago_derecho_revision_cap', label: 'Pago por Derecho de Revisión al CAP', required: true },
+    { key: 'factura', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.factura', label: 'Factura del pago realizado al CAP​', required: true },
+    { key: 'liquidacion', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.liquidacion', label: 'Liquidación del pago realizado al CAP​', required: true },
+    { key: 'otros_documentos', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.otros_documentos', label: 'Otros Documentos', required: true },
   ];
 
   // Convertir formData para StepAdministrado
@@ -85,9 +86,11 @@ export default function StepSeleccionAnteproyecto({
         clients={clients}
         errors={errors}
         onInputChange={handleAdministradoChange}
-        title="Paso 1: Vincular Administrado y Definir Proyecto"
-        description="Seleccione el administrado y defina el nombre del proyecto para la gestión del anteproyecto"
+        title="Paso 1: Vincular administrado y nombrar al anteproyecto​"
+        description="Seleccione el administrado y defina el nombre del anteproyecto para iniciar la gestión del mismo​"
         showProjectName={true}
+        label="Nombre del Anteproyecto"
+        placeholder="Ingrese el nombre del anteproyecto..."
       />
 
       <div className="border-t border-gray-200 pt-6">
@@ -127,7 +130,7 @@ export default function StepSeleccionAnteproyecto({
           <div>
             <Input
               label="Buscar Anteproyecto"
-              placeholder="Ingrese el nombre del proyecto o código del anteproyecto..."
+              placeholder="Ingrese el nombre o código del anteproyecto​..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               startContent={<LuSearch className="w-4 h-4 text-gray-400" />}
@@ -257,7 +260,7 @@ export default function StepSeleccionAnteproyecto({
                 <FileUpload
                   label={documento.label}
                   required={documento.required}
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.dwg"
                   onChange={(files) => onInputChange(documento.key as keyof GestionAnteproyectoFormData, files)}
                   onUpload={onFileUpload}
                   documentKey={documento.documentKey}

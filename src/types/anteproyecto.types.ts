@@ -43,6 +43,9 @@ export interface MedidasPerimetricas {
 export interface Edificacion {
   tipo_edificacion: string;
   numero_pisos: number;
+  area_techada_total_m2: number;
+  area_libre_m2: number;
+  area_libre_porcentaje: number;
   descripcion_proyecto: string;
 }
 
@@ -169,6 +172,9 @@ export interface AnteproyectoFormData {
   // Edificación
   tipo_edificacion: string;
   numero_pisos: number;
+  area_techada_total_m2: number;
+  area_libre_m2: number;
+  area_libre_porcentaje: number;
   descripcion_proyecto: string;
 
   // Paso 4: Documentos - Archivos

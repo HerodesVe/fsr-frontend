@@ -25,7 +25,7 @@ interface StepPredioProps {
   onInputChange: (field: keyof AnteproyectoFormData, value: any) => void;
 }
 
-export default function StepPredio({
+export default function StepPredioAnteproyecto({
   formData,
   errors,
   departments,
@@ -309,7 +309,7 @@ export default function StepPredio({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Descripción del Proyecto / Observaciones y Comentarios​
+              Descripción del Anteproyecto / Observaciones y Comentarios​
             </label>
             <textarea
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"

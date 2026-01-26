@@ -35,7 +35,7 @@ export default function StepSeguimientoRespuesta({
           Seguimiento y Respuesta de la Municipalidad
         </h2>
         <p className="text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-          Registre la respuesta de la municipalidad y gestione las observaciones si las hubiera.
+           Registre la respuesta de la municipalidad y de ser el caso gestione el levantamiento de observaciones.
         </p>
       </div>
 
@@ -63,7 +63,7 @@ export default function StepSeguimientoRespuesta({
 
         <div>
           <FileUpload
-            label="Archivo del Acta/Respuesta"
+            label="Archivo del Acta/ Notificación o Carta​"
             required
             accept=".pdf,.jpg,.jpeg,.png"
             onChange={(files) => onInputChange('archivo_respuesta', files)}

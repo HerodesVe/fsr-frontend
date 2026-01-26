@@ -15,6 +15,8 @@ interface StepAdministradoProps {
   description?: string;
   showCreateButton?: boolean;
   showProjectName?: boolean;
+  label?: string;
+  placeholder?: string;
 }
 
 export default function StepAdministrado({
@@ -24,6 +26,8 @@ export default function StepAdministrado({
   onInputChange,
   title = "Seleccionar Administrado",
   description = "Seleccione el administrado para este servicio",
+  label = "Nombre del Proyecto",
+  placeholder = "Ingrese el nombre del proyecto...",
   showCreateButton = false,
   showProjectName = false,
 }: StepAdministradoProps) {
@@ -55,8 +59,8 @@ export default function StepAdministrado({
           {showProjectName && (
             <div>
               <Input
-                label="Nombre del Proyecto"
-                placeholder="Ingrese el nombre del proyecto..."
+                label={label}
+                placeholder={placeholder}
                 value={formData.nombre_proyecto || ''}
                 onChange={(e) => onInputChange('nombre_proyecto', e.target.value)}
                 error={errors.nombre_proyecto}

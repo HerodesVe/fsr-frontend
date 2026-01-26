@@ -3,13 +3,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { LuArrowLeft, LuArrowRight, LuX } from 'react-icons/lu';
 import { useHeaderStore } from '@/store/headerStore';
 import { Button } from '@/components/ui';
-import { StepAdministrado, StepLicencia, StepPredio, StepDocumentos } from '@/components/utils/Steps';
+import { StepAdministrado, StepLicencia } from '@/components/utils/Steps';
 import { useAnteproyectos, useAnteproyectoById } from '@/hooks/useAnteproyectos';
 import { useClients } from '@/hooks/useClients';
 import { useDepartments, useProvinces, useDistricts } from '@/hooks/useUbigeo';
 import { ResumenExpediente } from './components/ResumenExpediente';
 import type { AnteproyectoFormData, FormStep, StepStatus, UploadedDocument } from '@/types/anteproyecto.types';
 import { DocumentStatus } from '@/types/anteproyecto.types';
+import StepPredioAnteproyecto from '../GestionAnteproyectos/StepGestionAnteproyecto/StepPredioAnteproyecto';
+import StepDocumentoAnteproyecto from './components/StepDocumentoAnteproyecto';
 
 export default function CreateEditAnteproyecto() {
   const navigate = useNavigate();
@@ -50,6 +52,9 @@ export default function CreateEditAnteproyecto() {
     fondo: 0,
     tipo_edificacion: '',
     numero_pisos: 0,
+    area_techada_total_m2: 0,
+    area_libre_m2: 0,
+    area_libre_porcentaje: 0,
     descripcion_proyecto: '',
   });
 
@@ -103,6 +108,9 @@ export default function CreateEditAnteproyecto() {
         fondo: data.datos_predio?.medidas_perimetricas?.fondo || 0,
         tipo_edificacion: data.datos_predio?.edificacion?.tipo_edificacion || '',
         numero_pisos: data.datos_predio?.edificacion?.numero_pisos || 0,
+        area_techada_total_m2: data.datos_predio?.edificacion?.area_techada_total_m2 || 0,
+        area_libre_m2: data.datos_predio?.edificacion?.area_libre_m2 || 0,
+        area_libre_porcentaje: data.datos_predio?.edificacion?.area_libre_porcentaje || 0,
         descripcion_proyecto: data.datos_predio?.edificacion?.descripcion_proyecto || '',
       });
 
@@ -309,6 +317,9 @@ export default function CreateEditAnteproyecto() {
               edificacion: {
                 tipo_edificacion: formData.tipo_edificacion,
                 numero_pisos: formData.numero_pisos,
+                area_techada_total_m2: formData.area_techada_total_m2,
+                area_libre_m2: formData.area_libre_m2,
+                area_libre_porcentaje: formData.area_libre_porcentaje,
                 descripcion_proyecto: formData.descripcion_proyecto,
               },
             },
@@ -447,7 +458,7 @@ export default function CreateEditAnteproyecto() {
 
       case 2: // Predio
         return (
-          <StepPredio
+          <StepPredioAnteproyecto
             formData={formData}
             errors={errors}
             departments={departments}
@@ -459,7 +470,7 @@ export default function CreateEditAnteproyecto() {
 
       case 3: // Documentos
         return (
-          <StepDocumentos
+          <StepDocumentoAnteproyecto
             formData={formData}
             anteproyectoId={anteproyectoId}
             uploadedDocuments={getUploadedDocuments()}
