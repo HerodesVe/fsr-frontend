@@ -18,7 +18,7 @@ export interface FileUploadProps {
   documentKey?: string; // Clave del documento para la API
   anteproyectoId?: string; // ID del anteproyecto
   // Props para documentos ya subidos
-  uploadedFiles?: Array<{ key: string; name: string; file_id: string; }>;
+  uploadedFiles?: Array<{ key: string; name: string; file_id: string; upload_date?: string; }>;
   // Props para descarga de documentos
   onDownload?: (documentId: string, fileName: string) => Promise<void>;
 }
@@ -168,6 +168,38 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const formatDate = (dateString?: string): string | null => {
+    if (!dateString) return null;
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('es-PE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return null;
+    }
+  };
+
+  // Ordenar documentos subidos por fecha (más recientes primero)
+  const sortedUploadedFiles = React.useMemo(() => {
+    const filtered = uploadedFiles.filter(uploadedFile => uploadedFile.key === documentKey);
+    return [...filtered].sort((a, b) => {
+      // Si ambos tienen fecha, ordenar por fecha descendente (más reciente primero)
+      if (a.upload_date && b.upload_date) {
+        return new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime();
+      }
+      // Si solo uno tiene fecha, ponerlo primero
+      if (a.upload_date && !b.upload_date) return -1;
+      if (!a.upload_date && b.upload_date) return 1;
+      // Si ninguno tiene fecha, mantener orden original
+      return 0;
+    });
+  }, [uploadedFiles, documentKey]);
+
   return (
     <div className={`w-full ${className}`}>
       {label && (
@@ -220,13 +252,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       </div>
 
       {/* Lista de archivos (subidos + seleccionados) */}
-      {(uploadedFiles.length > 0 || value.length > 0) && (
+      {(sortedUploadedFiles.length > 0 || value.length > 0) && (
         <div className="mt-3 space-y-2">
-          {/* Archivos ya subidos */}
-          {uploadedFiles
-            .filter(uploadedFile => uploadedFile.key === documentKey)
-            .map((uploadedFile, index) => {
+          {/* Archivos ya subidos (ordenados por fecha) */}
+          {sortedUploadedFiles.map((uploadedFile, index) => {
               const isPending = uploadedFile.file_id === 'pending' || !uploadedFile.file_id;
+              const formattedDate = formatDate(uploadedFile.upload_date);
               
               return (
                 <div
@@ -248,7 +279,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                         {uploadedFile.name}
                       </p>
                       <p className={`text-xs ${isPending ? 'text-yellow-600' : 'text-green-600'}`} style={{ fontFamily: 'Inter, sans-serif' }}>
-                        {isPending ? 'Procesando documento...' : `Documento subido • ID: ${uploadedFile.file_id}`}
+                        {isPending 
+                          ? 'Procesando documento...' 
+                          : formattedDate 
+                            ? `Subido el ${formattedDate}` 
+                            : `Documento subido • ID: ${uploadedFile.file_id}`}
                       </p>
                     </div>
                   </div>

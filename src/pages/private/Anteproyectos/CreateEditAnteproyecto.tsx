@@ -10,7 +10,7 @@ import { useDepartments, useProvinces, useDistricts } from '@/hooks/useUbigeo';
 import { ResumenExpediente } from './components/ResumenExpediente';
 import type { AnteproyectoFormData, FormStep, StepStatus, UploadedDocument } from '@/types/anteproyecto.types';
 import { DocumentStatus } from '@/types/anteproyecto.types';
-import StepPredioAnteproyecto from '../GestionAnteproyectos/StepGestionAnteproyecto/StepPredioAnteproyecto';
+import StepPredioAnteproyecto from './components/StepPredioAnteproyecto';
 import StepDocumentoAnteproyecto from './components/StepDocumentoAnteproyecto';
 
 export default function CreateEditAnteproyecto() {
@@ -138,6 +138,7 @@ export default function CreateEditAnteproyecto() {
   }, [isEditing, anteproyectoData, isLoadingAnteproyecto, clients]);
 
   // Función para extraer documentos subidos del objeto data
+  // Ahora soporta múltiples archivos por documento con fecha de subida
   const getUploadedDocuments = (): UploadedDocument[] => {
     if (!anteproyectoData?.data) return [];
 
@@ -161,37 +162,59 @@ export default function CreateEditAnteproyecto() {
       'otros_documentos_fsr',
     ];
 
-    // También incluir archivo_normativo de licencias_normativas
-    const archivoNormativo = data.licencias_normativas?.archivo_normativo;
-    if (archivoNormativo?.name) {
-      // Incluir el documento si tiene un name, incluso si file_reference está vacío
-      uploadedDocs.push({
-        key: 'licencias_normativas.archivo_normativo', // ✅ Key con notación de puntos
-        name: archivoNormativo.name || 'Archivo Normativo',
-        file_id: archivoNormativo.file_reference || 'pending', // Usar 'pending' si no hay file_reference
-      });
-    }
+    // Función helper para procesar un documento (soporta nuevo formato con files[] y legacy)
+    const processDocument = (key: string, doc: any) => {
+      if (!doc || typeof doc !== 'object' || !('name' in doc)) return;
 
-    // Iterar sobre las claves de documentos y extraer aquellos que tienen name
-    documentKeys.forEach(key => {
-      const doc = data[key as keyof typeof data];
-      if (
-        doc && 
-        typeof doc === 'object' && 
-        'name' in doc && 
-        doc.name
-      ) {
-        // Incluir el documento si tiene un name, incluso si file_reference está vacío o null
-        const fileReference = ('file_reference' in doc && doc.file_reference && typeof doc.file_reference === 'string' && doc.file_reference.trim() !== '')
-          ? doc.file_reference
-          : 'pending'; // Usar 'pending' si no hay file_reference válido
-
+      // NUEVO FORMATO: Si existe el array 'files', procesar cada archivo
+      if ('files' in doc && Array.isArray(doc.files) && doc.files.length > 0) {
+        doc.files.forEach((file: any) => {
+          if (file && file.file_id) {
+            uploadedDocs.push({
+              key,
+              name: file.filename || doc.name || key,
+              file_id: file.file_id,
+              upload_date: file.upload_date, // Incluir fecha si está disponible
+            });
+          }
+        });
+      } 
+      // FORMATO LEGACY: Si existe file_reference, usar ese
+      else if ('file_reference' in doc && doc.file_reference && typeof doc.file_reference === 'string' && doc.file_reference.trim() !== '') {
         uploadedDocs.push({
           key,
           name: doc.name || key,
-          file_id: fileReference,
+          file_id: doc.file_reference,
+          // No hay fecha en formato legacy
         });
       }
+    };
+
+    // Procesar archivo_normativo de licencias_normativas
+    const archivoNormativo = data.licencias_normativas?.archivo_normativo;
+    if (archivoNormativo) {
+      processDocument('licencias_normativas.archivo_normativo', archivoNormativo);
+    }
+
+    // Iterar sobre las claves de documentos
+    documentKeys.forEach(key => {
+      const doc = data[key as keyof typeof data];
+      if (doc) {
+        processDocument(key, doc);
+      }
+    });
+
+    // Ordenar por fecha (más recientes primero), luego por nombre
+    uploadedDocs.sort((a, b) => {
+      // Si ambos tienen fecha, ordenar por fecha descendente
+      if (a.upload_date && b.upload_date) {
+        return new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime();
+      }
+      // Si solo uno tiene fecha, ponerlo primero
+      if (a.upload_date && !b.upload_date) return -1;
+      if (!a.upload_date && b.upload_date) return 1;
+      // Si ninguno tiene fecha, ordenar por nombre
+      return a.name.localeCompare(b.name);
     });
 
     return uploadedDocs;

@@ -1,3 +1,53 @@
+// Tipos para el resultado de recursos (Reconsideración/Apelación)
+export type ResultadoRecurso = 'fundado' | 'infundado' | 'fundado_en_parte' | null;
+
+// Estructura de un Proceso de Recurso (Reconsideración o Apelación)
+export interface ProcesoRecursoData {
+  habilitado: boolean;
+  fecha_presentacion?: string;
+  documento_recurso?: File[];
+  resolucion_recurso?: File[];
+  resultado?: ResultadoRecurso;
+  observaciones?: string;
+}
+
+// Estructura de Notificación/Carta previa al Acta
+export interface NotificacionData {
+  tiene_notificacion: boolean;
+  fecha_notificacion?: string;
+  archivo_notificacion?: File[];
+  documentos_subsanacion_notificacion?: File[];
+  subsanacion_completada?: boolean;
+}
+
+// Estructura de una Revisión individual
+export interface RevisionData {
+  id: string;
+  numero_revision: number; // 1, 2, 3 o 4
+  fecha_creacion: string;
+  
+  // Notificación previa (Flujo A)
+  notificacion?: NotificacionData;
+  
+  // Datos del Acta (Flujo B)
+  fecha_respuesta?: string;
+  archivo_acta?: File[];
+  resultado_acta?: 'conforme' | 'no_conforme' | null;
+  
+  // Subsanación de observaciones (requerida si No Conforme)
+  documentos_subsanacion?: File[];
+  subsanacion_completada?: boolean;
+  
+  // Proceso de Reconsideración (Flujo C)
+  reconsideracion?: ProcesoRecursoData;
+  
+  // Proceso de Apelación (Flujo D)
+  apelacion?: ProcesoRecursoData;
+  
+  // Estado de la revisión
+  estado: 'en_progreso' | 'completada' | 'improcedente';
+}
+
 export interface GestionAnteproyectoFormData {
   // Administrado y Proyecto
   client_id?: string;
@@ -26,13 +76,16 @@ export interface GestionAnteproyectoFormData {
   numero_expediente?: string;
   archivo_cargo?: File[];
   
-  // Paso 3: Seguimiento y Respuesta
+  // Paso 3: Seguimiento y Respuesta - NUEVO: Array de Revisiones
+  revisiones?: RevisionData[];
+  revision_actual_index?: number; // Índice de la revisión activa
+  estado_seguimiento?: 'en_proceso' | 'conforme' | 'improcedente';
+  
+  // Campos legacy para compatibilidad (se migrarán a revisiones)
   fecha_respuesta?: string;
   archivo_respuesta?: File[];
   resultado_acta?: 'conforme' | 'no_conforme' | null;
   documentos_subsanacion?: File[];
-  
-  // Proceso de Reconsideración (opcional)
   fecha_presentacion_reconsideracion?: string;
   documento_reconsideracion?: File[];
   resolucion_reconsideracion?: File[];
@@ -43,6 +96,41 @@ export interface GestionAnteproyectoFormData {
   fue_aprobado?: File[];
   planos_aprobados?: File[];
   otros_documentos?: File[];
+}
+
+// Estructura de Recurso para el backend
+export interface RecursoBackendData {
+  habilitado: boolean;
+  fecha_presentacion?: string;
+  resultado?: ResultadoRecurso;
+  observaciones?: string;
+  documento_recurso?: DocumentInfo;
+  resolucion_recurso?: DocumentInfo;
+}
+
+// Estructura de Notificación para el backend
+export interface NotificacionBackendData {
+  tiene_notificacion: boolean;
+  fecha_notificacion?: string;
+  subsanacion_completada?: boolean;
+  archivo_notificacion?: DocumentInfo;
+  documentos_subsanacion_notificacion?: DocumentInfo;
+}
+
+// Estructura de Revisión para el backend
+export interface RevisionBackendData {
+  id: string;
+  numero_revision: number;
+  fecha_creacion: string;
+  fecha_respuesta?: string;
+  resultado_acta?: 'conforme' | 'no_conforme' | null;
+  subsanacion_completada?: boolean;
+  estado: 'en_progreso' | 'completada' | 'improcedente';
+  notificacion?: NotificacionBackendData;
+  archivo_acta?: DocumentInfo;
+  documentos_subsanacion?: DocumentInfo;
+  reconsideracion?: RecursoBackendData;
+  apelacion?: RecursoBackendData;
 }
 
 // Estructura de datos del backend
@@ -58,6 +146,12 @@ export interface GestionAnteproyectoData {
     archivo_cargo?: DocumentInfo;
   };
   seguimiento_respuesta?: {
+    // Nueva estructura con revisiones
+    revisiones?: RevisionBackendData[];
+    revision_actual_index?: number;
+    estado_seguimiento?: 'en_proceso' | 'conforme' | 'improcedente';
+    
+    // Campos legacy para compatibilidad
     fecha_respuesta?: string;
     resultado_acta?: 'conforme' | 'no_conforme' | null;
     fecha_presentacion_reconsideracion?: string;

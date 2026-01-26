@@ -289,22 +289,13 @@ export default function StepPredioAnteproyecto({
               numbersOnly
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Área Libre (m²)"
-                placeholder="xx.xx"
-                value={formData.area_libre_m2.toString()}
-                onChange={(e) => onInputChange('area_libre_m2', parseFloat(e.target.value) || 0)}
-                numbersOnly
-              />
-              <Input
-                label="Área Libre (%)"
-                placeholder="xx"
-                value={formData.area_libre_porcentaje.toString()}
-                onChange={(e) => onInputChange('area_libre_porcentaje', parseFloat(e.target.value) || 0)}
-                numbersOnly
-              />
-            </div>
+            <Input
+              label="Área Libre (m²)"
+              placeholder="xx.xx"
+              value={formData.area_libre_m2.toString()}
+              onChange={(e) => onInputChange('area_libre_m2', parseFloat(e.target.value) || 0)}
+              numbersOnly
+            />
           </div>
 
           <div>

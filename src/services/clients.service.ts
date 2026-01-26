@@ -3,7 +3,12 @@ import type { ClientOut, CreateClientRequest, UpdateClientRequest } from '@/type
 
 export const getAllClients = async (): Promise<ClientOut[]> => {
   const response = await api.get('/clients/');
-  return response.data;
+  const data = response.data;
+  if (Array.isArray(data)) return data;
+  // Soporte para respuestas paginadas: { results: [...] } o { data: [...] }
+  if (data?.results && Array.isArray(data.results)) return data.results;
+  if (data?.data && Array.isArray(data.data)) return data.data;
+  return [];
 };
 
 export const createClient = async (clientData: CreateClientRequest): Promise<ClientOut> => {

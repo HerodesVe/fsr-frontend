@@ -12,7 +12,7 @@ import {
   StepEntregaFinal
 } from './StepGestionAnteproyecto';
 import { ResumenGestionAnteproyecto } from './components/ResumenGestionAnteproyecto';
-import type { GestionAnteproyectoFormData, FormStep, UploadedDocument, DocumentInfo } from '@/types/gestionAnteproyecto.types';
+import type { GestionAnteproyectoFormData, FormStep, UploadedDocument, DocumentInfo, RevisionData } from '@/types/gestionAnteproyecto.types';
 
 const stepLabels = [
   'Selección Anteproyecto',
@@ -44,6 +44,10 @@ export default function CreateEditGestionAnteproyecto() {
     numero_expediente: '',
     fecha_respuesta: '',
     resultado_acta: null,
+    // Nuevos campos para revisiones
+    revisiones: [],
+    revision_actual_index: 0,
+    estado_seguimiento: 'en_proceso',
   });
 
   const [steps, setSteps] = useState<FormStep[]>([
@@ -56,6 +60,9 @@ export default function CreateEditGestionAnteproyecto() {
   // Cargar datos cuando se edita
   useEffect(() => {
     if (gestionAnteproyecto && isEditing) {
+      // Cargar revisiones del backend si existen
+      const revisionesBackend = gestionAnteproyecto.data?.seguimiento_respuesta?.revisiones || [];
+      
       setFormData(prev => ({
         ...prev,
         client_id: gestionAnteproyecto.client_id || '',
@@ -63,9 +70,25 @@ export default function CreateEditGestionAnteproyecto() {
         selectedAnteproyecto: gestionAnteproyecto.data?.seleccion_anteproyecto?.selected_anteproyecto || null,
         fecha_ingreso: gestionAnteproyecto.data?.presentacion_municipal?.fecha_ingreso || '',
         numero_expediente: gestionAnteproyecto.data?.presentacion_municipal?.numero_expediente || '',
+        // Campos legacy para compatibilidad
         fecha_respuesta: gestionAnteproyecto.data?.seguimiento_respuesta?.fecha_respuesta || '',
         resultado_acta: gestionAnteproyecto.data?.seguimiento_respuesta?.resultado_acta || null,
         fecha_presentacion_reconsideracion: gestionAnteproyecto.data?.seguimiento_respuesta?.fecha_presentacion_reconsideracion || '',
+        // Nuevos campos de revisiones
+        revisiones: revisionesBackend.map((rev: any) => ({
+          id: rev.id,
+          numero_revision: rev.numero_revision,
+          fecha_creacion: rev.fecha_creacion,
+          fecha_respuesta: rev.fecha_respuesta,
+          resultado_acta: rev.resultado_acta,
+          subsanacion_completada: rev.subsanacion_completada,
+          estado: rev.estado,
+          notificacion: rev.notificacion || { tiene_notificacion: false },
+          reconsideracion: rev.reconsideracion || { habilitado: false, resultado: null },
+          apelacion: rev.apelacion || { habilitado: false, resultado: null },
+        })) as RevisionData[],
+        revision_actual_index: gestionAnteproyecto.data?.seguimiento_respuesta?.revision_actual_index ?? (revisionesBackend.length > 0 ? revisionesBackend.length - 1 : 0),
+        estado_seguimiento: gestionAnteproyecto.data?.seguimiento_respuesta?.estado_seguimiento || 'en_proceso',
       }));
 
       // Cargar documentos
@@ -271,6 +294,8 @@ export default function CreateEditGestionAnteproyecto() {
       case 2: // Paso 3: Seguimiento y Respuesta
         const seguimientoData: any = {
           resultado_acta: formData.resultado_acta,
+          estado_seguimiento: formData.estado_seguimiento,
+          revision_actual_index: formData.revision_actual_index,
         };
         
         const fechaRespuesta = formatDateForBackend(formData.fecha_respuesta || '');
@@ -278,6 +303,34 @@ export default function CreateEditGestionAnteproyecto() {
 
         const fechaReconsideracion = formatDateForBackend(formData.fecha_presentacion_reconsideracion || '');
         if (fechaReconsideracion) seguimientoData.fecha_presentacion_reconsideracion = fechaReconsideracion;
+
+        // Agregar revisiones si existen
+        if (formData.revisiones && formData.revisiones.length > 0) {
+          seguimientoData.revisiones = formData.revisiones.map(rev => ({
+            id: rev.id,
+            numero_revision: rev.numero_revision,
+            fecha_creacion: rev.fecha_creacion,
+            fecha_respuesta: rev.fecha_respuesta,
+            resultado_acta: rev.resultado_acta,
+            subsanacion_completada: rev.subsanacion_completada,
+            estado: rev.estado,
+            notificacion: rev.notificacion ? {
+              tiene_notificacion: rev.notificacion.tiene_notificacion,
+              fecha_notificacion: rev.notificacion.fecha_notificacion,
+              subsanacion_completada: rev.notificacion.subsanacion_completada,
+            } : undefined,
+            reconsideracion: rev.reconsideracion ? {
+              habilitado: rev.reconsideracion.habilitado,
+              fecha_presentacion: rev.reconsideracion.fecha_presentacion,
+              resultado: rev.reconsideracion.resultado,
+            } : undefined,
+            apelacion: rev.apelacion ? {
+              habilitado: rev.apelacion.habilitado,
+              fecha_presentacion: rev.apelacion.fecha_presentacion,
+              resultado: rev.apelacion.resultado,
+            } : undefined,
+          }));
+        }
 
         return {
           data: {
@@ -329,6 +382,22 @@ export default function CreateEditGestionAnteproyecto() {
         },
         seguimiento_respuesta: {
           resultado_acta: formData.resultado_acta || 'conforme',
+          estado_seguimiento: formData.estado_seguimiento || 'en_proceso',
+          revision_actual_index: formData.revision_actual_index || 0,
+          revisiones: formData.revisiones && formData.revisiones.length > 0 
+            ? formData.revisiones.map(rev => ({
+                id: rev.id,
+                numero_revision: rev.numero_revision,
+                fecha_creacion: rev.fecha_creacion,
+                fecha_respuesta: rev.fecha_respuesta,
+                resultado_acta: rev.resultado_acta,
+                subsanacion_completada: rev.subsanacion_completada,
+                estado: rev.estado,
+                notificacion: rev.notificacion,
+                reconsideracion: rev.reconsideracion,
+                apelacion: rev.apelacion,
+              }))
+            : [],
           archivo_respuesta: createDocumentInfo('Archivo de Respuesta', true),
           documentos_subsanacion: createDocumentInfo('Documentos de Subsanación', false),
           documento_reconsideracion: createDocumentInfo('Documento de Reconsideración', false),

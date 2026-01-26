@@ -91,6 +91,7 @@ export interface UploadedDocument {
   key: string;
   name: string;
   file_id: string;
+  upload_date?: string; // Fecha ISO 8601 del backend
 }
 
 export interface Anteproyecto {

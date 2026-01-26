@@ -13,6 +13,7 @@ export const useClients = () => {
     queryFn: getAllClients,
     staleTime: 5 * 60 * 1000, // 5 minutos
     retry: 1,
+    refetchOnMount: 'always', // Siempre hacer GET al montar (p. ej. al entrar a Administrados)
   });
 
   return { 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { LuArrowLeft } from 'react-icons/lu';
 import toast from 'react-hot-toast';
 
@@ -56,6 +56,7 @@ export default function CreateEditAdministrado() {
   const { id } = useParams<{ id: string }>();
   const isEditing = Boolean(id);
   const { setHeader } = useHeaderStore();
+  const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState<FormData>({
     clientType: 'natural',
@@ -114,6 +115,7 @@ export default function CreateEditAdministrado() {
   const createMutation = useMutation({
     mutationFn: createClient,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
       toast.success('Administrado creado exitosamente', {
         duration: 4000,
       });
@@ -133,6 +135,7 @@ export default function CreateEditAdministrado() {
   const updateMutation = useMutation({
     mutationFn: updateClient,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
       toast.success('Administrado actualizado exitosamente', {
         duration: 4000,
       });
