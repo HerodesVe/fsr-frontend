@@ -22,14 +22,27 @@ export default function CreateEditGestionProyecto() {
   const [gestionId] = useState<string>(id || '');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Estado inicial de especialidad
+  const createInitialEspecialidad = () => ({
+    revisiones: [],
+    revision_actual_index: -1,
+    es_conforme: false,
+    es_improcedente: false,
+    estado: 'pendiente' as const,
+    revision_count: 0,
+    resultado_acta: null,
+  });
+
   const [formData, setFormData] = useState<GestionProyectoFormData>({
     selectedProyecto: null,
     especialidades: {
-      arquitectura: { es_conforme: false, revision_count: 0, resultado_acta: null },
-      estructuras: { es_conforme: false, revision_count: 0, resultado_acta: null },
-      electricas: { es_conforme: false, revision_count: 0, resultado_acta: null },
-      sanitarias: { es_conforme: false, revision_count: 0, resultado_acta: null }
-    }
+      arquitectura: createInitialEspecialidad(),
+      estructuras: createInitialEspecialidad(),
+      electricas: createInitialEspecialidad(),
+      sanitarias: createInitialEspecialidad(),
+    },
+    revisiones_globales_usadas: 0,
+    estado_proyecto: 'en_proceso',
   });
 
   const [steps, setSteps] = useState<FormStep[]>([
@@ -69,13 +82,15 @@ export default function CreateEditGestionProyecto() {
         break;
       
       case 1: // Gestión Especialidades
-        // Validar que al menos arquitectura tenga datos
+        // Validar que arquitectura haya iniciado al menos una revisión
         const arq = formData.especialidades.arquitectura;
-        if (!arq.fecha_respuesta) {
-          newErrors['arquitectura.fecha_respuesta'] = 'Fecha de respuesta de arquitectura es requerida';
-        }
-        if (!arq.resultado_acta) {
-          newErrors['arquitectura.resultado_acta'] = 'Debe seleccionar el resultado del acta de arquitectura';
+        if (!arq.revisiones || arq.revisiones.length === 0) {
+          newErrors['arquitectura'] = 'Debe iniciar al menos una revisión de arquitectura';
+        } else {
+          const revisionActual = arq.revisiones[arq.revision_actual_index];
+          if (revisionActual && !revisionActual.resultado_acta) {
+            newErrors['arquitectura.resultado_acta'] = 'Debe seleccionar el resultado del acta de arquitectura';
+          }
         }
         break;
       

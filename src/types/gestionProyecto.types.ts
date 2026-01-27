@@ -1,3 +1,76 @@
+// ============================================
+// TIPOS PARA EL SISTEMA DE REVISIONES (8 VIDAS GLOBALES)
+// ============================================
+
+// Tipos para el resultado de recursos (Reconsideración/Apelación)
+export type ResultadoRecursoProyecto = 'fundado' | 'infundado' | 'fundado_en_parte' | null;
+
+// Estructura de un Proceso de Recurso (Reconsideración o Apelación)
+export interface ProcesoRecursoProyectoData {
+  habilitado: boolean;
+  fecha_presentacion?: string;
+  documento_recurso?: File[];
+  resolucion_recurso?: File[];
+  resultado?: ResultadoRecursoProyecto;
+  observaciones?: string;
+}
+
+// Estructura de Notificación/Carta previa al Acta
+export interface NotificacionProyectoData {
+  tiene_notificacion: boolean;
+  fecha_notificacion?: string;
+  archivo_notificacion?: File[];
+  documentos_subsanacion_notificacion?: File[];
+  subsanacion_completada?: boolean;
+}
+
+// Estructura de una Revisión individual por Especialidad
+export interface RevisionEspecialidadData {
+  id: string;
+  numero_revision: number; // 1, 2, 3, ... hasta el límite de la especialidad
+  numero_revision_global: number; // Posición en el contador global (1-8)
+  fecha_creacion: string;
+  
+  // Notificación previa (Flujo A)
+  notificacion?: NotificacionProyectoData;
+  
+  // Datos del Acta (Flujo B)
+  fecha_respuesta?: string;
+  archivo_acta?: File[];
+  resultado_acta?: 'conforme' | 'no_conforme' | null;
+  
+  // Subsanación de observaciones (requerida si No Conforme)
+  documentos_subsanacion?: File[];
+  subsanacion_completada?: boolean;
+  
+  // Proceso de Reconsideración (Flujo C)
+  reconsideracion?: ProcesoRecursoProyectoData;
+  
+  // Proceso de Apelación (Flujo D)
+  apelacion?: ProcesoRecursoProyectoData;
+  
+  // Estado de la revisión
+  estado: 'en_progreso' | 'completada' | 'improcedente';
+}
+
+// Tipo de especialidad
+export type TipoEspecialidad = 'arquitectura' | 'estructuras' | 'electricas' | 'sanitarias';
+
+// Límites máximos por especialidad (considerando secuencialidad mínima)
+export const LIMITES_ESPECIALIDAD: Record<TipoEspecialidad, number> = {
+  arquitectura: 8,  // Puede usar todas las 8 revisiones
+  estructuras: 7,   // Máximo 7 (Global 8 - 1 mínimo de Arquitectura)
+  electricas: 6,    // Máximo 6 (Global 8 - 1 Arq - 1 Estructuras)
+  sanitarias: 6,    // Máximo 6 (Global 8 - 1 Arq - 1 Estructuras)
+};
+
+// Constante del máximo global
+export const MAX_REVISIONES_GLOBALES = 8;
+
+// ============================================
+// INTERFACES PRINCIPALES
+// ============================================
+
 export interface GestionProyectoFormData {
   // Paso 1: Selección del Proyecto
   selectedProyecto?: any;
@@ -16,20 +89,33 @@ export interface GestionProyectoFormData {
     sanitarias: EspecialidadData;
   };
   
+  // Contador global de revisiones (8 vidas)
+  revisiones_globales_usadas: number;
+  estado_proyecto: 'en_proceso' | 'conforme' | 'improcedente';
+  
   // Paso 3: Emisión de Licencia
   licencia_final?: File[];
   cargo_entrega_administrado?: File[];
 }
 
 export interface EspecialidadData {
+  // Nuevo: Array de revisiones históricas
+  revisiones: RevisionEspecialidadData[];
+  revision_actual_index: number;
+  
+  // Estado de la especialidad
+  es_conforme: boolean;
+  es_improcedente: boolean;
+  estado: 'pendiente' | 'en_progreso' | 'conforme' | 'improcedente';
+  
+  // Campos legacy para compatibilidad
   fecha_respuesta?: string;
   archivo_respuesta?: File[];
   resultado_acta?: 'conforme' | 'no_conforme' | null;
   revision_count: number;
   documentos_subsanacion?: File[];
-  es_conforme: boolean;
   
-  // Proceso de Reconsideración (opcional)
+  // Proceso de Reconsideración (opcional) - legacy
   fecha_presentacion_reconsideracion?: string;
   documento_reconsideracion?: File[];
   resolucion_reconsideracion?: File[];
