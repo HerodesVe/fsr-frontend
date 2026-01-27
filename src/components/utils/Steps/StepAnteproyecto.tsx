@@ -96,7 +96,7 @@ export default function StepAnteproyecto({
             <span className="text-white text-sm font-medium">📋</span>
           </div>
           <h3 className="text-lg font-semibold text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Datos del Anteproyecto
+            Datos del Anteproyecto Aprobado
           </h3>
         </div>
         <p className="text-sm text-gray-600 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>

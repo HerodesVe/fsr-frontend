@@ -5,17 +5,19 @@ import { useHeaderStore } from '@/store/headerStore';
 import { Button } from '@/components/ui';
 import { 
   StepAnteproyecto, 
-  StepLicenciaProyecto, 
-  StepArquitectura, 
-  StepEstructuras,
-  StepSanitarias,
+  StepPredio,
   StepElectricas,
   StepSustentoTecnico
 } from '@/components/utils/Steps';
 import { useProyectos, useProyectoById } from '@/hooks/useProyectos';
 import { useClients } from '@/hooks/useClients';
+import { useDepartments, useProvinces, useDistricts } from '@/hooks/useUbigeo';
 import { ResumenProyecto } from './components/ResumenProyecto';
 import type { ProyectoFormData, FormStep, StepStatus } from '@/types/proyecto.types';
+import StepTipoObraProyecto from './components/StepTipoObraProyecto';
+import StepArquitectura from './components/StepArquitecturaProyecto';
+import StepEstructuras from './components/StepEstructurasProyecto';
+import StepSanitarias from './components/StepSanitariasProyecto';
 
 export default function CreateEditProyecto() {
   const navigate = useNavigate();
@@ -39,23 +41,51 @@ export default function CreateEditProyecto() {
     tipo_licencia_edificacion: '',
     tipo_modalidad: '',
     link_normativas: '',
+    departmentId: '',
+    provinceId: '',
+    districtId: '',
+    urbanization: '',
+    mz: '',
+    lote: '',
+    subLote: '',
+    street: '',
+    number: '',
+    interior: '',
+    latitud: 0,
+    longitud: 0,
+    area_total_m2: 0,
+    frente: 0,
+    derecha: 0,
+    izquierda: 0,
+    fondo: 0,
+    tipo_edificacion: '',
+    numero_pisos: 0,
+    area_techada_total_m2: 0,
+    area_libre_m2: 0,
+    area_libre_porcentaje: 0,
+    descripcion_proyecto: '',
     requiere_sustento_legal: false,
     requiere_informe_vinculante: false,
   });
 
+  const { data: departments } = useDepartments();
+  const { data: provinces } = useProvinces(formData.departmentId);
+  const { data: districts } = useDistricts(formData.provinceId);
+
   const [steps, setSteps] = useState<FormStep[]>([
-    { id: 1, title: 'Anteproyecto', completed: false },
-    { id: 2, title: 'Licencias/Normativas', completed: false },
-    { id: 3, title: 'Arquitectura', completed: false },
-    { id: 4, title: 'Estructuras', completed: false },
-    { id: 5, title: 'Sanitarias', completed: false },
-    { id: 6, title: 'Eléctricas', completed: false },
-    { id: 7, title: 'Sustento Técnico', completed: false },
+    { id: 1, title: 'Anteproyecto Aprobado', completed: false },
+    { id: 2, title: 'Tipo de Obra / Normativas', completed: false },
+    { id: 3, title: 'Predio', completed: false },
+    { id: 4, title: 'Arquitectura', completed: false },
+    { id: 5, title: 'Estructuras', completed: false },
+    { id: 6, title: 'Sanitarias', completed: false },
+    { id: 7, title: 'Eléctricas', completed: false },
+    { id: 8, title: 'Sustento Técnico', completed: false },
   ]);
 
   useEffect(() => {
     setHeader(
-      isEditing ? 'Editar Proyecto' : 'Nuevo Proyecto',
+      isEditing ? 'Editar Proyecto' : 'Elaboracion de Proyecto',
       'Gestiona todos tus trámites y servicios en un solo lugar'
     );
     return () => {
@@ -68,7 +98,12 @@ export default function CreateEditProyecto() {
     if (isEditing && proyectoData && !isLoadingProyecto) {
       const data = proyectoData.data;
       
-      setFormData({
+      const dp = (data as { datos_predio?: { ubicacion?: Record<string, string>; latitud?: number; longitud?: number; medidas_perimetricas?: Record<string, number>; edificacion?: Record<string, string | number> } }).datos_predio;
+      const u = dp?.ubicacion;
+      const m = dp?.medidas_perimetricas;
+      const e = dp?.edificacion;
+      setFormData(prev => ({
+        ...prev,
         titulo_proyecto: data.titulo_proyecto || '',
         tipo_proyecto: data.tipo_proyecto || '',
         descripcion: data.descripcion || '',
@@ -77,9 +112,32 @@ export default function CreateEditProyecto() {
         tipo_licencia_edificacion: data.licencias_normativas?.tipo_licencia_edificacion || '',
         tipo_modalidad: data.licencias_normativas?.tipo_modalidad || '',
         link_normativas: data.licencias_normativas?.link_normativas || '',
+        departmentId: u?.departmentId || '',
+        provinceId: u?.provinceId || '',
+        districtId: u?.districtId || '',
+        urbanization: u?.urbanization || '',
+        mz: u?.mz || '',
+        lote: u?.lote || '',
+        subLote: u?.subLote || '',
+        street: u?.street || '',
+        number: u?.number || '',
+        interior: u?.interior || '',
+        latitud: dp?.latitud ?? 0,
+        longitud: dp?.longitud ?? 0,
+        area_total_m2: m?.area_total_m2 ?? 0,
+        frente: m?.frente ?? 0,
+        derecha: m?.derecha ?? 0,
+        izquierda: m?.izquierda ?? 0,
+        fondo: m?.fondo ?? 0,
+        tipo_edificacion: (e?.tipo_edificacion as string) || '',
+        numero_pisos: (e?.numero_pisos as number) ?? 0,
+        area_techada_total_m2: (e?.area_techada_total_m2 as number) ?? 0,
+        area_libre_m2: (e?.area_libre_m2 as number) ?? 0,
+        area_libre_porcentaje: (e?.area_libre_porcentaje as number) ?? 0,
+        descripcion_proyecto: (e?.descripcion_proyecto as string) || '',
         requiere_sustento_legal: data.sustento_tecnico?.requiere_sustento_legal || false,
         requiere_informe_vinculante: data.sustento_tecnico?.requiere_informe_vinculante || false,
-      });
+      }));
 
       // Si existe steps_status, usar esa información para determinar el paso actual y estados
       if (proyectoData.steps_status) {
@@ -119,6 +177,15 @@ export default function CreateEditProyecto() {
       case 1: // Licencias
         if (!formData.tipo_licencia_edificacion) newErrors.tipo_licencia_edificacion = 'Tipo de licencia es requerido';
         if (!formData.tipo_modalidad) newErrors.tipo_modalidad = 'Tipo de modalidad es requerido';
+        break;
+
+      case 2: // Predio
+        if (!formData.departmentId) newErrors.departmentId = 'Departamento es requerido';
+        if (!formData.provinceId) newErrors.provinceId = 'Provincia es requerida';
+        if (!formData.districtId) newErrors.districtId = 'Distrito es requerido';
+        if (!formData.urbanization) newErrors.urbanization = 'Urbanización es requerida';
+        if (!formData.street) newErrors.street = 'Vía es requerida';
+        if (!formData.area_total_m2 || formData.area_total_m2 <= 0) newErrors.area_total_m2 = 'Área total es requerida';
         break;
     }
 
@@ -162,6 +229,48 @@ export default function CreateEditProyecto() {
         };
 
         await updateMutation.mutateAsync(updateData);
+      }
+
+      // Paso 3: Actualizar datos del predio (solo si hay cambios)
+      else if (currentStep === 2 && proyectoId && hasChanges[currentStep]) {
+        const updateData = {
+          id: proyectoId,
+          client_id: formData.selectedClient?.id || formData.selectedAnteproyecto?.client_id || '',
+          data: {
+            datos_predio: {
+              ubicacion: {
+                departmentId: formData.departmentId,
+                provinceId: formData.provinceId,
+                districtId: formData.districtId,
+                urbanization: formData.urbanization,
+                mz: formData.mz,
+                lote: formData.lote,
+                subLote: formData.subLote,
+                street: formData.street,
+                number: formData.number,
+                interior: formData.interior,
+              },
+              latitud: formData.latitud,
+              longitud: formData.longitud,
+              medidas_perimetricas: {
+                area_total_m2: formData.area_total_m2,
+                frente: formData.frente,
+                derecha: formData.derecha,
+                izquierda: formData.izquierda,
+                fondo: formData.fondo,
+              },
+              edificacion: {
+                tipo_edificacion: formData.tipo_edificacion,
+                numero_pisos: formData.numero_pisos,
+                area_techada_total_m2: formData.area_techada_total_m2,
+                area_libre_m2: formData.area_libre_m2,
+                area_libre_porcentaje: formData.area_libre_porcentaje,
+                descripcion_proyecto: formData.descripcion_proyecto,
+              },
+            },
+          },
+        };
+        await updateMutation.mutateAsync(updateData as any);
       }
 
       // Marcar paso como completado
@@ -208,14 +317,15 @@ export default function CreateEditProyecto() {
 
   // Función para determinar el paso actual basado en el estado de los pasos
   const determineCurrentStep = (stepStatus: StepStatus): number => {
-    const stepMapping = {
+    const stepMapping: Record<string, number> = {
       'anteproyecto': 0,
       'licencias_normativas': 1,
-      'arquitectura': 2,
-      'estructuras': 3,
-      'sanitarias': 4,
-      'electricas': 5,
-      'sustento_tecnico': 6
+      'predio': 2,
+      'arquitectura': 3,
+      'estructuras': 4,
+      'sanitarias': 5,
+      'electricas': 6,
+      'sustento_tecnico': 7
     };
 
     // Encontrar el primer paso pendiente
@@ -226,23 +336,24 @@ export default function CreateEditProyecto() {
     }
     
     // Si todos están completados, ir al último paso
-    return 6;
+    return 7;
   };
 
   // Función para determinar qué pasos están completados
   const determineCompletedSteps = (stepStatus: StepStatus): FormStep[] => {
     const baseSteps = [
-      { id: 1, title: 'Anteproyecto', completed: false },
-      { id: 2, title: 'Licencias/Normativas', completed: false },
-      { id: 3, title: 'Arquitectura', completed: false },
-      { id: 4, title: 'Estructuras', completed: false },
-      { id: 5, title: 'Sanitarias', completed: false },
-      { id: 6, title: 'Eléctricas', completed: false },
-      { id: 7, title: 'Sustento Técnico', completed: false },
+      { id: 1, title: 'Anteproyecto Aprobado', completed: false },
+      { id: 2, title: 'Tipo de Obra / Normativas', completed: false },
+      { id: 3, title: 'Predio', completed: false },
+      { id: 4, title: 'Arquitectura', completed: false },
+      { id: 5, title: 'Estructuras', completed: false },
+      { id: 6, title: 'Sanitarias', completed: false },
+      { id: 7, title: 'Eléctricas', completed: false },
+      { id: 8, title: 'Sustento Técnico', completed: false },
     ];
 
     return baseSteps.map((step, index) => {
-      const stepKeys = ['anteproyecto', 'licencias_normativas', 'arquitectura', 'estructuras', 'sanitarias', 'electricas', 'sustento_tecnico'];
+      const stepKeys = ['anteproyecto', 'licencias_normativas', 'predio', 'arquitectura', 'estructuras', 'sanitarias', 'electricas', 'sustento_tecnico'];
       const stepKey = stepKeys[index] as keyof StepStatus;
       
       return {
@@ -274,17 +385,29 @@ export default function CreateEditProyecto() {
 
       case 1: // Licencias
         return (
-          <StepLicenciaProyecto
+          <StepTipoObraProyecto
             formData={formData}
             errors={errors}
-            anteproyectoId={proyectoId}
+            proyectoId={proyectoId}
             uploadedDocuments={proyectoData?.uploaded_documents || []}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
           />
         );
 
-      case 2: // Arquitectura
+      case 2: // Predio
+        return (
+          <StepPredio
+            formData={formData as any}
+            errors={errors}
+            departments={departments}
+            provinces={provinces}
+            districts={districts}
+            onInputChange={(field, value) => handleInputChange(field as keyof ProyectoFormData, value)}
+          />
+        );
+
+      case 3: // Arquitectura
         return (
           <StepArquitectura
             formData={formData}
@@ -295,7 +418,7 @@ export default function CreateEditProyecto() {
           />
         );
 
-      case 3: // Estructuras
+      case 4: // Estructuras
         return (
           <StepEstructuras
             formData={formData}
@@ -306,7 +429,7 @@ export default function CreateEditProyecto() {
           />
         );
 
-      case 4: // Sanitarias
+      case 5: // Sanitarias
         return (
           <StepSanitarias
             formData={formData}
@@ -328,7 +451,7 @@ export default function CreateEditProyecto() {
           />
         );
 
-      case 6: // Sustento Técnico
+      case 7: // Sustento Técnico
         return (
           <StepSustentoTecnico
             formData={formData}
@@ -345,7 +468,7 @@ export default function CreateEditProyecto() {
   };
 
   const getStepTitle = (index: number): string => {
-    const titles = ['Anteproyecto', 'Licencias', 'Arquitectura', 'Estructuras', 'Sanitarias', 'Eléctricas', 'Sustento Técnico'];
+    const titles = ['Anteproyecto', 'Licencias', 'Predio', 'Arquitectura', 'Estructuras', 'Sanitarias', 'Eléctricas', 'Sustento Técnico'];
     return titles[index] || '';
   };
 

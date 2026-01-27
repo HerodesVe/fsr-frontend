@@ -45,15 +45,18 @@ export interface ArquitecturaDocs {
   memoria_descriptiva_seguridad?: DocumentFile;
   memoria_descriptiva_arquitectura?: DocumentFile;
   memoria_descriptiva_estructura?: DocumentFile;
+  fue_presupuesto_obra?: DocumentFile;
+  sustento_tecnico_legal_mvcs?: DocumentFile;
 }
 
 export interface EstructurasDocs {
-  plano_ubicacion?: DocumentFile;
-  plano_arquitectura?: DocumentFile;
-  plano_seguridad?: DocumentFile;
-  memoria_descriptiva_seguridad?: DocumentFile;
-  memoria_descriptiva_arquitectura?: DocumentFile;
-  memoria_descriptiva_estructura?: DocumentFile;
+  planos_estructuras?: DocumentFile;
+  memoria_calculos_estructuras?: DocumentFile;
+  memoria_especificaciones_tecnicas_estructuras?: DocumentFile;
+  planos_sostenimiento_excavaciones?: DocumentFile;
+  memoria_descriptiva_sostenimiento_excavaciones?: DocumentFile;
+  estudio_mecanica_suelos?: DocumentFile;
+  otros_archivos?: DocumentFile;
 }
 
 export interface SanitariasDocs {
@@ -127,6 +130,7 @@ export interface ProyectoData {
   anteproyecto_importado_id?: string;
   anteproyecto_importado?: AnteproyectoImportado;
   licencias_normativas?: LicenciasNormativas;
+  datos_predio?: Record<string, unknown>;
   arquitectura_docs: ArquitecturaDocs;
   estructuras_docs: EstructurasDocs;
   sanitarias_docs: SanitariasDocs;
@@ -137,6 +141,7 @@ export interface ProyectoData {
 export interface StepStatus {
   anteproyecto: 'Completada' | 'Pendiente' | 'En progreso';
   licencias_normativas: 'Completada' | 'Pendiente' | 'En progreso';
+  predio?: 'Completada' | 'Pendiente' | 'En progreso';
   arquitectura: 'Completada' | 'Pendiente' | 'En progreso';
   estructuras: 'Completada' | 'Pendiente' | 'En progreso';
   sanitarias: 'Completada' | 'Pendiente' | 'En progreso';
@@ -198,6 +203,31 @@ export interface ProyectoFormData {
   link_normativas: string;
   archivo_normativo?: File;
 
+  // Paso 2b: Predio
+  departmentId: string;
+  provinceId: string;
+  districtId: string;
+  urbanization: string;
+  mz: string;
+  lote: string;
+  subLote: string;
+  street: string;
+  number: string;
+  interior: string;
+  latitud: number;
+  longitud: number;
+  area_total_m2: number;
+  frente: number;
+  derecha: number;
+  izquierda: number;
+  fondo: number;
+  tipo_edificacion: string;
+  numero_pisos: number;
+  area_techada_total_m2: number;
+  area_libre_m2: number;
+  area_libre_porcentaje: number;
+  descripcion_proyecto: string;
+
   // Paso 3: Arquitectura - Archivos
   arq_plano_ubicacion?: File[];
   arq_plano_arquitectura?: File[];
@@ -205,15 +235,17 @@ export interface ProyectoFormData {
   arq_memoria_descriptiva_seguridad?: File[];
   arq_memoria_descriptiva_arquitectura?: File[];
   arq_memoria_descriptiva_estructura?: File[];
+  arq_fue_presupuesto_obra?: File[];
+  arq_sustento_tecnico_legal_mvcs?: File[];
   arq_otros_archivos?: File[];
 
   // Paso 4: Estructuras - Archivos
-  est_plano_ubicacion?: File[];
-  est_plano_arquitectura?: File[];
-  est_plano_seguridad?: File[];
-  est_memoria_descriptiva_seguridad?: File[];
-  est_memoria_descriptiva_arquitectura?: File[];
-  est_memoria_descriptiva_estructura?: File[];
+  est_planos_estructuras?: File[];
+  est_memoria_calculos_estructuras?: File[];
+  est_memoria_especificaciones_tecnicas_estructuras?: File[];
+  est_planos_sostenimiento_excavaciones?: File[];
+  est_memoria_descriptiva_sostenimiento_excavaciones?: File[];
+  est_estudio_mecanica_suelos?: File[];
   est_otros_archivos?: File[];
 
   // Paso 5: Sanitarias - Archivos

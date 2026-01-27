@@ -31,7 +31,7 @@ export default function StepArquitectura({
           </h3>
         </div>
         <p className="text-sm text-gray-600 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
-          Sube los documentos relacionados con la especialidad de estructuras.
+          Adjuntar los documentos de la especialidad de Arquitectura
         </p>
 
         <div className="space-y-6">
@@ -69,7 +69,7 @@ export default function StepArquitectura({
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Plano de Arquitectura <span className="text-red-500">*</span>
+                  Planos de Arquitectura <span className="text-red-500">*</span>
                 </h5>
               </div>
               <div className="text-xs text-gray-500">
@@ -94,7 +94,7 @@ export default function StepArquitectura({
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Plano de Seguridad <span className="text-red-500">*</span>
+                  Planos de Seguridad <span className="text-red-500">*</span>
                 </h5>
               </div>
               <div className="text-xs text-gray-500">
@@ -164,12 +164,12 @@ export default function StepArquitectura({
             />
           </div>
 
-          {/* Memoria descriptiva de estructura */}
+          {/* FUE (Formulario Único de Edificación) y Presupuesto de Obra */}
           <div className="p-4 border border-gray-200 rounded-lg">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Memoria descriptiva de estructura <span className="text-red-500">*</span>
+                  FUE (Formulario Único de Edificación) y Presupuesto de Obra
                 </h5>
               </div>
               <div className="text-xs text-gray-500">
@@ -178,12 +178,37 @@ export default function StepArquitectura({
             </div>
             <FileUpload
               placeholder="Seleccione archivo"
-              value={formData.arq_memoria_descriptiva_estructura || []}
-              onChange={(files) => onInputChange('arq_memoria_descriptiva_estructura', files)}
+              value={formData.arq_fue_presupuesto_obra || []}
+              onChange={(files) => onInputChange('arq_fue_presupuesto_obra', files)}
+              accept=".pdf,.doc,.docx,.xls,.xlsx"
+              multiple
+              onUpload={onFileUpload}
+              documentKey="arq_fue_presupuesto_obra"
+              anteproyectoId={proyectoId}
+              uploadedFiles={uploadedDocuments}
+            />
+          </div>
+
+          {/* Sustento Técnico – Legal con Consulta al MVCS */}
+          <div className="p-4 border border-gray-200 rounded-lg">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Sustento Técnico – Legal con Consulta al MVCS
+                </h5>
+              </div>
+              <div className="text-xs text-gray-500">
+                <LuTriangle className="inline w-4 h-4 mr-1" />
+              </div>
+            </div>
+            <FileUpload
+              placeholder="Seleccione archivo"
+              value={formData.arq_sustento_tecnico_legal_mvcs || []}
+              onChange={(files) => onInputChange('arq_sustento_tecnico_legal_mvcs', files)}
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="arq_memoria_descriptiva_estructura"
+              documentKey="arq_sustento_tecnico_legal_mvcs"
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
