@@ -6,7 +6,6 @@ import { Button } from '@/components/ui';
 import { 
   StepAnteproyecto, 
   StepPredio,
-  StepElectricas,
   StepSustentoTecnico
 } from '@/components/utils/Steps';
 import { useProyectos, useProyectoById } from '@/hooks/useProyectos';
@@ -18,6 +17,7 @@ import StepTipoObraProyecto from './components/StepTipoObraProyecto';
 import StepArquitectura from './components/StepArquitecturaProyecto';
 import StepEstructuras from './components/StepEstructurasProyecto';
 import StepSanitarias from './components/StepSanitariasProyecto';
+import StepElectricas from './components/StepElectricas';
 
 export default function CreateEditProyecto() {
   const navigate = useNavigate();
@@ -440,7 +440,7 @@ export default function CreateEditProyecto() {
           />
         );
 
-      case 5: // Eléctricas
+      case 6: // Eléctricas
         return (
           <StepElectricas
             formData={formData}

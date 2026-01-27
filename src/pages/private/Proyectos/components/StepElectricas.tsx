@@ -47,7 +47,7 @@ export default function StepElectricas({
           <div className="flex items-center justify-between mb-4">
             <div>
               <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Otros Archivos
+                Otros Documentos
               </h5>
               <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
                 {description}
@@ -75,7 +75,7 @@ export default function StepElectricas({
           className="text-teal-600 hover:text-teal-700 text-sm font-medium"
           style={{ fontFamily: 'Inter, sans-serif' }}
         >
-          {showOtherFiles[tabKey] ? '- Ocultar Otros Archivos' : '+ Agregar Otros Archivos'}
+          {showOtherFiles[tabKey] ? '- Ocultar Otros Documentos' : '+ Agregar Otros Documentos'}
         </button>
       </div>
     </>
@@ -88,7 +88,7 @@ export default function StepElectricas({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Plano de instalación eléctrica
+              Planos de instalación eléctrica
             </h5>
           </div>
           <div className="text-xs text-gray-500">
@@ -138,7 +138,7 @@ export default function StepElectricas({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Especificaciones técnicas
+            Memoria de Especificaciones Técnicas:
             </h5>
           </div>
           <div className="text-xs text-gray-500">
@@ -163,7 +163,7 @@ export default function StepElectricas({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Factibilidad de energía
+            Certificado de Factibilidad de Servicios de Suministro Eléctrico:
             </h5>
           </div>
           <div className="text-xs text-gray-500">
@@ -183,7 +183,32 @@ export default function StepElectricas({
         />
       </div>
 
-      {/* Otros Archivos */}
+      {/* Memoria de Cálculos */}
+      <div className="p-4 border border-gray-200 rounded-lg">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+              Memoria de Cálculos
+            </h5>
+          </div>
+          <div className="text-xs text-gray-500">
+            <LuTriangle className="inline w-4 h-4 mr-1" />
+          </div>
+        </div>
+        <FileUpload
+          placeholder="Seleccione archivo"
+          value={formData.elec_memoria_calculos || []}
+          onChange={(files) => onInputChange('elec_memoria_calculos', files)}
+          accept=".pdf,.doc,.docx"
+          multiple
+          onUpload={onFileUpload}
+          documentKey="elec_memoria_calculos"
+          anteproyectoId={proyectoId}
+          uploadedFiles={uploadedDocuments}
+        />
+      </div>
+
+      {/* Otros Documentos */}
       {renderOtherFilesSection('electricas', 'elec_otros_archivos', 'Archivos adicionales relacionados con instalaciones eléctricas')}
     </div>
   );
@@ -195,7 +220,7 @@ export default function StepElectricas({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Plano de instalación mecánica
+            Planos de Instalaciones Mecánicas:
             </h5>
           </div>
           <div className="text-xs text-gray-500">
@@ -245,7 +270,7 @@ export default function StepElectricas({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Especificaciones técnicas
+            Memoria de Especificaciones Técnicas:
             </h5>
           </div>
           <div className="text-xs text-gray-500">
@@ -277,7 +302,7 @@ export default function StepElectricas({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Plano de instalación de gas
+            Planos de Instalación de Gas:
             </h5>
           </div>
           <div className="text-xs text-gray-500">
@@ -327,7 +352,7 @@ export default function StepElectricas({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Especificaciones técnicas
+            Memoria de Especificaciones Técnicas:
             </h5>
           </div>
           <div className="text-xs text-gray-500">
@@ -352,7 +377,7 @@ export default function StepElectricas({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Factibilidad de gas
+            Factibilidad de Servicios de Suministro de Gas:
             </h5>
           </div>
           <div className="text-xs text-gray-500">
@@ -372,7 +397,32 @@ export default function StepElectricas({
         />
       </div>
 
-      {/* Otros Archivos */}
+      {/* Memoria de Cálculos */}
+      <div className="p-4 border border-gray-200 rounded-lg">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+              Memoria de Cálculos
+            </h5>
+          </div>
+          <div className="text-xs text-gray-500">
+            <LuTriangle className="inline w-4 h-4 mr-1" />
+          </div>
+        </div>
+        <FileUpload
+          placeholder="Seleccione archivo"
+          value={formData.gas_memoria_calculos || []}
+          onChange={(files) => onInputChange('gas_memoria_calculos', files)}
+          accept=".pdf,.doc,.docx"
+          multiple
+          onUpload={onFileUpload}
+          documentKey="gas_memoria_calculos"
+          anteproyectoId={proyectoId}
+          uploadedFiles={uploadedDocuments}
+        />
+      </div>
+
+      {/* Otros Documentos */}
       {renderOtherFilesSection('gas', 'gas_otros_archivos', 'Archivos adicionales relacionados con instalaciones de gas')}
     </div>
   );
@@ -527,7 +577,7 @@ export default function StepElectricas({
           </h3>
         </div>
         <p className="text-sm text-gray-600 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
-          Sube los documentos relacionados con instalaciones eléctricas.
+          Adjuntar los documentos de la especialidad de Eléctricas
         </p>
 
         {/* Tabs */}

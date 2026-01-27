@@ -31,7 +31,7 @@ export default function StepSanitarias({
           </h3>
         </div>
         <p className="text-sm text-gray-600 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
-          Sube los documentos relacionados con instalaciones sanitarias.
+          Adjuntar los documentos de la especialidad de Sanitarias
         </p>
 
         <div className="space-y-6">
@@ -40,7 +40,7 @@ export default function StepSanitarias({
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Plano de instalación sanitaria
+                  Planos de Instalación de Sanitarias:
                 </h5>
               </div>
               <div className="text-xs text-gray-500">
@@ -90,7 +90,7 @@ export default function StepSanitarias({
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Especificaciones técnicas
+                Memoria de Especificaciones Técnicas:
                 </h5>
               </div>
               <div className="text-xs text-gray-500">
@@ -115,7 +115,7 @@ export default function StepSanitarias({
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Factibilidad de desagüe
+                Certificado de Factibilidad de Servicios de Agua Potable y Alcantarillado:
                 </h5>
               </div>
               <div className="text-xs text-gray-500">
@@ -135,13 +135,38 @@ export default function StepSanitarias({
             />
           </div>
 
-          {/* Otros Archivos */}
+          {/* Memoria de Cálculos */}
+          <div className="p-4 border border-gray-200 rounded-lg">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Memoria de Cálculos
+                </h5>
+              </div>
+              <div className="text-xs text-gray-500">
+                <LuTriangle className="inline w-4 h-4 mr-1" />
+              </div>
+            </div>
+            <FileUpload
+              placeholder="Seleccione archivo"
+              value={formData.san_memoria_calculos || []}
+              onChange={(files) => onInputChange('san_memoria_calculos', files)}
+              accept=".pdf,.doc,.docx"
+              multiple
+              onUpload={onFileUpload}
+              documentKey="san_memoria_calculos"
+              anteproyectoId={proyectoId}
+              uploadedFiles={uploadedDocuments}
+            />
+          </div>
+
+          {/* Otros Documentos */}
           {showOtherFiles && (
             <div className="p-4 border border-gray-200 rounded-lg">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    Otros Archivos
+                    Otros Documentos
                   </h5>
                   <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Archivos adicionales relacionados con instalaciones sanitarias
@@ -169,7 +194,7 @@ export default function StepSanitarias({
               className="text-teal-600 hover:text-teal-700 text-sm font-medium"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
-              {showOtherFiles ? '- Ocultar Otros Archivos' : '+ Agregar Otros Archivos'}
+              {showOtherFiles ? '- Ocultar Otros Documentos' : '+ Agregar Otros Documentos'}
             </button>
           </div>
         </div>

@@ -8,5 +8,4 @@ export { default as StepCargo } from './StepCargo';
 // Steps para Proyecto
 export { default as StepAnteproyecto } from './StepAnteproyecto';
 export { default as StepLicenciaProyecto } from './StepLicenciaProyecto';
-export { default as StepElectricas } from './StepElectricas';
 export { default as StepSustentoTecnico } from './StepSustentoTecnico';

@@ -64,6 +64,8 @@ export interface SanitariasDocs {
   memoria_descriptiva?: DocumentFile;
   especificaciones_tecnicas?: DocumentFile;
   factibilidad_desague?: DocumentFile;
+  memoria_calculos?: DocumentFile;
+  otros_archivos?: DocumentFile;
 }
 
 // Documentos eléctricos por sub-especialidad
@@ -72,6 +74,8 @@ export interface ElectricasDocs {
   memoria_descriptiva?: DocumentFile;
   especificaciones_tecnicas?: DocumentFile;
   factibilidad_energia?: DocumentFile;
+  memoria_calculos?: DocumentFile;
+  otros_archivos?: DocumentFile;
 }
 
 export interface MecanicasDocs {
@@ -85,6 +89,8 @@ export interface GasDocs {
   memoria_descriptiva?: DocumentFile;
   especificaciones_tecnicas?: DocumentFile;
   factibilidad_gas?: DocumentFile;
+  memoria_calculos?: DocumentFile;
+  otros_archivos?: DocumentFile;
 }
 
 export interface PanelesSolaresDocs {
@@ -253,6 +259,7 @@ export interface ProyectoFormData {
   san_memoria_descriptiva?: File[];
   san_especificaciones_tecnicas?: File[];
   san_factibilidad_desague?: File[];
+  san_memoria_calculos?: File[];
   san_otros_archivos?: File[];
 
   // Paso 6: Eléctricas - Archivos por sub-especialidad
@@ -261,6 +268,7 @@ export interface ProyectoFormData {
   elec_memoria_descriptiva?: File[];
   elec_especificaciones_tecnicas?: File[];
   elec_factibilidad_energia?: File[];
+  elec_memoria_calculos?: File[];
   
   // Mecánicas
   mec_plano_instalacion_mecanica?: File[];
@@ -272,6 +280,7 @@ export interface ProyectoFormData {
   gas_memoria_descriptiva?: File[];
   gas_especificaciones_tecnicas?: File[];
   gas_factibilidad_gas?: File[];
+  gas_memoria_calculos?: File[];
   
   // Paneles Solares
   pan_planos?: File[];
