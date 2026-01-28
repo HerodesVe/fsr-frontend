@@ -128,6 +128,15 @@ export interface LicenciasNormativas {
   archivo_normativo?: DocumentFile;
 }
 
+// Documentos proporcionados por el administrado
+export interface DocumentosAdministradoDocs {
+  partida_registral?: DocumentFile;
+  certificado_parametros_urbanisticos?: DocumentFile;
+  croquis_planos_ubicacion?: DocumentFile;
+  vigencia_poder?: DocumentFile;
+  otros_documentos?: DocumentFile;
+}
+
 export interface ProyectoData {
   service_type: string;
   titulo_proyecto: string;
@@ -137,6 +146,7 @@ export interface ProyectoData {
   anteproyecto_importado?: AnteproyectoImportado;
   licencias_normativas?: LicenciasNormativas;
   datos_predio?: Record<string, unknown>;
+  documentos_administrado?: DocumentosAdministradoDocs;
   arquitectura_docs: ArquitecturaDocs;
   estructuras_docs: EstructurasDocs;
   sanitarias_docs: SanitariasDocs;
@@ -148,6 +158,7 @@ export interface StepStatus {
   anteproyecto: 'Completada' | 'Pendiente' | 'En progreso';
   licencias_normativas: 'Completada' | 'Pendiente' | 'En progreso';
   predio?: 'Completada' | 'Pendiente' | 'En progreso';
+  documentos_administrado?: 'Completada' | 'Pendiente' | 'En progreso';
   arquitectura: 'Completada' | 'Pendiente' | 'En progreso';
   estructuras: 'Completada' | 'Pendiente' | 'En progreso';
   sanitarias: 'Completada' | 'Pendiente' | 'En progreso';
@@ -233,6 +244,13 @@ export interface ProyectoFormData {
   area_libre_m2: number;
   area_libre_porcentaje: number;
   descripcion_proyecto: string;
+
+  // Paso 2c: Documentos Administrado - Archivos
+  admin_partida_registral?: File[];
+  admin_certificado_parametros_urbanisticos?: File[];
+  admin_croquis_planos_ubicacion?: File[];
+  admin_vigencia_poder?: File[];
+  admin_otros_documentos?: File[];
 
   // Paso 3: Arquitectura - Archivos
   arq_plano_ubicacion?: File[];

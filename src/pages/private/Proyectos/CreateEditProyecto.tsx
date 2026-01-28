@@ -14,6 +14,7 @@ import { useDepartments, useProvinces, useDistricts } from '@/hooks/useUbigeo';
 import { ResumenProyecto } from './components/ResumenProyecto';
 import type { ProyectoFormData, FormStep, StepStatus } from '@/types/proyecto.types';
 import StepTipoObraProyecto from './components/StepTipoObraProyecto';
+import StepAdministrado from './components/StepAdministrado';
 import StepArquitectura from './components/StepArquitecturaProyecto';
 import StepEstructuras from './components/StepEstructurasProyecto';
 import StepSanitarias from './components/StepSanitariasProyecto';
@@ -74,13 +75,14 @@ export default function CreateEditProyecto() {
 
   const [steps, setSteps] = useState<FormStep[]>([
     { id: 1, title: 'Anteproyecto Aprobado', completed: false },
-    { id: 2, title: 'Tipo de Obra / Normativas', completed: false },
+    { id: 2, title: 'Tipo de Obra ', completed: false },
     { id: 3, title: 'Predio', completed: false },
-    { id: 4, title: 'Arquitectura', completed: false },
-    { id: 5, title: 'Estructuras', completed: false },
-    { id: 6, title: 'Sanitarias', completed: false },
-    { id: 7, title: 'Eléctricas', completed: false },
-    { id: 8, title: 'Sustento Técnico', completed: false },
+    { id: 4, title: 'Administrado', completed: false },
+    { id: 5, title: 'Arquitectura', completed: false },
+    { id: 6, title: 'Estructuras', completed: false },
+    { id: 7, title: 'Sanitarias', completed: false },
+    { id: 8, title: 'Eléctricas', completed: false },
+    { id: 9, title: 'Sustento Técnico', completed: false },
   ]);
 
   useEffect(() => {
@@ -186,6 +188,10 @@ export default function CreateEditProyecto() {
         if (!formData.urbanization) newErrors.urbanization = 'Urbanización es requerida';
         if (!formData.street) newErrors.street = 'Vía es requerida';
         if (!formData.area_total_m2 || formData.area_total_m2 <= 0) newErrors.area_total_m2 = 'Área total es requerida';
+        break;
+
+      case 3: // Documentos Administrado
+        // Los documentos son opcionales para avanzar
         break;
     }
 
@@ -321,11 +327,12 @@ export default function CreateEditProyecto() {
       'anteproyecto': 0,
       'licencias_normativas': 1,
       'predio': 2,
-      'arquitectura': 3,
-      'estructuras': 4,
-      'sanitarias': 5,
-      'electricas': 6,
-      'sustento_tecnico': 7
+      'documentos_administrado': 3,
+      'arquitectura': 4,
+      'estructuras': 5,
+      'sanitarias': 6,
+      'electricas': 7,
+      'sustento_tecnico': 8
     };
 
     // Encontrar el primer paso pendiente
@@ -336,24 +343,25 @@ export default function CreateEditProyecto() {
     }
     
     // Si todos están completados, ir al último paso
-    return 7;
+    return 8;
   };
 
   // Función para determinar qué pasos están completados
   const determineCompletedSteps = (stepStatus: StepStatus): FormStep[] => {
     const baseSteps = [
       { id: 1, title: 'Anteproyecto Aprobado', completed: false },
-      { id: 2, title: 'Tipo de Obra / Normativas', completed: false },
+      { id: 2, title: 'Tipo de Obra', completed: false },
       { id: 3, title: 'Predio', completed: false },
-      { id: 4, title: 'Arquitectura', completed: false },
-      { id: 5, title: 'Estructuras', completed: false },
-      { id: 6, title: 'Sanitarias', completed: false },
-      { id: 7, title: 'Eléctricas', completed: false },
-      { id: 8, title: 'Sustento Técnico', completed: false },
+      { id: 4, title: 'Documentos', completed: false },
+      { id: 5, title: 'Arquitectura', completed: false },
+      { id: 6, title: 'Estructuras', completed: false },
+      { id: 7, title: 'Sanitarias', completed: false },
+      { id: 8, title: 'Eléctricas', completed: false },
+      { id: 9, title: 'Sustento Técnico', completed: false },
     ];
 
     return baseSteps.map((step, index) => {
-      const stepKeys = ['anteproyecto', 'licencias_normativas', 'predio', 'arquitectura', 'estructuras', 'sanitarias', 'electricas', 'sustento_tecnico'];
+      const stepKeys = ['anteproyecto', 'licencias_normativas', 'predio', 'documentos_administrado', 'arquitectura', 'estructuras', 'sanitarias', 'electricas', 'sustento_tecnico'];
       const stepKey = stepKeys[index] as keyof StepStatus;
       
       return {
@@ -407,7 +415,18 @@ export default function CreateEditProyecto() {
           />
         );
 
-      case 3: // Arquitectura
+      case 3: // Documentos Administrado
+        return (
+          <StepAdministrado
+            formData={formData}
+            proyectoId={proyectoId}
+            uploadedDocuments={proyectoData?.uploaded_documents || []}
+            onInputChange={handleInputChange}
+            onFileUpload={handleFileUpload}
+          />
+        );
+
+      case 4: // Arquitectura
         return (
           <StepArquitectura
             formData={formData}
@@ -418,7 +437,7 @@ export default function CreateEditProyecto() {
           />
         );
 
-      case 4: // Estructuras
+      case 5: // Estructuras
         return (
           <StepEstructuras
             formData={formData}
@@ -429,7 +448,7 @@ export default function CreateEditProyecto() {
           />
         );
 
-      case 5: // Sanitarias
+      case 6: // Sanitarias
         return (
           <StepSanitarias
             formData={formData}
@@ -440,7 +459,7 @@ export default function CreateEditProyecto() {
           />
         );
 
-      case 6: // Eléctricas
+      case 7: // Eléctricas
         return (
           <StepElectricas
             formData={formData}
@@ -451,7 +470,7 @@ export default function CreateEditProyecto() {
           />
         );
 
-      case 7: // Sustento Técnico
+      case 8: // Sustento Técnico
         return (
           <StepSustentoTecnico
             formData={formData}
@@ -468,7 +487,7 @@ export default function CreateEditProyecto() {
   };
 
   const getStepTitle = (index: number): string => {
-    const titles = ['Anteproyecto', 'Licencias', 'Predio', 'Arquitectura', 'Estructuras', 'Sanitarias', 'Eléctricas', 'Sustento Técnico'];
+    const titles = ['Anteproyecto', 'Licencias', 'Predio', 'Administrado', 'Arquitectura', 'Estructuras', 'Sanitarias', 'Eléctricas', 'Sustento Técnico'];
     return titles[index] || '';
   };
 
