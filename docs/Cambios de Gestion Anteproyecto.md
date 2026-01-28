@@ -1,8 +1,38 @@
-# Guía de Configuración del Backend para el Flujo de Seguimiento y Respuesta
+# Guía de Configuración del Backend para Gestión de Anteproyectos
 
 ## Resumen Ejecutivo
 
-Este documento describe la estructura de datos y endpoints necesarios para gestionar el flujo de "Seguimiento y Respuesta" en el módulo de Gestión de Anteproyectos. El flujo soporta hasta 4 revisiones iterativas con procesos de notificación, reconsideración y apelación.
+Este documento describe la estructura de datos y endpoints necesarios para el módulo de **Gestión de Anteproyectos**, que incluye:
+
+1. **Selección de Anteproyecto** (buscar existente o cargar anteproyecto externo).
+2. **Presentación en Municipalidad**.
+3. **Seguimiento y Respuesta** (hasta 4 revisiones con notificación, reconsideración y apelación).
+4. **Entrega Final**.
+
+---
+
+## 0. Entidad: Gestión de Anteproyecto vs. Elaboración de Anteproyecto
+
+### Diferencia de entidades
+
+| Aspecto | **Elaboración de Anteproyecto** | **Gestión de Anteproyecto** |
+|--------|----------------------------------|-----------------------------|
+| Entidad | `anteproyectos` | `gestion_anteproyectos` |
+| Propósito | Crear y elaborar un anteproyecto desde cero | Gestionar trámites de un anteproyecto (existente o externo) ante la municipalidad |
+| Origen del anteproyecto | Siempre se crea uno nuevo en el sistema | Puede ser **existente** (referencia a `anteproyectos.id`) o **externo** (cargado en la gestión) |
+
+### Anteproyecto cargado como externo
+
+**Importante:** Cuando el usuario elige **“Cargar Anteproyecto Externo”** en el paso de Selección:
+
+- **No** se crea un registro en la entidad **Elaboración de Anteproyecto** (`anteproyectos`).
+- **No** se usa `anteproyectos.id` como referencia.
+- Los datos (tipo de obra, predio, documentos) **se guardan dentro de la Gestión de Anteproyecto**, en:
+  - `data.seleccion_anteproyecto.anteproyecto_externo` (licencias_normativas, datos_predio)
+  - `data.seleccion_anteproyecto.anteproyecto_externo_docs` (referencias a archivos)
+  - `uploaded_documents` de la **gestión** (`gestion_anteproyectos`), con `key` bajo el prefijo `seleccion_anteproyecto.anteproyecto_externo_docs.*`.
+
+Los documentos se suben al `gestion_id` (Gestión de Anteproyecto), **no** a un `anteproyecto_id`.
 
 ---
 
@@ -146,6 +176,132 @@ class GestionAnteproyecto(Base):
     scheduled_completion_date = Column(Date, nullable=True)
 ```
 
+### 1.4 Selección de Anteproyecto: Anteproyecto Externo
+
+Cuando `selected_anteproyecto` es `null` y el usuario carga un anteproyecto externo, los datos se persisten en `data.seleccion_anteproyecto` con la siguiente estructura. **Todo pertenece a la Gestión de Anteproyecto**; no se crea ni se vincula un registro en `anteproyectos`.
+
+#### 1.4.1 Esquema: Licencias / Tipo de Obra
+
+```python
+# schemas/seleccion_anteproyecto.py
+
+class LicenciasNormativasExternoSchema(BaseModel):
+    tipo_licencia_edificacion: Optional[str] = None   # ampliacion, remodelacion, etc.
+    tipo_modalidad: Optional[str] = None             # A, B, C, D
+    link_normativas: Optional[str] = None
+    # archivo_normativo: se guarda en anteproyecto_externo_docs.archivo_normativo
+```
+
+#### 1.4.2 Esquema: Datos del Predio
+
+```python
+class UbicacionPredioExternoSchema(BaseModel):
+    departmentId: Optional[str] = None
+    provinceId: Optional[str] = None
+    districtId: Optional[str] = None
+    urbanization: Optional[str] = None
+    mz: Optional[str] = None
+    lote: Optional[str] = None
+    subLote: Optional[str] = None
+    street: Optional[str] = None
+    number: Optional[str] = None
+    interior: Optional[str] = None
+
+class MedidasPerimetricasExternoSchema(BaseModel):
+    area_total_m2: Optional[float] = None
+    frente: Optional[float] = None
+    derecha: Optional[float] = None
+    izquierda: Optional[float] = None
+    fondo: Optional[float] = None
+
+class EdificacionExternoSchema(BaseModel):
+    tipo_edificacion: Optional[str] = None
+    numero_pisos: Optional[int] = None
+    area_techada_total_m2: Optional[float] = None
+    area_libre_m2: Optional[float] = None
+    area_libre_porcentaje: Optional[float] = None
+    descripcion_proyecto: Optional[str] = None
+
+class DatosPredioExternoSchema(BaseModel):
+    ubicacion: Optional[UbicacionPredioExternoSchema] = None
+    latitud: Optional[float] = None
+    longitud: Optional[float] = None
+    medidas_perimetricas: Optional[MedidasPerimetricasExternoSchema] = None
+    edificacion: Optional[EdificacionExternoSchema] = None
+```
+
+#### 1.4.3 Esquema: Documentos del Anteproyecto Externo
+
+Cada documento se almacena como referencia (file_id) en el storage de la **gestión**. Clave: `seleccion_anteproyecto.anteproyecto_externo_docs.{clave}`.
+
+```python
+# Claves usadas en anteproyecto_externo_docs (todos bajo la Gestión de Anteproyecto)
+
+class AnteproyectoExternoDocsSchema(BaseModel):
+    # Tipo de obra
+    archivo_normativo: Optional[DocumentInfo] = None
+
+    # Documentos del administrado
+    partida_registral: Optional[DocumentInfo] = None
+    certificado_parametro_municipal: Optional[DocumentInfo] = None
+    plano_ubicacion: Optional[DocumentInfo] = None
+    cabida_arquitectonica: Optional[DocumentInfo] = None
+    vigencia_poder: Optional[DocumentInfo] = None
+    otros_documentos_administrado: Optional[DocumentInfo] = None
+
+    # Documentos FSR
+    memoria_descriptiva_arquitectura: Optional[DocumentInfo] = None
+    memoria_descriptiva_seguridad: Optional[DocumentInfo] = None
+    formulario_unico_edificacion: Optional[DocumentInfo] = None
+    presupuesto: Optional[DocumentInfo] = None
+    plano_seguridad: Optional[DocumentInfo] = None
+    plano_arquitectura: Optional[DocumentInfo] = None
+    pago_derecho_revision_cap: Optional[DocumentInfo] = None
+    factura: Optional[DocumentInfo] = None
+    liquidacion: Optional[DocumentInfo] = None
+    otros_documentos_fsr: Optional[DocumentInfo] = None
+```
+
+#### 1.4.4 Estructura `seleccion_anteproyecto` en `data`
+
+```python
+class SeleccionAnteproyectoSchema(BaseModel):
+    # Si viene de Elaboración de Anteproyecto (existente en el sistema)
+    selected_anteproyecto: Optional[dict] = None  # { id, nombre, codigo } o null
+
+    # Solo cuando es ANTEPROYECTO EXTERNO (selected_anteproyecto is None)
+    anteproyecto_externo: Optional[dict] = None   # { licencias_normativas, datos_predio }
+    anteproyecto_externo_docs: Optional[dict] = None  # DocumentInfo por clave
+```
+
+En `data` (JSONB) de `gestion_anteproyectos`:
+
+```json
+{
+  "seleccion_anteproyecto": {
+    "selected_anteproyecto": null,
+    "anteproyecto_externo": {
+      "licencias_normativas": {
+        "tipo_licencia_edificacion": "ampliacion",
+        "tipo_modalidad": "B",
+        "link_normativas": "https://..."
+      },
+      "datos_predio": {
+        "ubicacion": { "departmentId": "...", "provinceId": "...", ... },
+        "latitud": -12.0,
+        "longitud": -77.0,
+        "medidas_perimetricas": { "area_total_m2": 120, ... },
+        "edificacion": { "tipo_edificacion": "Vivienda", ... }
+      }
+    },
+    "anteproyecto_externo_docs": {
+      "partida_registral": { "name": "...", "file_reference": "file_xxx", ... },
+      "plano_ubicacion": { ... }
+    }
+  }
+}
+```
+
 ---
 
 ## 2. Endpoints API
@@ -153,10 +309,82 @@ class GestionAnteproyecto(Base):
 ### 2.1 Estructura de Rutas
 
 ```
-/api/v1/gestion-anteproyectos/{gestion_id}/seguimiento-respuesta
+# Gestión (CRUD general y paso 1: selección)
+PATCH /api/v1/gestion-anteproyectos/{gestion_id}
+POST  /api/v1/gestion-anteproyectos/{gestion_id}/upload
+
+# Seguimiento y Respuesta
+GET   /api/v1/gestion-anteproyectos/{gestion_id}/seguimiento-respuesta
+PATCH /api/v1/gestion-anteproyectos/{gestion_id}/seguimiento-respuesta/revision-actual
+POST  /api/v1/gestion-anteproyectos/{gestion_id}/seguimiento-respuesta/revisiones
+POST  /api/v1/gestion-anteproyectos/{gestion_id}/seguimiento-respuesta/documentos
 ```
 
 ### 2.2 Endpoints Detallados
+
+#### 2.2.0 Paso 1: Selección de Anteproyecto (PATCH de la gestión)
+
+```python
+# PATCH /api/v1/gestion-anteproyectos/{gestion_id}
+
+# Body (parcial). Para anteproyecto EXTERNO se envía:
+{
+  "data": {
+    "nombre_proyecto": "string",
+    "seleccion_anteproyecto": {
+      "selected_anteproyecto": null,
+      "anteproyecto_externo": {
+        "licencias_normativas": {
+          "tipo_licencia_edificacion": "ampliacion",
+          "tipo_modalidad": "B",
+          "link_normativas": "https://..."
+        },
+        "datos_predio": {
+          "ubicacion": { "departmentId", "provinceId", "districtId", "urbanization", "mz", "lote", "subLote", "street", "number", "interior" },
+          "latitud": 0.0,
+          "longitud": 0.0,
+          "medidas_perimetricas": { "area_total_m2", "frente", "derecha", "izquierda", "fondo" },
+          "edificacion": { "tipo_edificacion", "numero_pisos", "area_techada_total_m2", "area_libre_m2", "descripcion_proyecto" }
+        }
+      }
+    }
+  }
+}
+```
+
+- Los **documentos** del anteproyecto externo **no** van en este body. Se suben con `POST /gestion-anteproyectos/{gestion_id}/upload` usando `document_key` con prefijo `seleccion_anteproyecto.anteproyecto_externo_docs.{clave}`.
+- Si `selected_anteproyecto` tiene `id`, entonces es anteproyecto existente y normalmente `anteproyecto_externo` y `anteproyecto_externo_docs` serán vacíos o ignorados.
+
+#### 2.2.0b Subida de documentos de la Gestión (incl. Anteproyecto Externo)
+
+```python
+# POST /api/v1/gestion-anteproyectos/{gestion_id}/upload
+# Content-Type: multipart/form-data
+# Parámetros: file, document_key
+
+# document_key para ANTEPROYECTO EXTERNO (gestión de anteproyecto, NO elaboración):
+#   seleccion_anteproyecto.anteproyecto_externo_docs.archivo_normativo
+#   seleccion_anteproyecto.anteproyecto_externo_docs.partida_registral
+#   seleccion_anteproyecto.anteproyecto_externo_docs.certificado_parametro_municipal
+#   seleccion_anteproyecto.anteproyecto_externo_docs.plano_ubicacion
+#   seleccion_anteproyecto.anteproyecto_externo_docs.cabida_arquitectonica
+#   seleccion_anteproyecto.anteproyecto_externo_docs.vigencia_poder
+#   seleccion_anteproyecto.anteproyecto_externo_docs.otros_documentos_administrado
+#   seleccion_anteproyecto.anteproyecto_externo_docs.memoria_descriptiva_arquitectura
+#   seleccion_anteproyecto.anteproyecto_externo_docs.memoria_descriptiva_seguridad
+#   seleccion_anteproyecto.anteproyecto_externo_docs.formulario_unico_edificacion
+#   seleccion_anteproyecto.anteproyecto_externo_docs.presupuesto
+#   seleccion_anteproyecto.anteproyecto_externo_docs.plano_seguridad
+#   seleccion_anteproyecto.anteproyecto_externo_docs.plano_arquitectura
+#   seleccion_anteproyecto.anteproyecto_externo_docs.pago_derecho_revision_cap
+#   seleccion_anteproyecto.anteproyecto_externo_docs.factura
+#   seleccion_anteproyecto.anteproyecto_externo_docs.liquidacion
+#   seleccion_anteproyecto.anteproyecto_externo_docs.otros_documentos_fsr
+```
+
+- El `gestion_id` es siempre el de **Gestión de Anteproyecto**. No se usa `anteproyecto_id` para el anteproyecto externo.
+
+---
 
 #### 2.2.1 Obtener Estado del Seguimiento
 
@@ -661,8 +889,10 @@ async def update_revision_actual(
 
 ### 5.1 Claves de Documentos
 
-| Frontend (documentKey) | Backend (document_type) |
-|------------------------|-------------------------|
+#### Seguimiento y Respuesta (revisiones)
+
+| Frontend (documentKey) | Backend (document_type / almacenamiento) |
+|------------------------|------------------------------------------|
 | `seguimiento_respuesta.revision_{N}.archivo_acta` | `archivo_acta` |
 | `seguimiento_respuesta.revision_{N}.notificacion.archivo_notificacion` | `notificacion.archivo_notificacion` |
 | `seguimiento_respuesta.revision_{N}.notificacion.documentos_subsanacion` | `notificacion.documentos_subsanacion` |
@@ -672,7 +902,41 @@ async def update_revision_actual(
 | `seguimiento_respuesta.revision_{N}.apelacion.documento_recurso` | `apelacion.documento_recurso` |
 | `seguimiento_respuesta.revision_{N}.apelacion.resolucion_recurso` | `apelacion.resolucion_recurso` |
 
-### 5.2 Campos Legacy (Compatibilidad)
+#### Anteproyecto Externo (Selección – Gestión de Anteproyecto)
+
+**Entidad:** `gestion_anteproyectos`. **No** se usa la entidad `anteproyectos`. Los archivos se asocian a `gestion_id` con `document_key`:
+
+| Frontend (documentKey) | Backend: clave en `anteproyecto_externo_docs` / `uploaded_documents.key` |
+|------------------------|--------------------------------------------------------------------------|
+| `seleccion_anteproyecto.anteproyecto_externo_docs.archivo_normativo` | `archivo_normativo` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.partida_registral` | `partida_registral` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.certificado_parametro_municipal` | `certificado_parametro_municipal` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.plano_ubicacion` | `plano_ubicacion` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.cabida_arquitectonica` | `cabida_arquitectonica` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.vigencia_poder` | `vigencia_poder` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.otros_documentos_administrado` | `otros_documentos_administrado` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.memoria_descriptiva_arquitectura` | `memoria_descriptiva_arquitectura` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.memoria_descriptiva_seguridad` | `memoria_descriptiva_seguridad` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.formulario_unico_edificacion` | `formulario_unico_edificacion` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.presupuesto` | `presupuesto` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.plano_seguridad` | `plano_seguridad` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.plano_arquitectura` | `plano_arquitectura` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.pago_derecho_revision_cap` | `pago_derecho_revision_cap` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.factura` | `factura` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.liquidacion` | `liquidacion` |
+| `seleccion_anteproyecto.anteproyecto_externo_docs.otros_documentos_fsr` | `otros_documentos_fsr` |
+
+### 5.2 Anteproyecto Externo en PATCH (Paso 1)
+
+En `PATCH /gestion-anteproyectos/{id}` con `data.seleccion_anteproyecto`, el backend debe aceptar y persistir:
+
+- `selected_anteproyecto`: `{ id, nombre, codigo }` o `null`.
+- `anteproyecto_externo`: solo cuando es externo (`selected_anteproyecto` es `null`):
+  - `licencias_normativas`: `{ tipo_licencia_edificacion, tipo_modalidad, link_normativas }`
+  - `datos_predio`: `{ ubicacion, latitud, longitud, medidas_perimetricas, edificacion }` según los esquemas de 1.4.2.
+- `anteproyecto_externo_docs`: se actualiza con las referencias de archivos al subir documentos vía `POST /upload`; no es obligatorio enviar este objeto en el PATCH.
+
+### 5.3 Campos Legacy (Compatibilidad) – Seguimiento y Respuesta
 
 Para mantener compatibilidad con el código existente, el backend debe:
 
@@ -685,9 +949,11 @@ Para mantener compatibilidad con el código existente, el backend debe:
 
 | Endpoint | Validaciones |
 |----------|--------------|
+| `PATCH /gestion-anteproyectos/{id}` (paso 1) | - `client_id` y `nombre_proyecto` presentes<br>- `selected_anteproyecto` O `anteproyecto_externo` (+ docs vía upload): al menos uno debe estar definido para considerar el paso completable |
+| `POST /gestion-anteproyectos/{id}/upload` | - `document_key` con prefijo admitido (p. ej. `seleccion_anteproyecto.anteproyecto_externo_docs.*`, `presentacion_municipal.*`, `seguimiento_respuesta.*`, `entrega_final.*`)<br>- Archivo válido (PDF, JPG, PNG, etc. según tipo) |
 | `PATCH /revision-actual` | - Revisión no completada<br>- Fecha y archivo requeridos para resultado<br>- Resultado válido (conforme/no_conforme) |
 | `POST /revisiones` | - Máximo 4 revisiones<br>- Revisión anterior = no_conforme<br>- Subsanación completada o recurso fundado<br>- Estado = en_proceso |
-| `POST /documentos` | - Revisión existe<br>- Tipo de documento válido<br>- Archivo válido (PDF, JPG, PNG) |
+| `POST /seguimiento-respuesta/documentos` | - Revisión existe<br>- Tipo de documento válido<br>- Archivo válido (PDF, JPG, PNG) |
 
 ---
 
@@ -702,8 +968,21 @@ class SeguimientoErrorCodes:
     SUBSANACION_PENDIENTE = "SUBSANACION_PENDIENTE"  # 400
     PROCESO_FINALIZADO = "PROCESO_FINALIZADO"  # 400
     REVISION_NO_ENCONTRADA = "REVISION_NO_ENCONTRADA"  # 404
+
+# Paso 1: Selección de Anteproyecto
+class SeleccionAnteproyectoErrorCodes:
+    FALTA_ANTEPROYECTO = "FALTA_ANTEPROYECTO"  # 400: ni selected_anteproyecto ni anteproyecto_externo con docs
+    DOCUMENT_KEY_INVALIDO = "DOCUMENT_KEY_INVALIDO"  # 400: document_key no admitido en upload
 ```
 
 ---
 
-Esta guía proporciona toda la estructura necesaria para implementar el backend del flujo de Seguimiento y Respuesta. El frontend ya está preparado para consumir estos endpoints con la estructura de datos descrita.
+## 8. Resumen
+
+Esta guía cubre el backend de **Gestión de Anteproyectos**:
+
+- **Anteproyecto externo:** Los datos y documentos se almacenan en la **Gestión de Anteproyecto** (`gestion_anteproyectos`). No se crea ni se vincula un registro en **Elaboración de Anteproyecto** (`anteproyectos`). La subida de archivos usa `gestion_id` y `document_key` con prefijo `seleccion_anteproyecto.anteproyecto_externo_docs.*`.
+- **Selección:** Esquemas y `document_key` para `anteproyecto_externo` (licencias_normativas, datos_predio) y `anteproyecto_externo_docs`.
+- **Seguimiento y Respuesta:** Revisiones (máx. 4), notificación, reconsideración, apelación, subsanación y mapeo de documentos de revisión.
+
+El frontend consume estos endpoints con la estructura de datos descrita.

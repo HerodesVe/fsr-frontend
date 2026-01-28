@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react';
 import { LuSearch, LuFileText, LuUpload, LuCalendar, LuUser } from 'react-icons/lu';
-import { Button, Input, FileUpload } from '@/components/ui';
+import { Button, Input } from '@/components/ui';
 import StepAdministrado from '@/components/utils/Steps/StepAdministrado';
+import AnteproyectoExternoForm from './components/AnteproyectoExternoForm';
 import { useClients } from '@/hooks/useClients';
 import { useAnteproyectos } from '@/hooks/useAnteproyectos';
+import { useDepartments, useProvinces, useDistricts } from '@/hooks/useUbigeo';
 import type { GestionAnteproyectoFormData, UploadedDocument } from '@/types/gestionAnteproyecto.types';
 
 interface StepSeleccionAnteproyectoProps {
@@ -30,6 +32,11 @@ export default function StepSeleccionAnteproyecto({
   const { clients } = useClients();
   const { anteproyectos, isLoading: isLoadingAnteproyectos } = useAnteproyectos();
 
+  // Hooks de ubigeo para el formulario de anteproyecto externo
+  const { data: departments } = useDepartments();
+  const { data: provinces } = useProvinces(formData.departmentId || '');
+  const { data: districts } = useDistricts(formData.provinceId || '');
+
   // Filtrar anteproyectos según el término de búsqueda
   const filteredAnteproyectos = useMemo(() => {
     if (!anteproyectos) return [];
@@ -45,23 +52,6 @@ export default function StepSeleccionAnteproyecto({
              instanceCode.includes(lowerSearchTerm);
     });
   }, [anteproyectos, searchTerm]);
-
-  // Documentos requeridos para anteproyecto externo
-  const documentosRequeridos = [
-    { key: 'partida_registral', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.partida_registral', label: 'Partida Registral SUNARP', required: true },
-    { key: 'certificado_parametro_municipal', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.certificado_parametro_municipal', label: 'Certificado de Parámetro Municipal', required: true },
-    { key: 'plano_ubicacion', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.plano_ubicacion', label: 'Planos de Ubicación', required: true },
-    { key: 'plano_arquitectura', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.plano_arquitectura', label: 'Planos de Arquitectura', required: true },
-    { key: 'plano_seguridad', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.plano_seguridad', label: 'Planos de Seguridad', required: true },
-    { key: 'memoria_descriptiva_arquitectura', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.memoria_descriptiva_arquitectura', label: 'Memoria Descriptiva de Arquitectura', required: true },
-    { key: 'memoria_descriptiva_seguridad', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.memoria_descriptiva_seguridad', label: 'Memoria Descriptiva de Seguridad', required: true },
-    { key: 'formulario_unico_edificacion', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.formulario_unico_edificacion', label: 'Formulario Único de Edificación (FUE)', required: true },
-    { key: 'presupuesto', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.presupuesto', label: 'Presupuesto de Obra (Añadir la palabra Obra)', required: true },
-    { key: 'pago_derecho_revision_cap', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.pago_derecho_revision_cap', label: 'Pago por Derecho de Revisión al CAP', required: true },
-    { key: 'factura', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.factura', label: 'Factura del pago realizado al CAP​', required: true },
-    { key: 'liquidacion', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.liquidacion', label: 'Liquidación del pago realizado al CAP​', required: true },
-    { key: 'otros_documentos', documentKey: 'seleccion_anteproyecto.anteproyecto_externo_docs.otros_documentos', label: 'Otros Documentos', required: true },
-  ];
 
   // Convertir formData para StepAdministrado
   const formDataForAdmin = {
@@ -244,35 +234,18 @@ export default function StepSeleccionAnteproyecto({
           </div>
         </div>
       ) : (
-        <div className="space-y-6">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-medium text-blue-900 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Documentos Requeridos para Anteproyecto Externo
-            </h4>
-            <p className="text-sm text-blue-700" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Todos los siguientes documentos son obligatorios para procesar un anteproyecto externo.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6">
-            {documentosRequeridos.map((documento) => (
-              <div key={documento.key}>
-                <FileUpload
-                  label={documento.label}
-                  required={documento.required}
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.dwg"
-                  onChange={(files) => onInputChange(documento.key as keyof GestionAnteproyectoFormData, files)}
-                  onUpload={onFileUpload}
-                  documentKey={documento.documentKey}
-                  anteproyectoId={gestionId}
-                  uploadedFiles={uploadedDocuments.filter(doc => doc.key === documento.documentKey).map(doc => ({ key: doc.key || doc.id, name: doc.name, file_id: doc.id }))}
-                  onDownload={onDownloadDocument}
-                  error={errors[documento.key]}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        <AnteproyectoExternoForm
+          formData={formData}
+          gestionId={gestionId}
+          uploadedDocuments={uploadedDocuments}
+          errors={errors}
+          departments={departments || []}
+          provinces={provinces || []}
+          districts={districts || []}
+          onInputChange={onInputChange}
+          onFileUpload={onFileUpload}
+          onDownloadDocument={onDownloadDocument}
+        />
       )}
 
       {/* Resumen de selección */}

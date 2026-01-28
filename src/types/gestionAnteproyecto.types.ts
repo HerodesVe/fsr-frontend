@@ -57,6 +57,44 @@ export interface GestionAnteproyectoFormData {
   selectedAnteproyecto?: any;
   anteproyecto_importado_id?: string;
   
+  // ============================================
+  // DATOS DEL ANTEPROYECTO EXTERNO
+  // ============================================
+  
+  // Tipo de Obra y Modalidad
+  tipo_licencia_edificacion?: string;
+  tipo_modalidad?: string;
+  link_normativas?: string;
+  
+  // Datos del Predio - Ubicación
+  departmentId?: string;
+  provinceId?: string;
+  districtId?: string;
+  urbanization?: string;
+  mz?: string;
+  lote?: string;
+  subLote?: string;
+  street?: string;
+  number?: string;
+  interior?: string;
+  latitud?: number;
+  longitud?: number;
+  
+  // Datos del Predio - Medidas
+  area_total_m2?: number;
+  frente?: number;
+  derecha?: number;
+  izquierda?: number;
+  fondo?: number;
+  
+  // Datos del Predio - Edificación
+  tipo_edificacion?: string;
+  numero_pisos?: number;
+  area_techada_total_m2?: number;
+  area_libre_m2?: number;
+  area_libre_porcentaje?: number;
+  descripcion_proyecto?: string;
+  
   // Documentos del anteproyecto externo (si aplica)
   partida_registral?: File[];
   certificado_parametro_municipal?: File[];
