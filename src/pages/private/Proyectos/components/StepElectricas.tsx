@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LuTriangle } from 'react-icons/lu';
 import { FileUpload } from '@/components/ui';
+import { DOCUMENT_KEYS } from '@/services/proyectos.service';
 import type { ProyectoFormData, UploadedDocument, ElectricasTabType } from '@/types/proyecto.types';
 
 interface StepElectricasProps {
@@ -102,7 +103,7 @@ export default function StepElectricas({
           accept=".pdf,.dwg,.dxf"
           multiple
           onUpload={onFileUpload}
-          documentKey="elec_plano_instalacion_electrica"
+          documentKey={DOCUMENT_KEYS.ELECTRICAS.PLANO_INSTALACION}
           anteproyectoId={proyectoId}
           uploadedFiles={uploadedDocuments}
         />
@@ -127,7 +128,7 @@ export default function StepElectricas({
           accept=".pdf,.doc,.docx"
           multiple
           onUpload={onFileUpload}
-          documentKey="elec_memoria_descriptiva"
+          documentKey={DOCUMENT_KEYS.ELECTRICAS.MEMORIA_DESCRIPTIVA}
           anteproyectoId={proyectoId}
           uploadedFiles={uploadedDocuments}
         />
@@ -152,7 +153,7 @@ export default function StepElectricas({
           accept=".pdf,.doc,.docx"
           multiple
           onUpload={onFileUpload}
-          documentKey="elec_especificaciones_tecnicas"
+          documentKey={DOCUMENT_KEYS.ELECTRICAS.ESPECIFICACIONES_TECNICAS}
           anteproyectoId={proyectoId}
           uploadedFiles={uploadedDocuments}
         />
@@ -177,7 +178,7 @@ export default function StepElectricas({
           accept=".pdf,.doc,.docx"
           multiple
           onUpload={onFileUpload}
-          documentKey="elec_factibilidad_energia"
+          documentKey={DOCUMENT_KEYS.ELECTRICAS.FACTIBILIDAD_ENERGIA}
           anteproyectoId={proyectoId}
           uploadedFiles={uploadedDocuments}
         />
@@ -202,7 +203,7 @@ export default function StepElectricas({
           accept=".pdf,.doc,.docx"
           multiple
           onUpload={onFileUpload}
-          documentKey="elec_memoria_calculos"
+          documentKey={DOCUMENT_KEYS.ELECTRICAS.MEMORIA_CALCULOS}
           anteproyectoId={proyectoId}
           uploadedFiles={uploadedDocuments}
         />
@@ -234,7 +235,7 @@ export default function StepElectricas({
           accept=".pdf,.dwg,.dxf"
           multiple
           onUpload={onFileUpload}
-          documentKey="mec_plano_instalacion_mecanica"
+          documentKey={DOCUMENT_KEYS.MECANICAS.PLANO_INSTALACION}
           anteproyectoId={proyectoId}
           uploadedFiles={uploadedDocuments}
         />
@@ -259,7 +260,7 @@ export default function StepElectricas({
           accept=".pdf,.doc,.docx"
           multiple
           onUpload={onFileUpload}
-          documentKey="mec_memoria_descriptiva"
+          documentKey={DOCUMENT_KEYS.MECANICAS.MEMORIA_DESCRIPTIVA}
           anteproyectoId={proyectoId}
           uploadedFiles={uploadedDocuments}
         />
@@ -284,7 +285,7 @@ export default function StepElectricas({
           accept=".pdf,.doc,.docx"
           multiple
           onUpload={onFileUpload}
-          documentKey="mec_especificaciones_tecnicas"
+          documentKey={DOCUMENT_KEYS.MECANICAS.ESPECIFICACIONES_TECNICAS}
           anteproyectoId={proyectoId}
           uploadedFiles={uploadedDocuments}
         />
@@ -316,7 +317,7 @@ export default function StepElectricas({
           accept=".pdf,.dwg,.dxf"
           multiple
           onUpload={onFileUpload}
-          documentKey="gas_plano_instalacion_gas"
+          documentKey={DOCUMENT_KEYS.GAS.PLANO_INSTALACION}
           anteproyectoId={proyectoId}
           uploadedFiles={uploadedDocuments}
         />
@@ -341,7 +342,7 @@ export default function StepElectricas({
           accept=".pdf,.doc,.docx"
           multiple
           onUpload={onFileUpload}
-          documentKey="gas_memoria_descriptiva"
+          documentKey={DOCUMENT_KEYS.GAS.MEMORIA_DESCRIPTIVA}
           anteproyectoId={proyectoId}
           uploadedFiles={uploadedDocuments}
         />
@@ -366,7 +367,7 @@ export default function StepElectricas({
           accept=".pdf,.doc,.docx"
           multiple
           onUpload={onFileUpload}
-          documentKey="gas_especificaciones_tecnicas"
+          documentKey={DOCUMENT_KEYS.GAS.ESPECIFICACIONES_TECNICAS}
           anteproyectoId={proyectoId}
           uploadedFiles={uploadedDocuments}
         />
@@ -391,7 +392,7 @@ export default function StepElectricas({
           accept=".pdf,.doc,.docx"
           multiple
           onUpload={onFileUpload}
-          documentKey="gas_factibilidad_gas"
+          documentKey={DOCUMENT_KEYS.GAS.FACTIBILIDAD_GAS}
           anteproyectoId={proyectoId}
           uploadedFiles={uploadedDocuments}
         />
@@ -416,7 +417,7 @@ export default function StepElectricas({
           accept=".pdf,.doc,.docx"
           multiple
           onUpload={onFileUpload}
-          documentKey="gas_memoria_calculos"
+          documentKey={DOCUMENT_KEYS.GAS.MEMORIA_CALCULOS}
           anteproyectoId={proyectoId}
           uploadedFiles={uploadedDocuments}
         />
@@ -454,7 +455,7 @@ export default function StepElectricas({
               accept=".pdf,.dwg,.dxf"
               multiple
               onUpload={onFileUpload}
-              documentKey="pan_planos"
+              documentKey={DOCUMENT_KEYS.PANELES_SOLARES.PLANOS}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -479,7 +480,7 @@ export default function StepElectricas({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="pan_memoria_descriptiva"
+              documentKey={DOCUMENT_KEYS.PANELES_SOLARES.MEMORIA_DESCRIPTIVA}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -504,7 +505,7 @@ export default function StepElectricas({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="pan_especificaciones_tecnicas"
+              documentKey={DOCUMENT_KEYS.PANELES_SOLARES.ESPECIFICACIONES_TECNICAS}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -537,7 +538,7 @@ export default function StepElectricas({
               accept=".pdf,.dwg,.dxf"
               multiple
               onUpload={onFileUpload}
-              documentKey="com_planos"
+              documentKey={DOCUMENT_KEYS.COMUNICACIONES.PLANOS}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />

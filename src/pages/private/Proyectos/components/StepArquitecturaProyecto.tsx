@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LuTriangle } from 'react-icons/lu';
 import { FileUpload } from '@/components/ui';
+import { DOCUMENT_KEYS } from '@/services/proyectos.service';
 import type { ProyectoFormData, UploadedDocument } from '@/types/proyecto.types';
 
 interface StepArquitecturaProps {
@@ -58,7 +59,7 @@ export default function StepArquitectura({
               accept=".pdf,.dwg,.dxf"
               multiple
               onUpload={onFileUpload}
-              documentKey="arq_plano_ubicacion"
+              documentKey={DOCUMENT_KEYS.ARQUITECTURA.PLANO_UBICACION}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -83,7 +84,7 @@ export default function StepArquitectura({
               accept=".pdf,.dwg,.dxf"
               multiple
               onUpload={onFileUpload}
-              documentKey="arq_plano_arquitectura"
+              documentKey={DOCUMENT_KEYS.ARQUITECTURA.PLANO_ARQUITECTURA}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -108,7 +109,7 @@ export default function StepArquitectura({
               accept=".pdf,.dwg,.dxf"
               multiple
               onUpload={onFileUpload}
-              documentKey="arq_plano_seguridad"
+              documentKey={DOCUMENT_KEYS.ARQUITECTURA.PLANO_SEGURIDAD}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -133,7 +134,7 @@ export default function StepArquitectura({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="arq_memoria_descriptiva_seguridad"
+              documentKey={DOCUMENT_KEYS.ARQUITECTURA.MEMORIA_SEGURIDAD}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -158,7 +159,7 @@ export default function StepArquitectura({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="arq_memoria_descriptiva_arquitectura"
+              documentKey={DOCUMENT_KEYS.ARQUITECTURA.MEMORIA_ARQUITECTURA}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -183,7 +184,7 @@ export default function StepArquitectura({
               accept=".pdf,.doc,.docx,.xls,.xlsx"
               multiple
               onUpload={onFileUpload}
-              documentKey="arq_fue_presupuesto_obra"
+              documentKey={DOCUMENT_KEYS.ARQUITECTURA.FUE_PRESUPUESTO}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -208,7 +209,7 @@ export default function StepArquitectura({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="arq_sustento_tecnico_legal_mvcs"
+              documentKey={DOCUMENT_KEYS.ARQUITECTURA.SUSTENTO_TECNICO_MVCS}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />

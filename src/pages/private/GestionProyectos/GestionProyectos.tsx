@@ -4,79 +4,12 @@ import { LuPlus } from 'react-icons/lu';
 import { useHeaderStore } from '@/store/headerStore';
 import { Button, Filter } from '@/components/ui';
 import { ProyectoCard } from '@/components/utils/ProyectoCard';
-import { GestionProyecto, GestionProyectoStatus } from '@/types/gestionProyecto.types';
-
-// Data dummy para desarrollo
-const gestionProyectosDummy: GestionProyecto[] = [
-  {
-    id: '1',
-    instance_code: 'GP-2024-001',
-    service_id: 'serv-001',
-    client_id: 'client-001',
-    user_id: 'user-001',
-    administrado: 'Constructora Lima S.A.C.',
-    responsable: 'Carlos Mendoza',
-    fecha_creacion: '15/01/2024',
-    fecha_culminacion: '20/02/2024',
-    status: 'Completado',
-    progress_percentage: 100,
-    created_at: '2024-01-15T00:00:00Z',
-    scheduled_completion_date: '2024-02-20T00:00:00Z',
-    next_step: 'completado',
-    uploaded_documents: [],
-    data: {
-      selectedProyecto: { titulo_proyecto: 'Edificio Residencial San Isidro' },
-      especialidades: {
-        arquitectura: { es_conforme: true, revision_count: 0 },
-        estructuras: { es_conforme: true, revision_count: 1 },
-        electricas: { es_conforme: true, revision_count: 0 },
-        sanitarias: { es_conforme: true, revision_count: 2 }
-      }
-    },
-    steps_status: {
-      seleccion_proyecto: 'Completada',
-      gestion_especialidades: 'Completada',
-      emision_licencia: 'Completada'
-    }
-  },
-  {
-    id: '2',
-    instance_code: 'GP-2024-002',
-    service_id: 'serv-002',
-    client_id: 'client-002',
-    user_id: 'user-002',
-    administrado: 'Inversiones Norte S.A.C.',
-    responsable: 'Ana García',
-    fecha_creacion: '18/01/2024',
-    fecha_culminacion: '',
-    status: 'Pendiente',
-    progress_percentage: 66,
-    created_at: '2024-01-18T00:00:00Z',
-    scheduled_completion_date: undefined,
-    next_step: 'gestion_especialidades',
-    uploaded_documents: [],
-    data: {
-      selectedProyecto: { titulo_proyecto: 'Centro Comercial Miraflores' },
-      especialidades: {
-        arquitectura: { es_conforme: true, revision_count: 0 },
-        estructuras: { es_conforme: true, revision_count: 1 },
-        electricas: { es_conforme: false, revision_count: 2 },
-        sanitarias: { es_conforme: false, revision_count: 0 }
-      }
-    },
-    steps_status: {
-      seleccion_proyecto: 'Completada',
-      gestion_especialidades: 'En progreso',
-      emision_licencia: 'Pendiente'
-    }
-  }
-];
+import { useGestionProyectos } from '@/hooks/useGestionProyectos';
+import { GestionProyectoStatus } from '@/types/gestionProyecto.types';
 
 export default function GestionProyectos() {
   const navigate = useNavigate();
-  const [gestionProyectos] = useState<GestionProyecto[]>(gestionProyectosDummy);
-  const [isLoading] = useState(false);
-  const [error] = useState<Error | null>(null);
+  const { gestionProyectos, isLoading, error, refetch } = useGestionProyectos();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<GestionProyectoStatus>(GestionProyectoStatus.TODOS);
   const { setHeader } = useHeaderStore();
@@ -87,10 +20,13 @@ export default function GestionProyectos() {
       'Gestiona todos tus trámites y servicios en un solo lugar'
     );
     
+    // Refetch al montar el componente
+    refetch();
+    
     return () => {
       setHeader('Dashboard');
     };
-  }, [setHeader]);
+  }, [setHeader, refetch]);
 
   const filterOptions = [
     { key: GestionProyectoStatus.TODOS, label: 'Todos' },
@@ -154,7 +90,7 @@ export default function GestionProyectos() {
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-700" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Error al cargar las gestiones de proyecto: {error.message}
+            Error al cargar las gestiones de proyecto: {(error as Error).message}
           </p>
         </div>
       </div>

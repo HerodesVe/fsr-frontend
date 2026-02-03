@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LuTriangle } from 'react-icons/lu';
 import { FileUpload } from '@/components/ui';
+import { DOCUMENT_KEYS } from '@/services/proyectos.service';
 import type { ProyectoFormData, UploadedDocument } from '@/types/proyecto.types';
 
 interface StepAdministradoProps {
@@ -55,7 +56,7 @@ export default function StepAdministrado({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="admin_partida_registral"
+              documentKey={DOCUMENT_KEYS.ADMIN.PARTIDA_REGISTRAL}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -80,7 +81,7 @@ export default function StepAdministrado({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="admin_certificado_parametros_urbanisticos"
+              documentKey={DOCUMENT_KEYS.ADMIN.CERTIFICADO_PARAMETROS}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -105,7 +106,7 @@ export default function StepAdministrado({
               accept=".pdf,.dwg,.dxf"
               multiple
               onUpload={onFileUpload}
-              documentKey="admin_croquis_planos_ubicacion"
+              documentKey={DOCUMENT_KEYS.ADMIN.CROQUIS_PLANOS}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -130,7 +131,7 @@ export default function StepAdministrado({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="admin_vigencia_poder"
+              documentKey={DOCUMENT_KEYS.ADMIN.VIGENCIA_PODER}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -156,7 +157,7 @@ export default function StepAdministrado({
                 accept="*"
                 multiple
                 onUpload={onFileUpload}
-                documentKey="admin_otros_documentos"
+                documentKey={DOCUMENT_KEYS.ADMIN.OTROS}
                 anteproyectoId={proyectoId}
                 uploadedFiles={uploadedDocuments}
               />

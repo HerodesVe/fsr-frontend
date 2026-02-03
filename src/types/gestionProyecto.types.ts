@@ -121,24 +121,108 @@ export interface EspecialidadData {
   resolucion_reconsideracion?: File[];
 }
 
+// Respuesta del backend según la guía de integración
 export interface GestionProyecto {
   id: string;
   instance_code: string;
-  service_id: string;
+  service_id?: string;
   client_id: string;
-  user_id: string;
-  administrado: string;
-  responsable: string;
-  fecha_creacion: string;
+  user_id?: string;
+  administrado?: string;
+  responsable?: string;
+  fecha_creacion?: string;
   fecha_culminacion?: string;
-  status: string;
-  progress_percentage: number;
-  created_at: string;
+  status: string; // 'Borrador', 'En Proceso', 'Completado', etc.
+  progress_percentage?: number;
+  created_at?: string;
   scheduled_completion_date?: string;
-  next_step: string;
-  uploaded_documents: UploadedDocument[];
-  data: GestionProyectoFormData;
-  steps_status: StepStatus;
+  next_step?: string;
+  uploaded_documents: UploadedDocumentBackend[];
+  data: GestionProyectoData;
+  steps_status?: StepStatus;
+}
+
+// Estructura de data según el backend
+export interface GestionProyectoData {
+  service_type?: string; // 'gestion_proyectos'
+  nombre_proyecto?: string;
+  revisiones_globales_usadas: number;
+  estado_proyecto: 'en_proceso' | 'conforme' | 'improcedente';
+  especialidades: {
+    arquitectura: EspecialidadDataBackend;
+    estructuras: EspecialidadDataBackend;
+    electricas: EspecialidadDataBackend;
+    sanitarias: EspecialidadDataBackend;
+  };
+  // Campos adicionales del frontend
+  selectedProyecto?: any;
+  proyecto_importado_id?: string;
+  acta_anteproyecto_conforme?: File[];
+  ficha_registral?: File[];
+  planos_especialidades?: File[];
+  licencia_final?: File[];
+  cargo_entrega_administrado?: File[];
+}
+
+// Estructura de especialidad según el backend
+export interface EspecialidadDataBackend {
+  estado: 'pendiente' | 'en_progreso' | 'conforme' | 'improcedente';
+  revisiones: RevisionEspecialidadDataBackend[];
+  // Campos calculados en frontend
+  revision_actual_index?: number;
+  es_conforme?: boolean;
+  es_improcedente?: boolean;
+  revision_count?: number;
+}
+
+// Estructura de revisión según el backend
+export interface RevisionEspecialidadDataBackend {
+  id: string;
+  numero_revision: number;
+  numero_revision_global: number;
+  fecha_creacion: string;
+  fecha_respuesta?: string;
+  estado: 'en_progreso' | 'completada' | 'improcedente';
+  resultado_acta?: 'conforme' | 'no_conforme' | null;
+  // Notificación
+  notificacion?: {
+    tiene_notificacion: boolean;
+    fecha_notificacion?: string;
+    subsanacion_completada?: boolean;
+  };
+  // Reconsideración
+  reconsideracion?: {
+    habilitado: boolean;
+    fecha_presentacion?: string;
+    resultado?: 'fundado' | 'infundado' | 'fundado_en_parte' | null;
+  };
+  // Apelación
+  apelacion?: {
+    habilitado: boolean;
+    fecha_presentacion?: string;
+    resultado?: 'fundado' | 'infundado' | 'fundado_en_parte' | null;
+  };
+  // Campos de archivos (referencias, no archivos físicos)
+  archivo_acta?: any;
+  archivo_notificacion?: any;
+  documentos_subsanacion?: any;
+  documentos_subsanacion_notificacion?: any;
+  documento_reconsideracion?: any;
+  resolucion_reconsideracion?: any;
+  documento_apelacion?: any;
+  resolucion_apelacion?: any;
+  // Campo adicional del frontend
+  subsanacion_completada?: boolean;
+}
+
+// Documento subido según el backend
+export interface UploadedDocumentBackend {
+  key: string; // Formato: {especialidad}_rev{numero}_{tipo_documento}
+  name: string;
+  file_id: string;
+  url?: string;
+  size?: number;
+  type?: string;
 }
 
 export interface StepStatus {
@@ -159,6 +243,8 @@ export interface UploadedDocument {
   url: string;
   size: number;
   type: string;
+  key?: string; // Agregado para compatibilidad con backend
+  file_id?: string; // Agregado para compatibilidad con backend
 }
 
 export enum GestionProyectoStatus {

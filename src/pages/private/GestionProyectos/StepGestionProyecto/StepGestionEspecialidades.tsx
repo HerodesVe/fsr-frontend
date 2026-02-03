@@ -6,9 +6,7 @@ import type {
   GestionProyectoFormData, 
   EspecialidadData, 
   RevisionEspecialidadData,
-  TipoEspecialidad,
-  LIMITES_ESPECIALIDAD,
-  MAX_REVISIONES_GLOBALES
+  TipoEspecialidad
 } from '@/types/gestionProyecto.types';
 
 // Importar constantes
@@ -27,6 +25,10 @@ interface StepGestionEspecialidadesProps {
   uploadedDocuments: any[];
   onInputChange: (field: keyof GestionProyectoFormData, value: any) => void;
   onFileUpload: (file: File, documentKey: string) => Promise<any>;
+  onSyncWithBackend?: (
+    especialidadKey: 'arquitectura' | 'estructuras' | 'electricas' | 'sanitarias',
+    especialidadData: EspecialidadData
+  ) => Promise<void>;
 }
 
 // Configuración de especialidades
@@ -40,13 +42,14 @@ const ESPECIALIDADES_CONFIG: { key: TipoEspecialidad; nombre: string }[] = [
 // Función para generar ID único
 const generateRevisionId = () => `rev_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-// Función para obtener fecha actual formateada
+// Función para obtener fecha actual en formato ISO (YYYY-MM-DD)
+// El backend espera este formato para validación con Pydantic
 const getCurrentDate = () => {
   const now = new Date();
   const day = String(now.getDate()).padStart(2, '0');
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const year = now.getFullYear();
-  return `${day}/${month}/${year}`;
+  return `${year}-${month}-${day}`;
 };
 
 // Función para crear especialidad inicial
@@ -83,7 +86,7 @@ interface EspecialidadComponentProps {
   limiteEspecialidad: number;
   gestionId: string;
   uploadedDocuments: any[];
-  onDataChange: (data: EspecialidadData) => void;
+  onDataChange: (data: EspecialidadData, shouldSync?: boolean) => void;
   onFileUpload: (file: File, documentKey: string) => Promise<any>;
   onAddRevision: () => boolean;
 }
@@ -170,6 +173,17 @@ function EspecialidadComponent({
     let newEsConforme = data.es_conforme;
     let newEsImprocedente = data.es_improcedente;
 
+    // Determinar si este cambio requiere sincronización con el backend
+    // Solo sincronizar en cambios significativos (no en cada keystroke de fechas)
+    const shouldSync = !!(
+      updates.resultado_acta !== undefined ||
+      updates.estado !== undefined ||
+      updates.subsanacion_completada !== undefined ||
+      updates.notificacion?.subsanacion_completada !== undefined ||
+      updates.reconsideracion?.resultado !== undefined ||
+      updates.apelacion?.resultado !== undefined
+    );
+
     if (updates.resultado_acta === 'conforme') {
       newEstado = 'conforme';
       newEsConforme = true;
@@ -193,7 +207,7 @@ function EspecialidadComponent({
       estado: newEstado,
       es_conforme: newEsConforme,
       es_improcedente: newEsImprocedente,
-    });
+    }, shouldSync);
   }, [revisionActual, data, limiteEspecialidad, revisionesGlobalesUsadas, onDataChange]);
 
   // Si no está habilitada
@@ -376,11 +390,11 @@ function EspecialidadComponent({
 // Componente Principal
 export default function StepGestionEspecialidades({
   formData,
-  errors,
   gestionId,
   uploadedDocuments,
   onInputChange,
   onFileUpload,
+  onSyncWithBackend,
 }: StepGestionEspecialidadesProps) {
   // Inicializar especialidades si no existen
   useEffect(() => {
@@ -445,9 +459,11 @@ export default function StepGestionEspecialidades({
   }, [formData.especialidades]);
 
   // Handler para cambio de especialidad
+  // shouldSync indica si debe sincronizar con el backend (solo para cambios significativos)
   const handleEspecialidadChange = useCallback((
     especialidadKey: TipoEspecialidad, 
-    data: EspecialidadData
+    data: EspecialidadData,
+    shouldSync: boolean = false
   ) => {
     const newEspecialidades = {
       ...formData.especialidades,
@@ -465,7 +481,13 @@ export default function StepGestionEspecialidades({
     if (newRevisionesGlobales !== formData.revisiones_globales_usadas) {
       onInputChange('revisiones_globales_usadas', newRevisionesGlobales);
     }
-  }, [formData.especialidades, formData.revisiones_globales_usadas, onInputChange]);
+
+    // Sincronizar con el backend SOLO si shouldSync es true
+    // (cambios significativos: resultado_acta, estado, es_conforme, es_improcedente, subsanacion_completada)
+    if (shouldSync && gestionId && gestionId !== 'new' && onSyncWithBackend) {
+      onSyncWithBackend(especialidadKey, data);
+    }
+  }, [formData.especialidades, formData.revisiones_globales_usadas, onInputChange, gestionId, onSyncWithBackend]);
 
   // Handler para agregar revisión
   const handleAddRevision = useCallback((especialidadKey: TipoEspecialidad): boolean => {
@@ -483,12 +505,13 @@ export default function StepGestionEspecialidades({
       revisionesGlobalesUsadas + 1
     );
 
+    // Agregar revisión es un cambio significativo, sincronizar con backend
     handleEspecialidadChange(especialidadKey, {
       ...esp,
       revisiones: [...(esp.revisiones || []), newRevision],
       revision_actual_index: (esp.revisiones?.length || 0),
       estado: 'en_progreso',
-    });
+    }, true);
 
     return true;
   }, [formData.especialidades, revisionesGlobalesUsadas, handleEspecialidadChange]);
@@ -597,7 +620,7 @@ export default function StepGestionEspecialidades({
             limiteEspecialidad={LIMITES[esp.key]}
             gestionId={gestionId}
             uploadedDocuments={uploadedDocuments}
-            onDataChange={(data) => handleEspecialidadChange(esp.key, data)}
+            onDataChange={(data, shouldSync) => handleEspecialidadChange(esp.key, data, shouldSync)}
             onFileUpload={onFileUpload}
             onAddRevision={() => handleAddRevision(esp.key)}
           />

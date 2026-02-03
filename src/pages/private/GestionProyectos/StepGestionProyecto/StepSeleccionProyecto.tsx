@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { LuSearch, LuFileText, LuUpload } from 'react-icons/lu';
 import { Button, Input, FileUpload } from '@/components/ui';
+import { useProyectos } from '@/hooks/useProyectos';
 import type { GestionProyectoFormData } from '@/types/gestionProyecto.types';
 
 interface StepSeleccionProyectoProps {
@@ -17,6 +18,26 @@ export default function StepSeleccionProyecto({
   onFileUpload
 }: StepSeleccionProyectoProps) {
   const [modoSeleccion, setModoSeleccion] = useState<'buscar' | 'cargar'>('buscar');
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Obtener proyectos del backend
+  const { proyectos, isLoading: isLoadingProyectos } = useProyectos();
+  
+  // Filtrar proyectos por búsqueda
+  const filteredProyectos = useMemo(() => {
+    if (!proyectos) return [];
+    
+    const query = searchQuery.toLowerCase();
+    return proyectos.filter((proyecto: any) => {
+      const titulo = proyecto.data?.titulo_proyecto || proyecto.titulo_proyecto || '';
+      const codigo = proyecto.instance_code || '';
+      const cliente = proyecto.client_id || '';
+      
+      return titulo.toLowerCase().includes(query) ||
+             codigo.toLowerCase().includes(query) ||
+             cliente.toLowerCase().includes(query);
+    });
+  }, [proyectos, searchQuery]);
 
   // Documentos requeridos para proyecto externo
   const documentosRequeridos = [
@@ -65,54 +86,82 @@ export default function StepSeleccionProyecto({
             <Input
               label="Buscar Proyecto"
               placeholder="Ingrese el nombre del proyecto o código..."
-              value=""
-              onChange={() => {}}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           
-          {/* Lista de proyectos disponibles (dummy) */}
+          {/* Lista de proyectos disponibles */}
           <div className="border rounded-lg p-4 bg-gray-50">
             <h4 className="font-medium text-gray-900 mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>
               Proyectos Disponibles
             </h4>
-            <div className="space-y-2">
-              {[
-                { id: '1', titulo: 'Edificio Residencial San Isidro', codigo: 'PRO-2024-001', cliente: 'Constructora Lima S.A.C.', especialidades: ['Arquitectura', 'Estructuras', 'Sanitarias', 'Eléctricas'] },
-                { id: '2', titulo: 'Centro Comercial Miraflores', codigo: 'PRO-2024-002', cliente: 'Inversiones Norte S.A.C.', especialidades: ['Arquitectura', 'Estructuras', 'Eléctricas'] },
-                { id: '3', titulo: 'Oficinas Corporativas La Molina', codigo: 'PRO-2024-003', cliente: 'Desarrollos Sur S.A.C.', especialidades: ['Arquitectura', 'Estructuras', 'Sanitarias', 'Eléctricas'] },
-              ].map((proyecto) => (
-                <div
-                  key={proyecto.id}
-                  className="flex items-center justify-between p-3 bg-white border rounded-lg hover:border-teal-300 cursor-pointer"
-                  onClick={() => onInputChange('selectedProyecto', proyecto)}
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <LuFileText className="w-4 h-4 text-gray-500" />
-                      <span className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-                        {proyecto.titulo}
-                      </span>
+            
+            {isLoadingProyectos ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-600"></div>
+                <span className="ml-2 text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Cargando proyectos...
+                </span>
+              </div>
+            ) : filteredProyectos.length === 0 ? (
+              <div className="text-center py-8 text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
+                {searchQuery ? 'No se encontraron proyectos que coincidan con la búsqueda.' : 'No hay proyectos disponibles.'}
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {filteredProyectos.map((proyecto: any) => {
+                  const titulo = proyecto.data?.titulo_proyecto || proyecto.titulo_proyecto || 'Sin título';
+                  const codigo = proyecto.instance_code || proyecto.id;
+                  const cliente = proyecto.administrado || proyecto.client_id || 'Sin cliente';
+                  const especialidades = ['Arquitectura', 'Estructuras', 'Sanitarias', 'Eléctricas'];
+                  const isSelected = formData.selectedProyecto?.id === proyecto.id;
+                  
+                  return (
+                    <div
+                      key={proyecto.id}
+                      className={`flex items-center justify-between p-3 bg-white border rounded-lg hover:border-teal-300 cursor-pointer transition-colors ${
+                        isSelected ? 'border-teal-500 bg-teal-50' : ''
+                      }`}
+                      onClick={() => onInputChange('selectedProyecto', {
+                        ...proyecto,
+                        titulo: titulo,
+                        codigo: codigo,
+                        cliente: cliente,
+                        especialidades: especialidades,
+                      })}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <LuFileText className="w-4 h-4 text-gray-500" />
+                          <span className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+                            {titulo}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 ml-6" style={{ fontFamily: 'Inter, sans-serif' }}>
+                          {codigo} - {cliente}
+                        </p>
+                        <div className="flex gap-1 ml-6 mt-1 flex-wrap">
+                          {especialidades.map((esp, index) => (
+                            <span key={index} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded" style={{ fontFamily: 'Inter, sans-serif' }}>
+                              {esp}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant={isSelected ? 'solid' : 'bordered'}
+                        style={isSelected ? { backgroundColor: 'var(--primary-color)' } : {}}
+                        className={isSelected ? 'text-white' : ''}
+                      >
+                        {isSelected ? 'Seleccionado' : 'Seleccionar'}
+                      </Button>
                     </div>
-                    <p className="text-sm text-gray-600 ml-6" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      {proyecto.codigo} - {proyecto.cliente}
-                    </p>
-                    <div className="flex gap-1 ml-6 mt-1">
-                      {proyecto.especialidades.map((esp, index) => (
-                        <span key={index} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          {esp}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="bordered"
-                  >
-                    Seleccionar
-                  </Button>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       ) : (

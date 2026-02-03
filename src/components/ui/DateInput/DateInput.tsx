@@ -1,11 +1,47 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { LuCalendar } from 'react-icons/lu';
+
+// Funciones de utilidad para conversión de fechas
+// El backend espera formato ISO (YYYY-MM-DD), pero el usuario ve formato latino (DD/MM/YYYY)
+
+/**
+ * Convierte fecha de formato latino (DD/MM/YYYY) a ISO (YYYY-MM-DD)
+ */
+const latinToISO = (latinDate: string): string => {
+  if (!latinDate || latinDate.length !== 10) return latinDate;
+  const parts = latinDate.split('/');
+  if (parts.length !== 3) return latinDate;
+  const [day, month, year] = parts;
+  return `${year}-${month}-${day}`;
+};
+
+/**
+ * Convierte fecha de formato ISO (YYYY-MM-DD) a latino (DD/MM/YYYY)
+ */
+const isoToLatin = (isoDate: string): string => {
+  if (!isoDate) return '';
+  // Si ya está en formato latino, devolverlo
+  if (isoDate.includes('/')) return isoDate;
+  // Validar formato ISO
+  if (isoDate.length !== 10 || !isoDate.includes('-')) return isoDate;
+  const parts = isoDate.split('-');
+  if (parts.length !== 3) return isoDate;
+  const [year, month, day] = parts;
+  return `${day}/${month}/${year}`;
+};
+
+/**
+ * Detecta si una fecha está en formato ISO
+ */
+const isISOFormat = (date: string): boolean => {
+  return date?.length === 10 && date.includes('-') && !date.includes('/');
+};
 
 export interface DateInputProps {
   label?: string;
   placeholder?: string;
-  value: string;
-  onChange: (value: string) => void;
+  value: string; // Acepta tanto ISO (YYYY-MM-DD) como latino (DD/MM/YYYY)
+  onChange: (value: string) => void; // Siempre devuelve formato ISO (YYYY-MM-DD)
   error?: string;
   required?: boolean;
   disabled?: boolean;
@@ -24,12 +60,18 @@ export default function DateInput({
 }: DateInputProps) {
   const [isFocused, setIsFocused] = useState(false);
 
+  // Convertir el value de ISO a latino para mostrar
+  const displayValue = useMemo(() => {
+    if (!value) return '';
+    return isISOFormat(value) ? isoToLatin(value) : value;
+  }, [value]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (disabled) return;
     
     let inputValue = e.target.value;
     
-    // Formatear automáticamente como dd/mm/yyyy
+    // Formatear automáticamente como dd/mm/yyyy para la visualización
     if (inputValue.length <= 10) {
       // Remover caracteres no numéricos excepto /
       inputValue = inputValue.replace(/[^\d/]/g, '');
@@ -62,9 +104,15 @@ export default function DateInput({
           // No permitir años fuera de rango razonable
           return;
         }
+        
+        // Si la fecha está completa y es válida, convertir a ISO antes de enviar
+        onChange(latinToISO(inputValue));
+        return;
       }
     }
     
+    // Para fechas incompletas, mantener el formato latino temporalmente
+    // pero al estar incompleto, pasamos el valor tal cual
     onChange(inputValue);
   };
 
@@ -88,7 +136,7 @@ export default function DateInput({
       <div className="relative">
         <input
           type="text"
-          value={value}
+          value={displayValue}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LuTriangle } from 'react-icons/lu';
 import { FileUpload } from '@/components/ui';
+import { DOCUMENT_KEYS } from '@/services/proyectos.service';
 import type { ProyectoFormData, UploadedDocument } from '@/types/proyecto.types';
 
 interface StepSanitariasProps {
@@ -54,7 +55,7 @@ export default function StepSanitarias({
               accept=".pdf,.dwg,.dxf"
               multiple
               onUpload={onFileUpload}
-              documentKey="san_plano_instalacion_sanitaria"
+              documentKey={DOCUMENT_KEYS.SANITARIAS.PLANO_INSTALACION}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -79,7 +80,7 @@ export default function StepSanitarias({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="san_memoria_descriptiva"
+              documentKey={DOCUMENT_KEYS.SANITARIAS.MEMORIA_DESCRIPTIVA}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -104,7 +105,7 @@ export default function StepSanitarias({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="san_especificaciones_tecnicas"
+              documentKey={DOCUMENT_KEYS.SANITARIAS.ESPECIFICACIONES_TECNICAS}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -129,7 +130,7 @@ export default function StepSanitarias({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="san_factibilidad_desague"
+              documentKey={DOCUMENT_KEYS.SANITARIAS.FACTIBILIDAD_DESAGUE}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -154,7 +155,7 @@ export default function StepSanitarias({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="san_memoria_calculos"
+              documentKey={DOCUMENT_KEYS.SANITARIAS.MEMORIA_CALCULOS}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -180,7 +181,7 @@ export default function StepSanitarias({
                 accept="*"
                 multiple
                 onUpload={onFileUpload}
-                documentKey="san_otros_archivos"
+                documentKey={DOCUMENT_KEYS.SANITARIAS.OTROS}
                 anteproyectoId={proyectoId}
                 uploadedFiles={uploadedDocuments}
               />

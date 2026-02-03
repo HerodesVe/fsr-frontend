@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LuTriangle } from 'react-icons/lu';
 import { FileUpload } from '@/components/ui';
+import { DOCUMENT_KEYS } from '@/services/proyectos.service';
 import type { ProyectoFormData, UploadedDocument } from '@/types/proyecto.types';
 
 interface StepEstructurasProps {
@@ -58,7 +59,7 @@ export default function StepEstructuras({
               accept=".pdf,.dwg,.dxf"
               multiple
               onUpload={onFileUpload}
-              documentKey="est_planos_estructuras"
+              documentKey={DOCUMENT_KEYS.ESTRUCTURAS.PLANOS}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -83,7 +84,7 @@ export default function StepEstructuras({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="est_memoria_calculos_estructuras"
+              documentKey={DOCUMENT_KEYS.ESTRUCTURAS.MEMORIA_CALCULOS}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -108,7 +109,7 @@ export default function StepEstructuras({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="est_memoria_especificaciones_tecnicas_estructuras"
+              documentKey={DOCUMENT_KEYS.ESTRUCTURAS.ESPECIFICACIONES_TECNICAS}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -133,7 +134,7 @@ export default function StepEstructuras({
               accept=".pdf,.dwg,.dxf"
               multiple
               onUpload={onFileUpload}
-              documentKey="est_planos_sostenimiento_excavaciones"
+              documentKey={DOCUMENT_KEYS.ESTRUCTURAS.PLANOS_SOSTENIMIENTO}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -158,7 +159,7 @@ export default function StepEstructuras({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="est_memoria_descriptiva_sostenimiento_excavaciones"
+              documentKey={DOCUMENT_KEYS.ESTRUCTURAS.MEMORIA_SOSTENIMIENTO}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -183,7 +184,7 @@ export default function StepEstructuras({
               accept=".pdf,.doc,.docx"
               multiple
               onUpload={onFileUpload}
-              documentKey="est_estudio_mecanica_suelos"
+              documentKey={DOCUMENT_KEYS.ESTRUCTURAS.ESTUDIO_MECANICA_SUELOS}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />
@@ -209,7 +210,7 @@ export default function StepEstructuras({
                 accept="*"
                 multiple
                 onUpload={onFileUpload}
-                documentKey="est_otros_archivos"
+                documentKey={DOCUMENT_KEYS.ESTRUCTURAS.OTROS}
                 anteproyectoId={proyectoId}
                 uploadedFiles={uploadedDocuments}
               />

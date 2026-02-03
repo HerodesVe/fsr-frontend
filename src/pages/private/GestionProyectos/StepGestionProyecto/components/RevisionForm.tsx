@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { LuCheck, LuX, LuInfo, LuChevronDown, LuChevronUp } from 'react-icons/lu';
 import { DateInput, FileUpload, Button, Switch } from '@/components/ui';
+import { generateDocumentKey } from '@/services/gestionProyectos.service';
 import type { 
   RevisionEspecialidadData, 
   ProcesoRecursoProyectoData, 
@@ -51,7 +52,18 @@ function ProcesoRecursoForm({
   const [expanded, setExpanded] = useState(data.habilitado);
   
   const titulo = tipo === 'reconsideracion' ? 'Proceso de Reconsideración' : 'Proceso de Apelación';
-  const docKeyPrefix = `${tipo}_${especialidadKey}_rev${revisionIndex}`;
+  
+  // Usar el formato de key del backend: {especialidad}_rev{numero}_{tipo_documento}
+  const docKeyDocumento = generateDocumentKey(
+    especialidadKey, 
+    revisionIndex, 
+    tipo === 'reconsideracion' ? 'reconsideracion_documento' : 'apelacion_documento'
+  );
+  const docKeyResolucion = generateDocumentKey(
+    especialidadKey, 
+    revisionIndex, 
+    tipo === 'reconsideracion' ? 'reconsideracion_resolucion' : 'apelacion_resolucion'
+  );
 
   const handleResultadoChange = (resultado: ResultadoRecursoProyecto) => {
     if (disabled) return;
@@ -111,11 +123,11 @@ function ProcesoRecursoForm({
               multiple={false}
               disabled={disabled}
               uploadedFiles={uploadedDocuments}
-              documentKey={`${docKeyPrefix}_documento`}
+              documentKey={docKeyDocumento}
               onChange={async (files: File[]) => {
                 if (files.length > 0 && !disabled) {
                   try {
-                    await onFileUpload(files[0], `${docKeyPrefix}_documento`);
+                    await onFileUpload(files[0], docKeyDocumento);
                     onChange({ documento_recurso: files });
                   } catch (error) {
                     console.error('Error uploading file:', error);
@@ -130,11 +142,11 @@ function ProcesoRecursoForm({
               multiple={false}
               disabled={disabled}
               uploadedFiles={uploadedDocuments}
-              documentKey={`${docKeyPrefix}_resolucion`}
+              documentKey={docKeyResolucion}
               onChange={async (files: File[]) => {
                 if (files.length > 0 && !disabled) {
                   try {
-                    await onFileUpload(files[0], `${docKeyPrefix}_resolucion`);
+                    await onFileUpload(files[0], docKeyResolucion);
                     onChange({ resolucion_recurso: files });
                   } catch (error) {
                     console.error('Error uploading file:', error);
@@ -210,11 +222,8 @@ function ProcesoRecursoForm({
 export default function RevisionForm({
   revision,
   especialidadKey,
-  gestionId,
   numeroRevisionLocal,
   numeroRevisionGlobal,
-  revisionesGlobalesUsadas,
-  limiteEspecialidad,
   uploadedDocuments,
   readOnly = false,
   onRevisionChange,
@@ -222,15 +231,19 @@ export default function RevisionForm({
 }: RevisionFormProps) {
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const docKeyPrefix = `${especialidadKey}_rev${numeroRevisionLocal}`;
+  // Usar el formato de key del backend: {especialidad}_rev{numero}_{tipo_documento}
+  const docKeyNotificacion = generateDocumentKey(especialidadKey, numeroRevisionLocal, 'notificacion');
+  const docKeySubsanacionNotificacion = generateDocumentKey(especialidadKey, numeroRevisionLocal, 'subsanacion_notificacion');
+  const docKeyActa = generateDocumentKey(especialidadKey, numeroRevisionLocal, 'acta');
+  const docKeySubsanacion = generateDocumentKey(especialidadKey, numeroRevisionLocal, 'subsanacion');
 
   // Verificar si tiene archivo de acta
   const tieneArchivoActa = useMemo(() => {
     const archivoSubido = uploadedDocuments.some(
-      doc => doc.key === `${docKeyPrefix}_acta` || doc.name?.includes(`acta_${especialidadKey}`)
+      doc => doc.key === docKeyActa || doc.name?.includes(`acta_${especialidadKey}`)
     );
     return archivoSubido || (revision.archivo_acta && revision.archivo_acta.length > 0);
-  }, [uploadedDocuments, revision.archivo_acta, docKeyPrefix, especialidadKey]);
+  }, [uploadedDocuments, revision.archivo_acta, docKeyActa, especialidadKey]);
 
   // Verificar si puede seleccionar resultado
   const puedeSeleccionarResultado = useMemo(() => {
@@ -362,11 +375,11 @@ export default function RevisionForm({
                 multiple={false}
                 disabled={readOnly}
                 uploadedFiles={uploadedDocuments}
-                documentKey={`${docKeyPrefix}_notificacion`}
+                documentKey={docKeyNotificacion}
                 onChange={async (files: File[]) => {
                   if (files.length > 0 && !readOnly) {
                     try {
-                      await onFileUpload(files[0], `${docKeyPrefix}_notificacion`);
+                      await onFileUpload(files[0], docKeyNotificacion);
                       handleNotificacionChange({ archivo_notificacion: files });
                     } catch (error) {
                       console.error('Error uploading file:', error);
@@ -387,12 +400,12 @@ export default function RevisionForm({
                 multiple={true}
                 disabled={readOnly}
                 uploadedFiles={uploadedDocuments}
-                documentKey={`${docKeyPrefix}_subsanacion_notificacion`}
+                documentKey={docKeySubsanacionNotificacion}
                 onChange={async (files: File[]) => {
                   if (files.length > 0 && !readOnly) {
                     try {
                       const uploadPromises = files.map(file => 
-                        onFileUpload(file, `${docKeyPrefix}_subsanacion_notificacion`)
+                        onFileUpload(file, docKeySubsanacionNotificacion)
                       );
                       await Promise.all(uploadPromises);
                       handleNotificacionChange({ 
@@ -454,11 +467,11 @@ export default function RevisionForm({
             multiple={false}
             disabled={readOnly}
             uploadedFiles={uploadedDocuments}
-            documentKey={`${docKeyPrefix}_acta`}
+            documentKey={docKeyActa}
             onChange={async (files: File[]) => {
               if (files.length > 0 && !readOnly) {
                 try {
-                  await onFileUpload(files[0], `${docKeyPrefix}_acta`);
+                  await onFileUpload(files[0], docKeyActa);
                   onRevisionChange({ archivo_acta: files });
                 } catch (error) {
                   console.error('Error uploading file:', error);
@@ -534,12 +547,12 @@ export default function RevisionForm({
                 multiple={true}
                 disabled={readOnly}
                 uploadedFiles={uploadedDocuments}
-                documentKey={`${docKeyPrefix}_subsanacion`}
+                documentKey={docKeySubsanacion}
                 onChange={async (files: File[]) => {
                   if (files.length > 0 && !readOnly) {
                     try {
                       const uploadPromises = files.map(file => 
-                        onFileUpload(file, `${docKeyPrefix}_subsanacion`)
+                        onFileUpload(file, docKeySubsanacion)
                       );
                       await Promise.all(uploadPromises);
                       onRevisionChange({ 

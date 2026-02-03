@@ -157,8 +157,8 @@ export interface ProyectoData {
 export interface StepStatus {
   anteproyecto: 'Completada' | 'Pendiente' | 'En progreso';
   licencias_normativas: 'Completada' | 'Pendiente' | 'En progreso';
-  predio?: 'Completada' | 'Pendiente' | 'En progreso';
-  documentos_administrado?: 'Completada' | 'Pendiente' | 'En progreso';
+  predio: 'Completada' | 'Pendiente' | 'En progreso';                    // Nuevo paso
+  documentos_administrado: 'Completada' | 'Pendiente' | 'En progreso';   // Nuevo paso
   arquitectura: 'Completada' | 'Pendiente' | 'En progreso';
   estructuras: 'Completada' | 'Pendiente' | 'En progreso';
   sanitarias: 'Completada' | 'Pendiente' | 'En progreso';

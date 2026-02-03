@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LuArrowLeft, LuArrowRight, LuX } from 'react-icons/lu';
 import { useHeaderStore } from '@/store/headerStore';
@@ -9,21 +9,36 @@ import {
   StepEmisionLicencia
 } from './StepGestionProyecto';
 import { ResumenGestionProyecto } from './components/ResumenGestionProyecto';
-import type { GestionProyectoFormData, FormStep } from '@/types/gestionProyecto.types';
+import { useGestionProyecto } from '@/hooks/useGestionProyectos';
+import { generateDocumentKey } from '@/services/gestionProyectos.service';
+import type { GestionProyectoFormData, FormStep, EspecialidadData } from '@/types/gestionProyecto.types';
 
 export default function CreateEditGestionProyecto() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const isEditing = !!id;
+  const isEditing = !!id && id !== 'new';
   
   const { setHeader } = useHeaderStore();
 
+  // Hook para gestión de proyecto con API
+  const {
+    gestionProyecto,
+    isLoading,
+    createNew,
+    update,
+    uploadDocs,
+    isCreating,
+    isUpdating,
+    isUploading,
+  } = useGestionProyecto(id);
+
   const [currentStep, setCurrentStep] = useState(0);
-  const [gestionId] = useState<string>(id || '');
+  const [gestionId, setGestionId] = useState<string>(id || '');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [uploadedDocuments, setUploadedDocuments] = useState<any[]>([]);
 
   // Estado inicial de especialidad
-  const createInitialEspecialidad = () => ({
+  const createInitialEspecialidad = (): EspecialidadData => ({
     revisiones: [],
     revision_actual_index: -1,
     es_conforme: false,
@@ -51,6 +66,60 @@ export default function CreateEditGestionProyecto() {
     { id: 3, title: 'Emisión Licencia', completed: false },
   ]);
 
+  // Cargar datos del backend cuando se está editando
+  useEffect(() => {
+    if (gestionProyecto && isEditing) {
+      const backendData = gestionProyecto.data;
+      
+      // Mapear datos del backend al formato del frontend
+      const mappedEspecialidades = {
+        arquitectura: mapEspecialidadFromBackend(backendData.especialidades?.arquitectura),
+        estructuras: mapEspecialidadFromBackend(backendData.especialidades?.estructuras),
+        electricas: mapEspecialidadFromBackend(backendData.especialidades?.electricas),
+        sanitarias: mapEspecialidadFromBackend(backendData.especialidades?.sanitarias),
+      };
+
+      setFormData({
+        ...formData,
+        selectedProyecto: backendData.selectedProyecto || { titulo: backendData.nombre_proyecto },
+        especialidades: mappedEspecialidades,
+        revisiones_globales_usadas: backendData.revisiones_globales_usadas || 0,
+        estado_proyecto: backendData.estado_proyecto || 'en_proceso',
+      });
+
+      // Cargar documentos subidos
+      if (gestionProyecto.uploaded_documents) {
+        setUploadedDocuments(gestionProyecto.uploaded_documents.map(doc => ({
+          ...doc,
+          id: doc.file_id,
+        })));
+      }
+    }
+  }, [gestionProyecto, isEditing]);
+
+  // Función para mapear especialidad del backend al frontend
+  const mapEspecialidadFromBackend = (backendEsp: any): EspecialidadData => {
+    if (!backendEsp) return createInitialEspecialidad();
+
+    const revisiones = backendEsp.revisiones || [];
+    const ultimaRevision = revisiones[revisiones.length - 1];
+    
+    return {
+      revisiones: revisiones.map((rev: any) => ({
+        ...rev,
+        notificacion: rev.notificacion || { tiene_notificacion: false },
+        reconsideracion: rev.reconsideracion || { habilitado: false },
+        apelacion: rev.apelacion || { habilitado: false },
+      })),
+      revision_actual_index: revisiones.length - 1,
+      es_conforme: backendEsp.estado === 'conforme' || ultimaRevision?.resultado_acta === 'conforme',
+      es_improcedente: backendEsp.estado === 'improcedente',
+      estado: backendEsp.estado || 'pendiente',
+      revision_count: revisiones.length,
+      resultado_acta: ultimaRevision?.resultado_acta || null,
+    };
+  };
+
   useEffect(() => {
     setHeader(
       isEditing ? 'Editar Gestión de Proyecto' : 'Nueva Gestión de Proyecto',
@@ -70,6 +139,52 @@ export default function CreateEditGestionProyecto() {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
+
+  // Función para sincronizar especialidades con el backend
+  const syncEspecialidadWithBackend = useCallback(async (
+    especialidadKey: 'arquitectura' | 'estructuras' | 'electricas' | 'sanitarias',
+    especialidadData: EspecialidadData
+  ) => {
+    if (!gestionId || gestionId === 'new') return;
+
+    try {
+      await update({
+        id: gestionId,
+        payload: {
+          data: {
+            especialidades: {
+              [especialidadKey]: {
+                estado: especialidadData.estado,
+                revision_actual_index: especialidadData.revision_actual_index,
+                revisiones: especialidadData.revisiones.map(rev => ({
+                  id: rev.id,
+                  numero_revision: rev.numero_revision,
+                  numero_revision_global: rev.numero_revision_global,
+                  fecha_creacion: rev.fecha_creacion,
+                  fecha_respuesta: rev.fecha_respuesta,
+                  estado: rev.estado,
+                  resultado_acta: rev.resultado_acta,
+                  notificacion: rev.notificacion,
+                  reconsideracion: rev.reconsideracion ? {
+                    habilitado: rev.reconsideracion.habilitado,
+                    fecha_presentacion: rev.reconsideracion.fecha_presentacion,
+                    resultado: rev.reconsideracion.resultado,
+                  } : { habilitado: false },
+                  apelacion: rev.apelacion ? {
+                    habilitado: rev.apelacion.habilitado,
+                    fecha_presentacion: rev.apelacion.fecha_presentacion,
+                    resultado: rev.apelacion.resultado,
+                  } : { habilitado: false },
+                })),
+              },
+            },
+          },
+        },
+      });
+    } catch (error) {
+      console.error('Error sincronizando con backend:', error);
+    }
+  }, [gestionId, update]);
 
   const validateCurrentStep = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -119,8 +234,21 @@ export default function CreateEditGestionProyecto() {
     if (!validateCurrentStep()) return;
 
     try {
-      // Simular guardado de datos
-      console.log('Guardando paso:', currentStep, formData);
+      // Si es el primer paso y no hay gestionId, crear el expediente
+      if (currentStep === 0 && (!gestionId || gestionId === 'new')) {
+        // Crear expediente en el backend (Endpoint 1)
+        const clientId = formData.selectedProyecto?.client_id || 'default_client_id'; // TODO: Obtener del contexto de usuario
+        const result = await createNew({
+          client_id: clientId,
+          data: {
+            nombre_proyecto: formData.selectedProyecto?.titulo || 'Nuevo Proyecto',
+          },
+        });
+        
+        if (result?.id) {
+          setGestionId(result.id);
+        }
+      }
 
       // Marcar paso como completado
       setSteps(prev => prev.map(step => 
@@ -159,37 +287,91 @@ export default function CreateEditGestionProyecto() {
     }
   };
 
-  const handleFileUpload = async (file: File, _documentKey: string): Promise<any> => {
-    // Simular upload
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          id: Date.now().toString(),
-          name: file.name,
-          url: URL.createObjectURL(file),
-          size: file.size,
-          type: file.type,
-        });
-      }, 1000);
-    });
+  const handleFileUpload = async (file: File, documentKey: string): Promise<any> => {
+    // Si no hay gestionId, no podemos subir archivos
+    if (!gestionId || gestionId === 'new') {
+      console.warn('No se puede subir archivo sin gestionId');
+      return {
+        id: Date.now().toString(),
+        name: file.name,
+        url: URL.createObjectURL(file),
+        size: file.size,
+        type: file.type,
+        key: documentKey,
+      };
+    }
+
+    try {
+      // Subir archivo al backend (Endpoint 4)
+      const result = await uploadDocs({
+        gestionId,
+        files: [file],
+        documentKeys: [documentKey],
+      });
+
+      // Actualizar lista de documentos subidos
+      if (result?.uploaded_documents) {
+        setUploadedDocuments(result.uploaded_documents.map(doc => ({
+          ...doc,
+          id: doc.file_id,
+        })));
+      }
+
+      return {
+        id: Date.now().toString(),
+        name: file.name,
+        url: URL.createObjectURL(file),
+        size: file.size,
+        type: file.type,
+        key: documentKey,
+      };
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      throw error;
+    }
   };
 
   const handleCancel = () => {
     navigate('/dashboard/gestion-proyectos');
   };
 
-  const handleSaveGestion = () => {
-    console.log('Guardando gestión completa...');
+  const handleSaveGestion = async () => {
+    if (!gestionId || gestionId === 'new') {
+      console.warn('No hay gestionId para guardar');
+      return;
+    }
+
+    try {
+      // Sincronizar todas las especialidades con el backend
+      const especialidadesKeys = ['arquitectura', 'estructuras', 'electricas', 'sanitarias'] as const;
+      
+      for (const key of especialidadesKeys) {
+        await syncEspecialidadWithBackend(key, formData.especialidades[key]);
+      }
+      
+      console.log('Gestión guardada exitosamente');
+    } catch (error) {
+      console.error('Error guardando gestión:', error);
+    }
   };
 
   const renderStepContent = () => {
+    if (isLoading && isEditing) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+          <span className="ml-3 text-gray-600">Cargando datos...</span>
+        </div>
+      );
+    }
+
     switch (currentStep) {
       case 0: // Selección Proyecto
         return (
           <StepSeleccionProyecto
             formData={formData}
             gestionId={gestionId}
-            uploadedDocuments={[]}
+            uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
           />
@@ -201,9 +383,10 @@ export default function CreateEditGestionProyecto() {
             formData={formData}
             errors={errors}
             gestionId={gestionId}
-            uploadedDocuments={[]}
+            uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
+            onSyncWithBackend={syncEspecialidadWithBackend}
           />
         );
 
@@ -213,7 +396,7 @@ export default function CreateEditGestionProyecto() {
             formData={formData}
             errors={errors}
             gestionId={gestionId}
-            uploadedDocuments={[]}
+            uploadedDocuments={uploadedDocuments}
             onInputChange={handleInputChange}
             onFileUpload={handleFileUpload}
           />
@@ -328,8 +511,8 @@ export default function CreateEditGestionProyecto() {
             steps={steps}
             gestionId={gestionId}
             onSave={handleSaveGestion}
-            isSaving={false}
-            uploadedDocuments={[]}
+            isSaving={isUpdating || isUploading}
+            uploadedDocuments={uploadedDocuments}
           />
         </div>
       </div>
