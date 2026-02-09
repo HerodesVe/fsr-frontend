@@ -126,6 +126,14 @@ export interface LicenciasNormativas {
   tipo_modalidad: string;
   link_normativas: string;
   archivo_normativo?: DocumentFile;
+  // --- NUEVOS CAMPOS DE CONTROL (Tipo de Obra) ---
+  por_etapas?: boolean;               // Boolean
+  numero_obras?: number;              // Integer (Relevante si por_etapas=true)
+  etapa_por_autorizar?: boolean;      // Boolean
+  // --- CONTROL MVCS ---
+  consulta_mvcs?: boolean;            // Boolean (Activa la obligatoriedad del documento)
+  documento_consulta_mvcs?: DocumentFile;   // Obligatorio si consulta_mvcs es true
+  documento_respuesta_mvcs?: DocumentFile;  // Opcional / Informativo
 }
 
 // Documentos proporcionados por el administrado
@@ -219,6 +227,14 @@ export interface ProyectoFormData {
   tipo_modalidad: string;
   link_normativas: string;
   archivo_normativo?: File;
+  // --- NUEVOS CAMPOS DE CONTROL (Tipo de Obra) ---
+  por_etapas: boolean;
+  numero_obras: number;
+  etapa_por_autorizar: boolean;
+  // --- CONTROL MVCS ---
+  consulta_mvcs: boolean;
+  lic_documento_consulta_mvcs?: File[];   // Obligatorio si consulta_mvcs es true
+  lic_documento_respuesta_mvcs?: File[];  // Opcional / Informativo
 
   // Paso 2b: Predio
   departmentId: string;
@@ -244,6 +260,12 @@ export interface ProyectoFormData {
   area_libre_m2: number;
   area_libre_porcentaje: number;
   descripcion_proyecto: string;
+  // --- NUEVOS CAMPOS DE EDIFICACIÓN ---
+  zonificacion: string;               // String (Requerido)
+  numero_sotanos: number;             // Integer
+  azotea: string;                     // String
+  semisotano: string;                 // String
+  uso_edificacion: string;            // String (Requerido)
 
   // Paso 2c: Documentos Administrado - Archivos
   admin_partida_registral?: File[];
@@ -307,6 +329,7 @@ export interface ProyectoFormData {
   
   // Comunicaciones
   com_planos?: File[];
+  com_memoria_descriptiva?: File[];
 
   // Otros archivos para cada especialidad eléctrica
   elec_otros_archivos?: File[];

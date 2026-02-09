@@ -47,6 +47,12 @@ export interface Edificacion {
   area_libre_m2: number;
   area_libre_porcentaje: number;
   descripcion_proyecto: string;
+  // --- NUEVOS CAMPOS ---
+  zonificacion?: string;           // String (Requerido para completar paso)
+  numero_sotanos?: number;         // Integer
+  azotea?: string;                 // String (Descripción breve)
+  semisotano?: string;             // String (Descripción breve)
+  uso_edificacion?: string;        // String (Requerido para completar paso)
 }
 
 export interface DatosPredio {
@@ -62,6 +68,14 @@ export interface LicenciasNormativas {
   tipo_modalidad: string;
   link_normativas: string;
   archivo_normativo: DocumentFile;
+  // --- NUEVOS CAMPOS DE CONTROL (Tipo de Obra) ---
+  por_etapas?: boolean;               // Boolean
+  numero_obras?: number;              // Integer (Relevante si por_etapas=true)
+  etapa_por_autorizar?: boolean;      // Boolean
+  // --- CONTROL MVCS ---
+  consulta_mvcs?: boolean;            // Boolean (Activa flujo MVCS)
+  documento_consulta_mvcs?: DocumentFile;   // Obligatorio si consulta_mvcs es true
+  documento_respuesta_mvcs?: DocumentFile;  // Opcional / Informativo
 }
 
 export interface AnteproyectoData {
@@ -145,6 +159,14 @@ export interface AnteproyectoFormData {
   tipo_modalidad: string;
   link_normativas: string;
   archivo_normativo?: File;
+  // --- NUEVOS CAMPOS DE CONTROL (Tipo de Obra) ---
+  por_etapas: boolean;
+  numero_obras: number;
+  etapa_por_autorizar: boolean;
+  // --- CONTROL MVCS ---
+  consulta_mvcs: boolean;
+  lic_documento_consulta_mvcs?: File[];   // Obligatorio si consulta_mvcs es true
+  lic_documento_respuesta_mvcs?: File[];  // Opcional / Informativo
 
   // Paso 3: Predio
   // Ubicación
@@ -177,6 +199,12 @@ export interface AnteproyectoFormData {
   area_libre_m2: number;
   area_libre_porcentaje: number;
   descripcion_proyecto: string;
+  // --- NUEVOS CAMPOS DE EDIFICACIÓN ---
+  zonificacion: string;
+  numero_sotanos: number;
+  azotea: string;
+  semisotano: string;
+  uso_edificacion: string;
 
   // Paso 4: Documentos - Archivos
   // Documentos Proporcionados por el Administrado

@@ -441,7 +441,7 @@ export default function StepElectricas({
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Planos
+                  Planos de Paneles Solares
                 </h5>
               </div>
               <div className="text-xs text-gray-500">
@@ -466,7 +466,7 @@ export default function StepElectricas({
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Memoria descriptiva
+                  Memoria descriptiva de Paneles Solares
                 </h5>
               </div>
               <div className="text-xs text-gray-500">
@@ -524,7 +524,7 @@ export default function StepElectricas({
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Planos
+                  Planos de Comunicaciones
                 </h5>
               </div>
               <div className="text-xs text-gray-500">
@@ -539,6 +539,31 @@ export default function StepElectricas({
               multiple
               onUpload={onFileUpload}
               documentKey={DOCUMENT_KEYS.COMUNICACIONES.PLANOS}
+              anteproyectoId={proyectoId}
+              uploadedFiles={uploadedDocuments}
+            />
+          </div>
+
+          {/* Memoria Descriptiva - Comunicaciones */}
+          <div className="p-4 border border-gray-200 rounded-lg">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h5 className="font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Memoria Descriptiva - Comunicaciones
+                </h5>
+              </div>
+              <div className="text-xs text-gray-500">
+                <LuTriangle className="inline w-4 h-4 mr-1" />
+              </div>
+            </div>
+            <FileUpload
+              placeholder="Seleccione archivo"
+              value={formData.com_memoria_descriptiva || []}
+              onChange={(files) => onInputChange('com_memoria_descriptiva', files)}
+              accept=".pdf,.doc,.docx"
+              multiple
+              onUpload={onFileUpload}
+              documentKey={DOCUMENT_KEYS.COMUNICACIONES.MEMORIA_DESCRIPTIVA}
               anteproyectoId={proyectoId}
               uploadedFiles={uploadedDocuments}
             />

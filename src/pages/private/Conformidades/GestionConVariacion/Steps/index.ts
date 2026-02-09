@@ -1,0 +1,9 @@
+export { default as StepDocumentosIniciales } from './StepDocumentosIniciales';
+export { default as StepAntecedentesLicencias } from './StepAntecedentesLicencias';
+export { default as StepLicenciaEdificacion } from './StepLicenciaEdificacion';
+export { default as StepChecklistCascoHabitable } from './StepChecklistCascoHabitable';
+export { default as StepPredioConformidadObra } from './StepPredioConformidadObra';
+export { default as StepVerificacionOcular } from './StepVerificacionOcular';
+export { default as StepPresentacionMunicipal } from './StepPresentacionMunicipal';
+export { default as StepSeguimiento } from './StepSeguimiento';
+export { default as StepPresentacionCopias } from './StepPresentacionCopias';

@@ -74,6 +74,12 @@ export interface DatosPredioPayload {
     area_techada_total_m2?: number;
     area_libre_m2?: number;
     area_libre_porcentaje?: number;
+    // --- NUEVOS CAMPOS ---
+    zonificacion?: string;            // String (Requerido)
+    numero_sotanos?: number;          // Integer
+    azotea?: string;                  // String
+    semisotano?: string;              // String
+    uso_edificacion?: string;         // String (Requerido)
   };
 }
 
@@ -228,5 +234,13 @@ export const DOCUMENT_KEYS = {
   // I. Comunicaciones
   COMUNICACIONES: {
     PLANOS: 'com_planos',
+    MEMORIA_DESCRIPTIVA: 'com_memoria_descriptiva',
+  },
+  
+  // J. Licencias y MVCS
+  LICENCIAS: {
+    ARCHIVO_NORMATIVO: 'licencias_normativas.archivo_normativo',
+    DOCUMENTO_CONSULTA_MVCS: 'lic_documento_consulta_mvcs',     // Obligatorio si consulta_mvcs es true
+    DOCUMENTO_RESPUESTA_MVCS: 'lic_documento_respuesta_mvcs',   // Opcional / Informativo
   },
 } as const;

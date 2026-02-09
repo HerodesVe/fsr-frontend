@@ -11,7 +11,18 @@ import CreateEditAnteproyecto from '@/pages/private/Anteproyectos/CreateEditAnte
 import Proyectos, { CreateEditProyecto } from '@/pages/private/Proyectos';
 import Demoliciones from '@/pages/private/Demoliciones';
 import CreateEditDemolicion from '@/pages/private/Demoliciones/CreateEditDemolicion';
-import { Conformidades, CreateEditConformidad } from '@/pages/private/Conformidades';
+import { 
+  Conformidades, 
+  CreateEditConformidad,
+  GestionConVariacionList,
+  CreateEditConformidadConVariacion,
+  GestionSinVariacionList,
+  CreateEditConformidadSinVariacion,
+  ElaboracionConVariacionList,
+  CreateEditElaboracionConVariacion,
+  ElaboracionSinVariacionList,
+  CreateEditElaboracionSinVariacion,
+} from '@/pages/private/Conformidades';
 import { Modificaciones, CreateEditModificacion } from '@/pages/private/Modificaciones';
 import { Regularizaciones, CreateEditRegularizacion } from '@/pages/private/Regularizaciones';
 import { Ampliaciones, CreateEditAmpliacion } from '@/pages/private/Ampliaciones';
@@ -100,6 +111,26 @@ export default function AppRoutes() {
         <Route path="dashboard/gestion-proyectos" element={<GestionProyectos />} />
         <Route path="dashboard/gestion-proyectos/create" element={<CreateEditGestionProyecto />} />
         <Route path="dashboard/gestion-proyectos/edit/:id" element={<CreateEditGestionProyecto />} />
+        
+        {/* Gestión Conformidad Con Variación */}
+        <Route path="dashboard/gestion-conformidad-con-variacion" element={<GestionConVariacionList />} />
+        <Route path="dashboard/gestion-conformidad-con-variacion/create" element={<CreateEditConformidadConVariacion />} />
+        <Route path="dashboard/gestion-conformidad-con-variacion/edit/:id" element={<CreateEditConformidadConVariacion />} />
+        
+        {/* Gestión Conformidad Sin Variación */}
+        <Route path="dashboard/gestion-conformidad-sin-variacion" element={<GestionSinVariacionList />} />
+        <Route path="dashboard/gestion-conformidad-sin-variacion/create" element={<CreateEditConformidadSinVariacion />} />
+        <Route path="dashboard/gestion-conformidad-sin-variacion/edit/:id" element={<CreateEditConformidadSinVariacion />} />
+        
+        {/* Elaboración Conformidad Con Variación */}
+        <Route path="dashboard/elaboracion-conformidad-con-variacion" element={<ElaboracionConVariacionList />} />
+        <Route path="dashboard/elaboracion-conformidad-con-variacion/create" element={<CreateEditElaboracionConVariacion />} />
+        <Route path="dashboard/elaboracion-conformidad-con-variacion/:id" element={<CreateEditElaboracionConVariacion />} />
+        
+        {/* Elaboración Conformidad Sin Variación */}
+        <Route path="dashboard/elaboracion-conformidad-sin-variacion" element={<ElaboracionSinVariacionList />} />
+        <Route path="dashboard/elaboracion-conformidad-sin-variacion/create" element={<CreateEditElaboracionSinVariacion />} />
+        <Route path="dashboard/elaboracion-conformidad-sin-variacion/:id" element={<CreateEditElaboracionSinVariacion />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" />} />

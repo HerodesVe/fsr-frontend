@@ -3,15 +3,224 @@ import { useNavigate } from 'react-router-dom';
 
 import { useServices } from '@/hooks/useServices';
 import { useHeaderStore } from '@/store/headerStore';
-// import { Filter } from '@/components/ui';
-// import { ServiceCard } from './components/ServiceCard';
 import { EditServiceModal } from './components/EditServiceModal';
 import type { ServiceDefinition } from '@/types/service.types';
+
+// Configuración de las cards de servicios
+interface ServiceCardConfig {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  icon: string;
+  bgColor: string;
+  route: string;
+  linkText: string;
+}
+
+const SERVICES_CONFIG: ServiceCardConfig[] = [
+  {
+    id: 'anteproyectos',
+    title: 'Elaboración de Anteproyectos',
+    subtitle: 'ELABORACIÓN DE EXPEDIENTES TÉCNICOS',
+    description: 'Gestiona los anteproyectos de arquitectura, desde la documentación inicial hasta la aprobación final.',
+    icon: '📋',
+    bgColor: 'bg-teal-100',
+    route: '/dashboard/anteproyectos',
+    linkText: 'Acceder a Anteproyectos',
+  },
+  {
+    id: 'proyectos',
+    title: 'Elaboración de Proyectos',
+    subtitle: 'Elaboración de Expedientes Técnicos',
+    description: 'Gestiona los proyectos completos con todas las especialidades: arquitectura, estructuras, sanitarias y eléctricas.',
+    icon: '🏗️',
+    bgColor: 'bg-blue-100',
+    route: '/dashboard/proyectos',
+    linkText: 'Acceder a Proyectos',
+  },
+  {
+    id: 'demoliciones',
+    title: 'Demolición Total',
+    subtitle: 'Gestión de demoliciones',
+    description: 'Gestiona los procesos de demolición total con todas las especialidades y documentación requerida.',
+    icon: '🏚️',
+    bgColor: 'bg-red-100',
+    route: '/dashboard/demoliciones',
+    linkText: 'Acceder a Demoliciones',
+  },
+  {
+    id: 'modificaciones',
+    title: 'Modificación de Obra',
+    subtitle: 'Modificaciones y ampliaciones',
+    description: 'Gestiona las modificaciones de obras existentes, incluyendo ampliaciones, cambios de uso y remodelaciones en todas las modalidades.',
+    icon: '🔧',
+    bgColor: 'bg-purple-100',
+    route: '/dashboard/modificaciones',
+    linkText: 'Acceder a Modificaciones',
+  },
+  {
+    id: 'regularizaciones',
+    title: 'Regularización de Licencia',
+    subtitle: 'Legalización de construcciones',
+    description: 'Regulariza construcciones existentes que no cuentan con licencia de edificación mediante el proceso de legalización retroactiva.',
+    icon: '📜',
+    bgColor: 'bg-orange-100',
+    route: '/dashboard/regularizaciones',
+    linkText: 'Acceder a Regularizaciones',
+  },
+  {
+    id: 'ampliaciones',
+    title: 'Ampliación/Remodelación',
+    subtitle: 'Modificaciones de obra',
+    description: 'Gestiona proyectos de ampliación, remodelación y demolición con todas las especialidades y documentación técnica requerida.',
+    icon: '🔨',
+    bgColor: 'bg-indigo-100',
+    route: '/dashboard/ampliaciones',
+    linkText: 'Acceder a Ampliaciones',
+  },
+  {
+    id: 'gestion-anexo',
+    title: 'Gestión del Anexo H',
+    subtitle: 'Supervisión de obra',
+    description: 'Gestiona el proceso de supervisión de obra mediante el Anexo H, desde la documentación hasta la entrega al administrado.',
+    icon: '📋',
+    bgColor: 'bg-yellow-100',
+    route: '/dashboard/gestion-anexo',
+    linkText: 'Acceder a Gestión del Anexo',
+  },
+  {
+    id: 'habilitaciones-urbanas',
+    title: 'Habilitación Urbana',
+    subtitle: 'Proyectos de habilitación urbana',
+    description: 'Gestiona proyectos de licencia de habilitación urbana con elaboración y gestión de documentación técnica completa.',
+    icon: '🏘️',
+    bgColor: 'bg-cyan-100',
+    route: '/dashboard/habilitaciones-urbanas',
+    linkText: 'Acceder a Habilitaciones Urbanas',
+  },
+  {
+    id: 'licencias-funcionamiento',
+    title: 'Licencia de Funcionamiento',
+    subtitle: 'Licencias comerciales y ITSE',
+    description: 'Gestiona el proceso completo de licencias de funcionamiento, desde la consulta inicial hasta la entrega de certificados ITSE.',
+    icon: '🏪',
+    bgColor: 'bg-emerald-100',
+    route: '/dashboard/licencias-funcionamiento',
+    linkText: 'Acceder a Licencias de Funcionamiento',
+  },
+  {
+    id: 'rectificacion-linderos',
+    title: 'Rectificación de Linderos',
+    subtitle: 'Elaboración y gestión',
+    description: 'Gestiona el proceso completo de rectificación de linderos y áreas perimétricas, desde la elaboración hasta la aprobación final.',
+    icon: '📐',
+    bgColor: 'bg-amber-100',
+    route: '/dashboard/rectificacion-linderos',
+    linkText: 'Acceder a Rectificación de Linderos',
+  },
+  {
+    id: 'gestion-anteproyectos',
+    title: 'Gestión de Anteproyecto',
+    subtitle: 'Trámite municipal de anteproyecto',
+    description: 'Gestiona el trámite de un anteproyecto ante la municipalidad, desde la presentación hasta obtener la conformidad final.',
+    icon: '📋',
+    bgColor: 'bg-pink-100',
+    route: '/dashboard/gestion-anteproyectos',
+    linkText: 'Acceder a Gestión de Anteproyecto',
+  },
+  {
+    id: 'gestion-proyectos',
+    title: 'Gestión de Proyecto',
+    subtitle: 'Trámite municipal de proyecto completo',
+    description: 'Gestiona el proyecto completo ante la municipalidad, aprobando cada especialidad secuencialmente para obtener la licencia final.',
+    icon: '🏗️',
+    bgColor: 'bg-violet-100',
+    route: '/dashboard/gestion-proyectos',
+    linkText: 'Acceder a Gestión de Proyecto',
+  },
+  {
+    id: 'gestion-conformidad-con-variacion',
+    title: 'Gestión Conformidad Con Variación',
+    subtitle: 'Conformidad de obra con variaciones',
+    description: 'Gestiona el trámite de conformidad de obra cuando existen variaciones respecto a los planos aprobados originalmente.',
+    icon: '✅',
+    bgColor: 'bg-emerald-100',
+    route: '/dashboard/gestion-conformidad-con-variacion',
+    linkText: 'Acceder a Conformidad Con Variación',
+  },
+  {
+    id: 'gestion-conformidad-sin-variacion',
+    title: 'Gestión Conformidad Sin Variación',
+    subtitle: 'Conformidad de obra sin variaciones',
+    description: 'Gestiona el trámite de conformidad de obra cuando la construcción se ejecutó conforme a los planos aprobados.',
+    icon: '☑️',
+    bgColor: 'bg-lime-100',
+    route: '/dashboard/gestion-conformidad-sin-variacion',
+    linkText: 'Acceder a Conformidad Sin Variación',
+  },
+  {
+    id: 'elaboracion-conformidad-con-variacion',
+    title: 'Elaboración Conformidad Con Variación',
+    subtitle: 'Elaboración de expediente con variaciones',
+    description: 'Elabora el expediente técnico de conformidad de obra cuando existen variaciones respecto a los planos aprobados.',
+    icon: '📝',
+    bgColor: 'bg-rose-100',
+    route: '/dashboard/elaboracion-conformidad-con-variacion',
+    linkText: 'Acceder a Elaboración Con Variación',
+  },
+  {
+    id: 'elaboracion-conformidad-sin-variacion',
+    title: 'Elaboración Conformidad Sin Variación',
+    subtitle: 'Elaboración de expediente sin variaciones',
+    description: 'Elabora el expediente técnico de conformidad de obra cuando la construcción se ejecutó conforme a los planos aprobados.',
+    icon: '📄',
+    bgColor: 'bg-sky-100',
+    route: '/dashboard/elaboracion-conformidad-sin-variacion',
+    linkText: 'Acceder a Elaboración Sin Variación',
+  },
+];
+
+// Componente de Card reutilizable
+interface ServiceCardProps {
+  config: ServiceCardConfig;
+  onClick: (route: string) => void;
+}
+
+const ServiceCard = ({ config, onClick }: ServiceCardProps) => (
+  <div
+    onClick={() => onClick(config.route)}
+    className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
+  >
+    <div className="flex items-center gap-4 mb-4">
+      <div className={`w-12 h-12 ${config.bgColor} rounded-lg flex items-center justify-center flex-shrink-0`}>
+        <span className="text-2xl">{config.icon}</span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
+          {config.title}
+        </h3>
+        <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
+          {config.subtitle}
+        </p>
+      </div>
+    </div>
+    <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
+      {config.description}
+    </p>
+    <div className="flex items-center text-teal-600 font-medium text-sm">
+      <span>{config.linkText}</span>
+      <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+      </svg>
+    </div>
+  </div>
+);
 
 export default function Servicios() {
   const navigate = useNavigate();
   const { services, isLoading, error, refetch } = useServices();
-  const [searchTerm ] = useState('');
+  const [searchTerm] = useState('');
   const [selectedService, setSelectedService] = useState<ServiceDefinition | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { setHeader } = useHeaderStore();
@@ -23,7 +232,6 @@ export default function Servicios() {
       'Gestiona todos tus trámites y servicios en un solo lugar'
     );
 
-    // Limpiar el header cuando el componente se desmonta
     return () => {
       setHeader('Dashboard');
     };
@@ -43,71 +251,18 @@ export default function Servicios() {
     });
   }, [services, searchTerm]);
 
-  // const handleEditService = (service: ServiceDefinition) => {
-  //   setSelectedService(service);
-  //   setIsModalOpen(true);
-  // };
-
   const handleModalClose = () => {
     setIsModalOpen(false);
     setSelectedService(null);
   };
 
   const handleModalSuccess = () => {
-    refetch(); // Recargar la lista de servicios
+    refetch();
     handleModalClose();
   };
 
-  const handleAnteproyectosClick = () => {
-    navigate('/dashboard/anteproyectos');
-  };
-
-  const handleProyectosClick = () => {
-    navigate('/dashboard/proyectos');
-  };
-
-  const handleDemolicionesClick = () => {
-    navigate('/dashboard/demoliciones');
-  };
-
-  const handleConformidadesClick = () => {
-    navigate('/dashboard/conformidades');
-  };
-
-  const handleModificacionesClick = () => {
-    navigate('/dashboard/modificaciones');
-  };
-
-  const handleRegularizacionesClick = () => {
-    navigate('/dashboard/regularizaciones');
-  };
-
-  const handleAmpliacionesClick = () => {
-    navigate('/dashboard/ampliaciones');
-  };
-
-  const handleGestionAnexoClick = () => {
-    navigate('/dashboard/gestion-anexo');
-  };
-
-  const handleHabilitacionesUrbanasClick = () => {
-    navigate('/dashboard/habilitaciones-urbanas');
-  };
-
-  const handleLicenciasFuncionamientoClick = () => {
-    navigate('/dashboard/licencias-funcionamiento');
-  };
-
-  const handleRectificacionLinderosClick = () => {
-    navigate('/dashboard/rectificacion-linderos');
-  };
-
-  const handleGestionAnteproyectosClick = () => {
-    navigate('/dashboard/gestion-anteproyectos');
-  };
-
-  const handleGestionProyectosClick = () => {
-    navigate('/dashboard/gestion-proyectos');
+  const handleCardClick = (route: string) => {
+    navigate(route);
   };
 
   if (error) {
@@ -130,382 +285,13 @@ export default function Servicios() {
           Servicios Principales
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
-          {/* Card de Anteproyectos */}
-          <div
-            onClick={handleAnteproyectosClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">📋</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Elaboracion de Anteproyectos
-                </h3>
-                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Elaboración de expediente técnico
-                </p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Gestiona los anteproyectos de arquitectura, desde la documentación inicial hasta la aprobación final.
-            </p>
-            <div className="flex items-center text-teal-600 font-medium text-sm">
-              <span>Acceder a Anteproyectos</span>
-              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Card de Proyectos */}
-          <div
-            onClick={handleProyectosClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">🏗️</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Proyectos
-                </h3>
-                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Expediente técnico completo
-                </p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Gestiona los proyectos completos con todas las especialidades: arquitectura, estructuras, sanitarias y eléctricas.
-            </p>
-            <div className="flex items-center text-teal-600 font-medium text-sm">
-              <span>Acceder a Proyectos</span>
-              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Card de Demoliciones */}
-          <div
-            onClick={handleDemolicionesClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">🏚️</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Demolición Total
-                </h3>
-                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Gestión de demoliciones
-                </p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Gestiona los procesos de demolición total con todas las especialidades y documentación requerida.
-            </p>
-            <div className="flex items-center text-teal-600 font-medium text-sm">
-              <span>Acceder a Demoliciones</span>
-              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Card de Conformidad de Obra */}
-          <div
-            onClick={handleConformidadesClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">✓</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Conformidad de Obra
-                </h3>
-                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Certificación de conformidad
-                </p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Gestiona los trámites de conformidad de obra en sus diferentes modalidades: sin variaciones, con variaciones y casco habitable.
-            </p>
-            <div className="flex items-center text-teal-600 font-medium text-sm">
-              <span>Acceder a Conformidades</span>
-              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Card de Modificación de Obra */}
-          <div
-            onClick={handleModificacionesClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">🔧</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Modificación de Obra
-                </h3>
-                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Modificaciones y ampliaciones
-                </p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Gestiona las modificaciones de obras existentes, incluyendo ampliaciones, cambios de uso y remodelaciones en todas las modalidades.
-            </p>
-            <div className="flex items-center text-teal-600 font-medium text-sm">
-              <span>Acceder a Modificaciones</span>
-              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Card de Regularización de Licencia */}
-          <div
-            onClick={handleRegularizacionesClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">📜</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Regularización de Licencia
-                </h3>
-                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Legalización de construcciones
-                </p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Regulariza construcciones existentes que no cuentan con licencia de edificación mediante el proceso de legalización retroactiva.
-            </p>
-            <div className="flex items-center text-teal-600 font-medium text-sm">
-              <span>Acceder a Regularizaciones</span>
-              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Card de Ampliación, Remodelación, Demolición */}
-          <div
-            onClick={handleAmpliacionesClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">🔨</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Ampliación/Remodelación
-                </h3>
-                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Modificaciones de obra
-                </p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Gestiona proyectos de ampliación, remodelación y demolición con todas las especialidades y documentación técnica requerida.
-            </p>
-            <div className="flex items-center text-teal-600 font-medium text-sm">
-              <span>Acceder a Ampliaciones</span>
-              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Card de Gestión del Anexo H */}
-          <div
-            onClick={handleGestionAnexoClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">📋</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Gestión del Anexo H
-                </h3>
-                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Supervisión de obra
-                </p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Gestiona el proceso de supervisión de obra mediante el Anexo H, desde la documentación hasta la entrega al administrado.
-            </p>
-            <div className="flex items-center text-teal-600 font-medium text-sm">
-              <span>Acceder a Gestión del Anexo</span>
-              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Card de Proyecto de Licencia de Habilitación Urbana */}
-          <div
-            onClick={handleHabilitacionesUrbanasClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">🏘️</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Habilitación Urbana
-                </h3>
-                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Proyectos de habilitación urbana
-                </p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Gestiona proyectos de licencia de habilitación urbana con elaboración y gestión de documentación técnica completa.
-            </p>
-            <div className="flex items-center text-teal-600 font-medium text-sm">
-              <span>Acceder a Habilitaciones Urbanas</span>
-              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Card de Licencia de Funcionamiento */}
-          <div
-            onClick={handleLicenciasFuncionamientoClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">🏪</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Licencia de Funcionamiento
-                </h3>
-                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Licencias comerciales y ITSE
-                </p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Gestiona el proceso completo de licencias de funcionamiento, desde la consulta inicial hasta la entrega de certificados ITSE.
-            </p>
-            <div className="flex items-center text-teal-600 font-medium text-sm">
-              <span>Acceder a Licencias de Funcionamiento</span>
-              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Card de Rectificación de Linderos */}
-          <div
-            onClick={handleRectificacionLinderosClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">📐</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Rectificación de Linderos
-                </h3>
-                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Elaboración y gestión
-                </p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Gestiona el proceso completo de rectificación de linderos y áreas perimétricas, desde la elaboración hasta la aprobación final.
-            </p>
-            <div className="flex items-center text-teal-600 font-medium text-sm">
-              <span>Acceder a Rectificación de Linderos</span>
-              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Card de Gestión de Anteproyecto */}
-          <div
-            onClick={handleGestionAnteproyectosClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">📋</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Gestión de Anteproyecto
-                </h3>
-                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Trámite municipal de anteproyecto
-                </p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Gestiona el trámite de un anteproyecto ante la municipalidad, desde la presentación hasta obtener la conformidad final.
-            </p>
-            <div className="flex items-center text-teal-600 font-medium text-sm">
-              <span>Acceder a Gestión de Anteproyecto</span>
-              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Card de Gestión de Proyecto */}
-          <div
-            onClick={handleGestionProyectosClick}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-teal-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-violet-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">🏗️</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Gestión de Proyecto
-                </h3>
-                <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Trámite municipal de proyecto completo
-                </p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Gestiona el proyecto completo ante la municipalidad, aprobando cada especialidad secuencialmente para obtener la licencia final.
-            </p>
-            <div className="flex items-center text-teal-600 font-medium text-sm">
-              <span>Acceder a Gestión de Proyecto</span>
-              <svg className="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
+          {SERVICES_CONFIG.map((service) => (
+            <ServiceCard
+              key={service.id}
+              config={service}
+              onClick={handleCardClick}
+            />
+          ))}
         </div>
       </div>
 

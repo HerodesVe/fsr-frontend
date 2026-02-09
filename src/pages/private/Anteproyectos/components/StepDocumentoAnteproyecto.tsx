@@ -27,7 +27,7 @@ export default function StepDocumentoAnteproyecto({
         Documentos proporcionados por el administrado
         </h3>
         <p className="text-sm text-gray-600 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
-          Adjunta los documentos necesarios para el expediente de anteproyecto
+        Adjunta los documentos necesarios proporcionados por el administrado
         </p>
         
         <div className="space-y-6">
@@ -189,7 +189,7 @@ export default function StepDocumentoAnteproyecto({
            Documentos elaborados por FSR
         </h3>
         <p className="text-sm text-gray-600 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
-          Adjunta los documentos necesarios para el expediente de anteproyecto
+        Adjunta los documentos elaborados
         </p>
         
         <div className="space-y-6">

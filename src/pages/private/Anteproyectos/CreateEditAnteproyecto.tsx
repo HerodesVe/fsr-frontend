@@ -33,6 +33,13 @@ export default function CreateEditAnteproyecto() {
     tipo_licencia_edificacion: '',
     tipo_modalidad: '',
     link_normativas: '',
+    // --- NUEVOS CAMPOS DE CONTROL (Tipo de Obra) ---
+    por_etapas: false,
+    numero_obras: 0,
+    etapa_por_autorizar: false,
+    // --- CONTROL MVCS ---
+    consulta_mvcs: false,
+    // --- FIN NUEVOS CAMPOS ---
     departmentId: '',
     provinceId: '',
     districtId: '',
@@ -56,6 +63,12 @@ export default function CreateEditAnteproyecto() {
     area_libre_m2: 0,
     area_libre_porcentaje: 0,
     descripcion_proyecto: '',
+    // --- NUEVOS CAMPOS DE EDIFICACIÓN ---
+    zonificacion: '',
+    numero_sotanos: 0,
+    azotea: '',
+    semisotano: '',
+    uso_edificacion: '',
   });
 
   const { data: departments } = useDepartments();
@@ -89,6 +102,13 @@ export default function CreateEditAnteproyecto() {
         tipo_licencia_edificacion: data.licencias_normativas?.tipo_licencia_edificacion || '',
         tipo_modalidad: data.licencias_normativas?.tipo_modalidad || '',
         link_normativas: data.licencias_normativas?.link_normativas || '',
+        // --- NUEVOS CAMPOS DE CONTROL (Tipo de Obra) ---
+        por_etapas: data.licencias_normativas?.por_etapas || false,
+        numero_obras: data.licencias_normativas?.numero_obras || 0,
+        etapa_por_autorizar: data.licencias_normativas?.etapa_por_autorizar || false,
+        // --- CONTROL MVCS ---
+        consulta_mvcs: data.licencias_normativas?.consulta_mvcs || false,
+        // --- FIN NUEVOS CAMPOS ---
         departmentId: data.datos_predio?.ubicacion?.departmentId || '',
         provinceId: data.datos_predio?.ubicacion?.provinceId || '',
         districtId: data.datos_predio?.ubicacion?.districtId || '',
@@ -112,6 +132,12 @@ export default function CreateEditAnteproyecto() {
         area_libre_m2: data.datos_predio?.edificacion?.area_libre_m2 || 0,
         area_libre_porcentaje: data.datos_predio?.edificacion?.area_libre_porcentaje || 0,
         descripcion_proyecto: data.datos_predio?.edificacion?.descripcion_proyecto || '',
+        // --- NUEVOS CAMPOS DE EDIFICACIÓN ---
+        zonificacion: data.datos_predio?.edificacion?.zonificacion || '',
+        numero_sotanos: data.datos_predio?.edificacion?.numero_sotanos || 0,
+        azotea: data.datos_predio?.edificacion?.azotea || '',
+        semisotano: data.datos_predio?.edificacion?.semisotano || '',
+        uso_edificacion: data.datos_predio?.edificacion?.uso_edificacion || '',
       });
 
       // Buscar cliente correspondiente
@@ -252,6 +278,9 @@ export default function CreateEditAnteproyecto() {
         if (!formData.street) newErrors.street = 'Calle es requerida';
         if (!formData.area_total_m2) newErrors.area_total_m2 = 'Área total es requerida';
         if (!formData.tipo_edificacion) newErrors.tipo_edificacion = 'Tipo de edificación es requerido';
+        // --- NUEVOS CAMPOS OBLIGATORIOS ---
+        if (!formData.zonificacion) newErrors.zonificacion = 'Zonificación es requerida';
+        if (!formData.uso_edificacion) newErrors.uso_edificacion = 'Uso de edificación es requerido';
         break;
     }
 
@@ -294,6 +323,12 @@ export default function CreateEditAnteproyecto() {
               tipo_licencia_edificacion: formData.tipo_licencia_edificacion,
               tipo_modalidad: formData.tipo_modalidad,
               link_normativas: formData.link_normativas,
+              // --- NUEVOS CAMPOS DE CONTROL ---
+              por_etapas: formData.por_etapas,
+              numero_obras: formData.numero_obras,
+              etapa_por_autorizar: formData.etapa_por_autorizar,
+              // --- CONTROL MVCS ---
+              consulta_mvcs: formData.consulta_mvcs,
               archivo_normativo: {
                 name: formData.archivo_normativo?.name || '',
                 is_mandatory: true,
@@ -344,6 +379,12 @@ export default function CreateEditAnteproyecto() {
                 area_libre_m2: formData.area_libre_m2,
                 area_libre_porcentaje: formData.area_libre_porcentaje,
                 descripcion_proyecto: formData.descripcion_proyecto,
+                // --- NUEVOS CAMPOS DE EDIFICACIÓN ---
+                zonificacion: formData.zonificacion,
+                numero_sotanos: formData.numero_sotanos,
+                azotea: formData.azotea,
+                semisotano: formData.semisotano,
+                uso_edificacion: formData.uso_edificacion,
               },
             },
           },

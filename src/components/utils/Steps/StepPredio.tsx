@@ -1,5 +1,6 @@
 import { Input, Select } from '@/components/ui';
 import type { AnteproyectoFormData } from '@/types/anteproyecto.types';
+import { USOS_EDIFICACION } from '@/types/conformidad.types';
 
 interface Department {
   id: string;
@@ -16,13 +17,24 @@ interface District {
   name: string;
 }
 
+// Tipo extendido para soportar campos adicionales de Proyecto
+interface ExtendedFormData extends AnteproyectoFormData {
+  zonificacion?: string;
+  numero_sotanos?: number;
+  azotea?: string;
+  semisotano?: string;
+  uso_edificacion?: string;
+}
+
 interface StepPredioProps {
-  formData: AnteproyectoFormData;
+  formData: ExtendedFormData;
   errors: Record<string, string>;
   departments: Department[] | undefined;
   provinces: Province[] | undefined;
   districts: District[] | undefined;
-  onInputChange: (field: keyof AnteproyectoFormData, value: any) => void;
+  onInputChange: (field: keyof ExtendedFormData, value: any) => void;
+  // Flag para mostrar campos adicionales de Proyecto (no Anteproyecto)
+  showProyectoFields?: boolean;
 }
 
 export default function StepPredio({
@@ -32,6 +44,7 @@ export default function StepPredio({
   provinces,
   districts,
   onInputChange,
+  showProyectoFields = false,
 }: StepPredioProps) {
   const departmentOptions = departments?.map(dept => ({
     value: dept.id,
@@ -279,6 +292,60 @@ export default function StepPredio({
               />
             </div>
           </div>
+
+          {/* --- NUEVOS CAMPOS DE EDIFICACIÓN (Solo para Proyecto) --- */}
+          {showProyectoFields && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <Input
+                  label="Zonificación"
+                  placeholder="Ej: CM, RDM, RDA"
+                  value={formData.zonificacion || ''}
+                  onChange={(e) => onInputChange('zonificacion', e.target.value)}
+                  error={errors.zonificacion}
+                  required
+                />
+
+                <Select
+                  label="Uso de Edificación"
+                  placeholder="Seleccione el uso de edificación"
+                  options={USOS_EDIFICACION.map(uso => ({ value: uso.value, label: uso.label }))}
+                  selectedKeys={formData.uso_edificacion ? [formData.uso_edificacion] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys)[0] as string;
+                    onInputChange('uso_edificacion', value || '');
+                  }}
+                  error={errors.uso_edificacion}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <Input
+                  label="Número de Sótanos"
+                  placeholder="Ingrese número de sótanos"
+                  value={(formData.numero_sotanos || 0).toString()}
+                  onChange={(e) => onInputChange('numero_sotanos', parseInt(e.target.value) || 0)}
+                  numbersOnly
+                />
+
+                <Input
+                  label="Azotea"
+                  placeholder="Ej: Área de equipos, Terraza"
+                  value={formData.azotea || ''}
+                  onChange={(e) => onInputChange('azotea', e.target.value)}
+                />
+
+                <Input
+                  label="Semisótano"
+                  placeholder="Ej: Depósito, Estacionamiento"
+                  value={formData.semisotano || ''}
+                  onChange={(e) => onInputChange('semisotano', e.target.value)}
+                />
+              </div>
+            </>
+          )}
+          {/* --- FIN NUEVOS CAMPOS --- */}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <Input

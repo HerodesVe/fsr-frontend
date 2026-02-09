@@ -17,7 +17,7 @@ export default function Anteproyectos() {
   useEffect(() => {
     setHeader(
       'Elaboración de expediente técnico de Arquitectura para Anteproyecto',
-      'Gestiona todos tus trámites y servicios en un solo lugar'
+      'Elaboración de Expedientes Técnicos de Arquitectura para Anteproyecto'
     );
     
     // Refetch data when component mounts

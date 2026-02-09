@@ -33,7 +33,7 @@ export default function StepAdministrado({
           </h3>
         </div>
         <p className="text-sm text-gray-600 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
-          ADJUNTA LOS DOCUMENTOS NECESARIOS PARA EL EXPEDIENTE DE PROYECTO
+        ADJUNTA LOS DOCUMENTOS SOLICITADOS AL ADMINISTRADO
         </p>
 
         <div className="space-y-6">

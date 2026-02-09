@@ -99,3 +99,41 @@ export const downloadDocumentWithName = async (id: string, documentId: string, f
   a.remove();
   window.URL.revokeObjectURL(url);
 };
+
+// ============================================
+// TABLA MAESTRA DE KEYS PARA DOCUMENTOS
+// Según la guía de integración del backend
+// ============================================
+
+export const DOCUMENT_KEYS = {
+  // Licencias y MVCS
+  LICENCIAS: {
+    ARCHIVO_NORMATIVO: 'lic_archivo_normativo',
+    DOCUMENTO_CONSULTA_MVCS: 'lic_documento_consulta_mvcs',     // Obligatorio si consulta_mvcs es true
+    DOCUMENTO_RESPUESTA_MVCS: 'lic_documento_respuesta_mvcs',   // Opcional / Informativo
+  },
+  
+  // Documentos del Administrado
+  ADMINISTRADO: {
+    PARTIDA_REGISTRAL: 'partida_registral',
+    CERTIFICADO_PARAMETROS: 'certificado_parametros_urbanisticos',
+    CROQUIS_PLANO: 'croquis_plano_ubicacion',
+    PLANO_ARQUITECTURA: 'plano_arquitectura_adm',
+    PAGO_REVISION_FACTURA: 'pago_derecho_revision_factura',
+    CABIDA_ARQUITECTONICA: 'cabida_arquitectonica',
+    VIGENCIA_PODER: 'vigencia_poder',
+    OTROS: 'otros_documentos_administrado',
+  },
+  
+  // Documentos FSR
+  FSR: {
+    MEMORIA_ARQUITECTURA: 'memoria_descriptiva_arquitectura',
+    MEMORIA_SEGURIDAD: 'memoria_descriptiva_seguridad',
+    FORMULARIO_UNICO: 'formulario_unico_edificacion',
+    PRESUPUESTO: 'presupuesto',
+    PLANO_SEGURIDAD: 'plano_seguridad',
+    PAGO_REVISION_LIQUIDACION: 'pago_derecho_revision_liquidacion',
+    PLANO_ARQUITECTURA: 'plano_arquitectura_fsr',
+    OTROS: 'otros_documentos_fsr',
+  },
+} as const;
